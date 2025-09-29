@@ -1,0 +1,106 @@
+<div *ngIf="hotel" class="hotel-detalle-container">
+  
+  <div class="header-section">
+    <div class="breadcrumb">
+      <a [routerLink]="['/resultadosHoteles']" [queryParams]="{ 
+          query: hotel.ubicacion, 
+          checkIn: checkInDate, 
+          checkOut: checkOutDate, 
+          adultos: adultos, 
+          ninos: ninos, 
+          habitaciones: habitaciones 
+      }">
+        <span>{{ hotel.ubicacion }}</span>
+      </a> &gt; <span>{{ hotel.nombre }}</span>
+    </div>
+
+    <div class="hotel-info-header">
+      <div class="main-info">
+        <h1>{{ hotel.nombre }}</h1>
+        <p class="location-text">
+          <i class="fa-solid fa-location-dot"></i> {{ hotel.distrito }}, {{ hotel.ubicacion }}
+        </p>
+        <p class = "location-direct"> {{ hotel.direccion }}</p>
+        <div class="rating-info">
+          <p class="rating-text"> {{ hotel.estrellas }} / 5</p>
+          <span class="estrellas">{{ '⭐'.repeat(5) }}</span>
+        </div>
+      </div>
+      <div class="price-and-reserve">
+        <p class="price-text">
+          {{ hotel.precio_por_noche | currency:'PEN':'symbol':'1.0-0' }}
+          <span class="price-per-night-header">/noche</span>
+        </p>
+        <a class="reserve-button" href="#seccion-habitaciones">Reservar</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="image-gallery">
+    <div class="main-image">
+      <img [src]="hotel.imagenUrl[0]" alt="Imagen principal de {{ hotel.nombre }}">
+    </div>
+
+    <div class="thumbnail-gallery">
+      <div *ngFor="let imagen of hotel.imagenUrl?.slice(1,3)" class="thumbnail">
+        <img [src]="imagen" alt="Imagen de {{ hotel.nombre }}">
+      </div>
+    </div>
+  </div>
+
+  <div class="content-section">
+    <div class="summary">
+      <h2>Resumen</h2>
+      <p>{{ hotel.descripcion }}</p>
+    </div>
+  </div>
+
+  <div class="available-rooms" id="seccion-habitaciones">
+    <h2>Habitaciones disponibles</h2>
+
+    <div *ngIf="habitacionesFiltradas.length === 0" class="no-rooms-message">
+        <p>No se encontraron habitaciones que cumplan con los requisitos de **{{ adultos }} adultos y {{ ninos }} niños**.</p>
+        <p>Intenta modificar los filtros de huéspedes.</p>
+    </div>
+
+    <div class="room-header-row" *ngIf="habitacionesFiltradas.length > 0">
+      <div class="room-type-title">Tipo de habitación</div>
+      <div class="room-selection-title">Seleccionar habitaciones</div>
+    </div>
+    
+    <div *ngFor="let habitacion of habitacionesFiltradas" class="room-card">
+      <div class="room-details">
+        <h4>{{ habitacion.nombre }}</h4> 
+        
+        <p class="room-capacity">
+            <i class="fa-solid fa-user-group"></i> Capacidad: {{ habitacion.capacidad_adultos }} adultos / {{ habitacion.capacidad_ninos }} niños
+        </p>
+        <p class="room-units">Unidades disponibles: {{ habitacion.unidades_disponibles }}</p>
+        <p class="room-description"> {{ habitacion.descripcion }}</p>
+      </div>
+
+      <div class="room-selection-controls">
+        <p class="price-text">{{ habitacion.precio_por_noche | currency:'PEN':'symbol':'1.0-0' }}<span class="price-per-night">/noche</span></p>
+        <div class="quantity-controls">
+          <button 
+              (click)="actualizarSeleccion(habitacion, -1)" 
+              [disabled]="!habitacion.seleccionada || habitacion.seleccionada === 0"
+          >-</button>
+          <span>{{ habitacion.seleccionada || 0 }}</span>
+          <button 
+              (click)="actualizarSeleccion(habitacion, 1)" 
+              [disabled]="habitacion.seleccionada && habitacion.seleccionada >= habitacion.unidades_disponibles"
+          >+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="mostrarBotonReservar" class="final-reserve-section">
+      <button class="final-reserve-button" (click)="reservarHotelFinal()">Reservar</button>
+  </div>
+</div>
+
+<div *ngIf="!hotel" class="loading-message">
+  <p>Cargando detalles del hotel...</p>
+</div>

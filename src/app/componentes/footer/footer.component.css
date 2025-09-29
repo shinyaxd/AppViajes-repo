@@ -1,0 +1,19 @@
+/*PIE DE PAGINA*/
+footer {
+    background-color: #8ed1b2;
+    color: #ffffff;
+    text-align: center;
+    padding: 30px 0;
+}
+
+footer a {
+    text-decoration: none;
+    color: #ffffff;
+    display: inline-block;
+    margin: 0;
+    margin-left: 20px;
+    font-size: 15px;
+}
+div.redes a:hover{
+    color: #58816e;
+}

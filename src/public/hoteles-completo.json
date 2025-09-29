@@ -1,0 +1,81 @@
+{
+    "data": [{
+        "id": 1,
+        "tipo": "hotel",
+        "nombre": "Hessel-Heller Hotel",
+        "ubicacion": "Alemania",
+        "distrito": "Cesse",
+        "direccion": "31817 Lizzie Square Suite 949\nHaaghaven, NJ 35056-2146",
+        "estrellas": 4.9,
+        "precio_por_noche": 63.22,
+        "imagenUrl": [
+          "/public/img/Hoteles/HotelB/hotelB.jpg",
+          "/public/img/Hoteles/HotelB/HotelB-1.jpg",
+          "/public/img/Hoteles/HotelB/HotelB-2.jpg",
+          "/public/img/Hoteles/HotelB/HotelB-3.jpg"
+        ],
+        "descripcion": "Un hotel de prueba para el seeder.",
+        "disponibilidad": {
+          "desde": "2025-10-01",
+          "hasta": "2025-10-05"
+        },
+        "filtros": {
+            "adultos": 5,
+            "ninos": 2,
+            "habitaciones": 5
+        },
+        "habitaciones": [
+            {
+                "id": 1,
+                "nombre": "qui Room",
+                "capacidad_adultos": 2,
+                "capacidad_ninos": 1,
+                "precio_por_noche": 406.02,
+                "unidades_totales": 14,
+                "unidades_disponibles": 13,
+                "descripcion": "Enim et voluptatem est omnis fugiat ad ut sunt officiis."
+            },
+            {
+                "id": 2,
+                "nombre": "sequi Room",
+                "capacidad_adultos": 4,
+                "capacidad_ninos": 3,
+                "precio_por_noche": 382.84,
+                "unidades_totales": 4,
+                "unidades_disponibles": 4,
+                "descripcion": "Deserunt vel explicabo et magnam aliquid qui."
+            },
+            {
+                "id": 3,
+                "nombre": "ut Room",
+                "capacidad_adultos": 2,
+                "capacidad_ninos": 3,
+                "precio_por_noche": 63.22,
+                "unidades_totales": 12,
+                "unidades_disponibles": 12,
+                "descripcion": "Nam incidunt nulla est magni qui corporis."
+            },
+            {
+                "id": 4,
+                "nombre": "autem Room",
+                "capacidad_adultos": 1,
+                "capacidad_ninos": 3,
+                "precio_por_noche": 342.39,
+                "unidades_totales": 5,
+                "unidades_disponibles": 2,
+                "descripcion": "Necessitatibus dolor soluta autem dolorem officiis."
+            },
+            {
+                "id": 5,
+                "nombre": "voluptatem Room",
+                "capacidad_adultos": 1,
+                "capacidad_ninos": 2,
+                "precio_por_noche": 209.91,
+                "unidades_totales": 7,
+                "unidades_disponibles": 7,
+                "descripcion": "Nostrum inventore exercitationem rem est est nihil eum perspiciatis occaecati."
+            }
+        ]
+    }
+  ]
+}

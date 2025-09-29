@@ -1,0 +1,126 @@
+/* Estilos para el banner */
+.banner {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0)), url('/public/img/tour.png');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  margin-top: 60px;
+}
+
+/* Texto encima del banner */
+.banner-text {
+  color: rgb(255, 255, 255);
+  margin-top: -100px;
+  padding-left: 100px;
+  max-width: 300px;
+  z-index: 2;
+  position: relative;
+  text-shadow: 1px 1px 6px rgba(0,0,0,0.6);
+}
+
+.banner-text h1{
+    margin-top: -20px;
+    font-size: 3em;
+}
+
+.banner-text p{
+  margin-top: 90px;
+  font-size: 1em;
+}
+
+/* Posicionamiento del buscador */
+app-buscador-dinamico {
+    position: relative;
+    z-index: 2;
+}
+
+/* Contenedor principal de tours*/
+.tours-grid {
+    display: grid;
+    /* Crea 2 columnas de igual tamaño */
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 40px; 
+    max-width: 1000px; 
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+/* Estilos de las tarjetas individuales */
+.tour-card {
+    width: 520px; /* Ancho */
+    height: 400px; /* Altura fija */
+    position: relative; 
+    background-size: cover;
+    background-position: center;
+    border-radius: 8px; 
+    overflow: hidden; /* Asegura que el contenido extra no se salga */
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.tour-card:hover {
+    transform: scale(1.02); /* Un pequeño zoom al pasar el ratón */
+}
+
+/* Capa de superposición para mejorar la legibilidad del texto */
+.tour-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1; /* Coloca el overlay detrás del texto */
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 50%);
+}
+
+/* Contenido del texto (Título, descripción, precio) */
+.tour-info {
+    position: absolute;
+    bottom: 20px; /* Posiciona el texto en la parte inferior */
+    left: 30px;
+    color: white;
+    z-index: 2; /* Coloca el texto encima del overlay */
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8); /* Sombra para resaltar el texto */
+}
+
+.tour-info h2 {
+    font-size: 2em;
+    margin: 0;
+}
+
+.tour-info p {
+    font-size: 0.9em;
+    margin: 5px 0 10px 0;
+    max-width: 90%;
+}
+
+/* definición de imagenes por categoria */
+.tour-card.aventura {
+    background-image: url('/public/img/aventura.png'); 
+}
+
+.tour-card.gastronomia {
+    background-image: url('/public/img/gastronomia.png');
+}
+
+.tour-card.cultura {
+    background-image: url('/public/img/cultura.png');
+}
+
+.tour-card.relajacion {
+    background-image: url('/public/img/relajacion.png');
+}
+
+/* Acomodar centrado categoria tour */
+.ToursCategoria-section {
+    margin-bottom: 30px; 
+    max-width: 900px;
+    margin-left: 350px;
+    margin-top: 70px;
+    margin-right: auto;
+}

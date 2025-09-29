@@ -1,0 +1,112 @@
+<div class="main-wrapper">
+    <div class="pago-card">
+        
+        <div class="header">
+            <h1>Confirmación de Reserva</h1>
+            <p>Revisa los detalles y completa tus datos para confirmar tu reserva.</p>
+        </div>
+        
+        <div *ngIf="successMessage" class="alert success-message">
+            <i class="fas fa-check-circle"></i> {{ successMessage }}
+        </div>
+        <div *ngIf="errorMessage" class="alert error-message">
+            <i class="fas fa-exclamation-triangle"></i> {{ errorMessage }}
+        </div>
+
+        <form #reservaForm="ngForm" (ngSubmit)="procesarReserva(reservaForm)">
+            
+            <div class="secciones-flex-container">
+            
+                <div class="seccion-reserva detalle-columna">
+                    <h2><i class="fas fa-building"></i> {{ nombreHotel }}</h2>
+                    <p class="ubicacion">{{ ubicacion }}</p>
+                    
+                    <div class="fechas-reserva">
+                        <div class="fecha-item">
+                            <label>CHECK IN</label>
+                            <p class="fecha-valor">{{ checkIn | date:'EEE, MMM d, y' }}</p>
+                        </div>
+                        <div class="separador-fechas">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                        <div class="fecha-item">
+                            <label>CHECK OUT</label>
+                            <p class="fecha-valor">{{ checkOut | date:'EEE, MMM d, y' }}</p>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div> 
+
+                    <h3><i class="fas fa-user-friends"></i> Huéspedes y Cuartos</h3>
+                    <div class="huespedes-resumen">
+                        <p>Adultos totales: <strong>{{ adultosReservados }}</strong></p>
+                        <p>Niños totales: <strong>{{ ninosReservados }}</strong></p>
+                        <p>Habitaciones solicitadas: <strong>{{ cantidadTotalCuartos }}</strong></p> 
+                    </div>
+
+                    <div class="divider"></div>
+                    
+                    <h3><i class="fas fa-id-card"></i> Tus Datos Personales</h3>
+                    <div class="datos-cliente-form">
+                        <div class="form-group">
+                            <label for="nombre">Nombre Completo (*)</label>
+                            <input type="text" id="nombre" name="nombre" [(ngModel)]="datosCliente.nombre" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Correo Electrónico (*)</label>
+                            <input type="email" id="email" name="email" [(ngModel)]="datosCliente.email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="telefono">Teléfono</label>
+                            <input type="tel" id="telefono" name="telefono" [(ngModel)]="datosCliente.telefono">
+                        </div>
+                    </div>
+                </div>
+            
+                <div class="seccion-precio detalle-columna">
+                    <h3><i class="fas fa-bed"></i> Habitaciones Reservadas</h3>
+                    
+                    <p class="cantidad">Total de cuartos: <strong>{{ cantidadTotalCuartos }}</strong></p>
+                    
+                    <div *ngFor="let reserva of reservas" class="detalle-reserva-multiple">
+                        <p class="tipo-cuarto">
+                            <strong>{{ reserva.cantidad }}x {{ reserva.tipo }}</strong>
+                            <span class="precio-unitario">{{ reserva.precioNoche | currency:'PEN':'symbol':'1.0-0' }} / noche</span>
+                        </p>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <h3><i class="fas fa-receipt"></i> Total y Desglose</h3>
+                    
+                    <div class="desglose-item">
+                        <span>Tarifa Básica ({{ totalNoches }} noches)</span>
+                        <span>{{ tarifaBasica | currency:'PEN':'symbol':'1.0-0' }}</span>
+                    </div>
+                    
+                    <div class="desglose-item tax">
+                        <span>Impuesto (IGV {{ impuesto * 100 }}%)</span>
+                        <span>{{ montoImpuesto | currency:'PEN':'symbol':'1.0-0' }}</span>
+                    </div>
+
+                    <div class="total-final">
+                        <h4>Total a Pagar</h4>
+                        <h4 class="precio-total">{{ totalPagar | currency:'PEN':'symbol':'1.0-0' }}</h4>
+                    </div>
+                </div>
+                
+            </div>
+
+            <button 
+                type="submit" 
+                class="boton-pagar" 
+                [disabled]="isProcessing || reservaForm.invalid">
+                <span *ngIf="!isProcessing"><i class="fas fa-lock"></i> Confirmar Reserva</span>
+                <span *ngIf="isProcessing">Procesando...</span>
+            </button>
+            
+            <p class="nota-pago-cero">Al presionar "Confirmar Reserva", su habitación quedará reservada y confirmada.</p>
+
+        </form>
+    </div>
+</div>

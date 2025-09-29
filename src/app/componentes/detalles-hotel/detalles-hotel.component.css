@@ -1,0 +1,281 @@
+/* Contenedor general */
+.hotel-detalle-container {
+  font-family: Arial, sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  color: #000000;
+}
+
+/* Header and Breadcrumb Seccion */
+.header-section {
+  display: flex;
+  flex-direction: column;
+  margin-top: 50px;
+  margin-bottom: 20px;
+}
+
+.breadcrumb {
+  font-size: 14px;
+  color: #000000;
+  margin-bottom: 10px;
+}
+
+.breadcrumb a {
+  text-decoration: none; /* Elimina el subrayado */
+  color: #000000; 
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline; 
+}
+
+.hotel-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.main-info h1 {
+  font-size: 2.5rem;
+  margin: 0;
+}
+
+.rating-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 5px 0;
+}
+
+.hotel-type {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.estrellas {
+  font-size: 1.2rem;
+}
+
+.rating-text {
+  font-size: 1rem;
+  color: #000000;
+}
+
+.location-text {
+  font-size: 1rem;
+  color: #000000;
+}
+
+.price-and-reserve {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.price-text {
+  font-size: 1.8rem;
+  color: #83c4a6;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.reserve-button,
+.reserve-room-button {
+  background-color: #8ed1b2;
+  color: rgb(0, 0, 0);
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+  text-decoration: none;
+}
+
+.reserve-button:hover,
+.reserve-room-button:hover {
+  background-color: #83c4a6;
+}
+
+/* Image Gallery Section */
+.image-gallery {
+  display: flex; 
+  gap: 15px; /* Espacio entre la imagen principal y la galería de miniaturas */
+  margin-bottom: 30px;
+}
+
+.main-image {
+  flex:2;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.main-image img {
+  width: 100%;
+  height: 400px; 
+  object-fit: cover; /* Recorta la imagen para cubrir el área sin distorsionar */
+  border-radius: 8px;
+  transition: transform 0.3s ease;
+}
+
+.main-image img:hover {
+  transform: scale(1.02); /* Efecto al pasar el cursor */
+}
+
+.thumbnail-gallery {
+  flex: 1; 
+  display: grid; 
+  gap: 10px; /* Espacio entre las miniaturas */
+}
+
+.thumbnail {
+  width: 100%;
+  height: 195px; 
+  position: relative;
+  overflow: hidden; 
+  border-radius: 8px;
+}
+
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; 
+  border-radius: 8px;
+  transition: transform 0.3s ease;
+}
+
+.thumbnail img:hover {
+  transform: scale(1.05); /* Efecto al pasar el cursor */
+}
+
+/* Secciones */
+.content-section,
+.available-rooms {
+  margin-bottom: 30px;
+}
+
+h2 {
+  font-size: 2rem;
+  color: #333;
+  border-bottom: 2px solid #ddd;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.summary p {
+  line-height: 1.6;
+}
+
+/* Seccion de habitaciones disponibles */
+.room-header-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.room-type-title {
+  font-weight: bold;
+  width: 70%;
+}
+
+.room-selection-title {
+  font-weight: bold;
+  width: 30%;
+  text-align: right;
+}
+
+.room-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 30px;
+  margin-bottom: 18px;
+  background-color: #f9f9f9;
+}
+
+.room-details {
+  width: 70%;
+}
+
+.room-details h4 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #000000;
+}
+
+.room-details p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+  color: #000000;
+}
+
+.room-amenities {
+  font-size: 0.8rem;
+  color: #000000;
+  line-height: 1.4;
+}
+
+.room-selection-controls {
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.price-text {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #83c4a6;
+}
+
+.price-per-night {
+  font-size: 0.8rem;
+  font-weight: normal;
+  color: #83c4a6;
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quantity-controls button {
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  width: 30px;
+  height: 30px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+/* Botón de reservar que aparece al final */
+.final-reserve-section {
+  text-align: right;
+}
+
+.final-reserve-button {
+  background-color: #8ed1b2;
+  color: rgb(0, 0, 0);
+  padding: 15px 30px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: background-color 0.3s ease;
+}
+
+.final-reserve-button:hover {
+  background-color: #83c4a6;
+}
+
+
+

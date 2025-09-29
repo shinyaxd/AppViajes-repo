@@ -1,0 +1,32 @@
+[
+  {
+    "nombre": "Tierra Viva Miraflores",
+    "ubicacion": "Lima",
+    "imagenUrl":[
+      "/public/img/Hoteles/TierraViva/Tierra-Viva.jpg",
+      "/public/img/Hoteles/TierraViva/Tierra-Viva-1.jpg",
+      "/public/img/Hoteles/TierraViva/Tierra-Viva-2.jpg",
+      "/public/img/Hoteles/TierraViva/Tierra-Viva-3.jpg"
+    ]
+  },
+  {
+    "nombre": "Palacio del Inka",
+    "ubicacion": "Cusco",
+    "imagenUrl": ["/public/img/Hoteles/PalacioInka/palacio-inka.jpg"]
+  },
+  {
+    "nombre": "Hotel B",
+    "ubicacion": "Lima",
+    "imagenUrl": [
+      "/public/img/Hoteles/HotelB/hotelB.jpg",
+      "/public/img/Hoteles/HotelB/HotelB-1.jpg",
+      "/public/img/Hoteles/HotelB/HotelB-2.jpg",
+      "/public/img/Hoteles/HotelB/HotelB-3.jpg"
+    ]
+  },
+  {
+    "nombre": "Aranwa Sacred Valley Hotel",
+    "ubicacion": "Cusco",
+    "imagenUrl": ["/public/img/Hoteles/Aranwa/aranwa.jpg"]
+  }
+]

@@ -1,0 +1,29 @@
+<!-- ENCABEZADO -->
+<header class="encabezado">
+  <div class="contenido-header">
+    <div class="tourhotel">
+      <a 
+        routerLink="/tour" 
+        routerLinkActive="activo" 
+        [routerLinkActiveOptions]="{ exact: true }" 
+        class="somb">
+        <i class="fa-solid fa-location-dot"></i> Encontrar Tour
+      </a>
+
+      <a 
+        routerLink="/hoteles" 
+        routerLinkActive="activo" 
+        [routerLinkActiveOptions]="{ exact: true }" 
+        class="somb">
+        <i class="fa-solid fa-bed"></i> Encontrar Hotel
+      </a>
+    </div>
+
+    <!-- Inicio y registro -->
+    <div class="sesreg">
+      <a href="alojamiento.html" target="_blank" class="btn">Registra tu alojamiento</a>
+      <a href="sesion.html" target="_blank" class="btn">Iniciar sesión</a>
+      <a href="registro.html" target="_blank" class="btn">Registrarse</a>
+    </div>
+  </div>
+</header>

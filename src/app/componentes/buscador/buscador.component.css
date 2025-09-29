@@ -1,0 +1,210 @@
+/* cantidad cuartos y huespedes*/
+.input-group {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.guests-selector {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  background-color: #fff;
+  cursor: pointer;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+
+.guests-selector .fa-caret-down {
+  transition: transform 0.3s ease-in-out;
+}
+
+.guests-selector .fa-caret-down.rotated {
+  transform: rotate(180deg);
+}
+
+/* Contenedor del menú desplegable */
+.guest-options-menu {
+  position: absolute;
+  top: 100%; 
+  left: 0;
+  z-index: 10;
+  width: 250px; 
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  padding: 15px;
+  margin-top: 5px;
+}
+
+.guest-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.guest-option:last-of-type {
+  margin-bottom: 20px;
+}
+
+.counter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.counter button {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #ccc;
+  background-color: #f0f0f0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.counter button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.counter span {
+  font-weight: bold;
+}
+
+.save-button {
+  width: 100%;
+  padding: 10px;
+  background-color: #8ed1b2;
+  color: rgb(0, 0, 0);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+}
+
+.save-button:hover {
+  background-color: #83c4a6;
+}
+
+/* Estilos para la barra de búsqueda */
+.search-container {
+  position: relative;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  max-width: 900px;
+  margin: 90px auto 20px;
+  z-index: 2;
+}
+
+.search-container h3 {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.input-group-guests {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  position: relative;
+}
+
+.search-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: flex-start;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.input-group label {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 5px;
+}
+
+.input-group input {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 1rem;
+}
+
+.search-button {
+  background-color: #8ed1b2; 
+  color: rgb(0, 0, 0);
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 26px;
+}
+
+.search-button:hover {
+  background-color: #83c4a6;
+}
+
+
+/* Contenedor principal para los botones y el contenido */
+.content-container {
+  max-width: 900px;
+  margin: 20px auto;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 20px;
+  border-bottom: 2px solid #e0e0e0;
+  margin-bottom: 20px;
+}
+
+.filter-buttons button {
+  background-color: transparent;
+  border: none;
+  padding: 10px 0;
+  font-size: 1.1rem;
+  color: #555;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-weight: 500;
+}
+
+.filter-buttons button span {
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: 5px;
+}
+
+.filter-buttons button.active {
+  color: #8ed1b2;
+  font-weight: bold;
+}
+
+.filter-buttons button.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 2px;
+  background-color: #8ed1b2;
+}

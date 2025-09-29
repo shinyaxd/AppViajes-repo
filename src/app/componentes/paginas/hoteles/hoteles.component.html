@@ -1,0 +1,46 @@
+<div class="banner">
+  <div class="banner-text">
+    <h1>Make your travel wishlist, we'll do the rest</h1>
+    <p>Special offers to suit your plan</p>
+  </div>
+</div>
+
+<app-buscador-dinamico [tipoBusqueda]="'hoteles'"></app-buscador-dinamico>
+
+<div class="hoteles-container">
+  <h2>Hoteles que viste recientemente</h2>
+
+  <div class="lista-hoteles">
+    <div *ngFor="let hotel of hotelesRecientes" class="hotel-item">
+      <img [src]="hotel.imagenUrl[0]" alt="Foto del {{hotel.nombre}}">
+
+      <div>
+        <p class="nombre-hotel">{{hotel.nombre}}</p>
+        <p class="ubicacion-hotel">{{hotel.ubicacion}}</p>
+      </div>  
+    </div>
+  </div>
+</div>
+
+<div class="populares-section">
+  <div class="populares-header">
+    <h2>¡Hoteles más populares!</h2>
+    <p>Going somewhere to celebrate this season? Whether you're going home or somewhere to roam, we've got the travel tools to get you to your destination.</p>
+    <button class="see-all-button">See All</button>
+  </div>
+
+  <div class="populares-cards">
+    <div *ngFor="let hotel of hotelesPopulares" class="hotel-card">
+      <img [src]="hotel.imagenUrl[0]" alt="{{ hotel.nombre }}">
+      <div class="card-overlay">
+        
+        <div class="price-name-group">
+            <h3 class="card-title">{{ hotel.nombre }}</h3>
+            <p class="card-price">{{ hotel.precio_por_noche | currency:'PEN':'symbol':'1.0-0' }}</p>
+        </div>
+        
+      </div>
+      <button class="reserve-button" [routerLink]="['/detallesHotel', hotel.id]">Reservar hotel</button>
+    </div>
+  </div>
+</div>

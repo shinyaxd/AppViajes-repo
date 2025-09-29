@@ -1,0 +1,178 @@
+:host {
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    background-color: #f7f9fc;
+    min-height: 100vh;
+    padding: 30px 0px; 
+    width: 100%; 
+}
+
+/* Contenedor principal de la tarjeta */
+.pago-card {
+    width: 100%; 
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); 
+}
+
+/* Contenedor (Hotel/Fechas vs Habitaciones/Precio) */
+.secciones-flex-container {
+    display: flex;
+    gap: 30px; 
+    margin-top: 20px;
+}
+
+.detalle-columna {
+    flex: 1; 
+    padding: 20px;
+    border: 1px solid #e9ecef; 
+    border-radius: 8px;
+}
+
+/* Títulos y Encabezados */
+.header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 5px;
+}
+.header p {
+    font-size: 16px;
+    color: #6c757d;
+    margin-bottom: 25px;
+}
+
+.seccion-reserva h2, .seccion-precio h3 {
+    color: #0b222d;
+    font-weight: 600;
+    font-size: 20px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+.seccion-reserva h2 i, .seccion-precio h3 i {
+    margin-right: 10px;
+    color: #000000; 
+}
+
+/* Información del Hotel y Ubicación */
+.ubicacion {
+    color: #888;
+    font-size: 14px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 15px;
+}
+
+/* Sección de Fechas */
+.fechas-reserva {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 15px 30px;
+    margin-bottom: 15px;
+}
+.fecha-item {
+    text-align: center;
+}
+.fecha-item label {
+    display: block;
+    font-size: 12px;
+    color: #6c757d;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+.fecha-valor {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+.separador-fechas {
+    color: #adb5bd;
+}
+
+/* Separador Interno */
+.divider {
+    height: 1px;
+    background-color: #e9ecef;
+    margin: 20px 0;
+}
+
+/* Sección de Habitaciones */
+.cantidad {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.detalle-reserva-multiple {
+    padding: 10px 0;
+    border-bottom: 1px dashed #e9ecef; 
+}
+.detalle-reserva-multiple:last-of-type {
+    border-bottom: none;
+}
+.tipo-cuarto {
+    display: flex;
+    justify-content: space-between;
+    font-size: 15px;
+    color: #1a1a1a;
+    font-weight: 600;
+}
+.precio-unitario {
+    color: #555;
+    font-weight: 400;
+    font-size: 14px;
+}
+
+/* Desglose de Precios */
+.desglose-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 15px;
+    color: #333;
+}
+.desglose-item span:last-child {
+    font-weight: 600;
+}
+.desglose-item.tax {
+    color: #83c4a6; 
+}
+
+.total-final {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 15px;
+    margin-top: 15px;
+    border-top: 2px solid #e9ecef;
+}
+.total-final h4 {
+    font-size: 20px;
+    font-weight: 700;
+}
+.precio-total {
+    color: #000000; 
+}
+
+/* Botón de Pagar */
+.boton-pagar {
+    width: 100%;
+    padding: 15px;
+    background-color: #8ed1b2; 
+    color: rgb(0, 0, 0);
+    font-size: 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 30px;
+    transition: background-color 0.3s, transform 0.1s;
+}
+.boton-pagar:hover {
+    background-color: #83c4a6;
+}
+.boton-pagar:active {
+    transform: translateY(1px);
+}

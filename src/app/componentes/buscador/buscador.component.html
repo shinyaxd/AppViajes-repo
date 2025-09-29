@@ -1,0 +1,113 @@
+<div class="search-container">
+  <h3>¿A dónde vas?</h3>
+  <div class="search-form">
+
+    <ng-container *ngIf="tipoBusqueda === 'hoteles'">
+      <div class="input-group">
+        <label for="destino">Destino</label>
+        <input type="text" id="destino" placeholder="Lima, Perú" [(ngModel)]="destino" (input)="buscarSugerencias()">
+        <ul *ngIf="sugerencias.length > 0" class="sugerencias-lista">
+          <li *ngFor="let sugerencia of sugerencias" (click)="seleccionarDestino(sugerencia)">
+            {{sugerencia}}
+          </li>
+        </ul>
+      </div>
+
+      <div class="input-group">
+        <label for="check-in">Check In</label>
+        <input type="date" id="check-in" [min]="minDate" [(ngModel)]="checkInDate" (change)="onCheckInChange($event)">
+      </div>
+
+      <div class="input-group">
+        <label for="check-out">Check Out</label>
+        <input type="date" id="check-out" [min]="minCheckoutDate" [(ngModel)]="checkOutDate">
+      </div>
+
+      <div class="input-group">
+        <label for="huespedes">Cuartos & Huéspedes</label>
+        <div class="guests-selector" (click)="toggleGuestMenu()">
+          {{ huespedes.habitaciones }} cuartos, {{ huespedes.adultos }} adultos y {{ huespedes.ninos }} niños
+        </div>
+        <div *ngIf="showGuestMenu" class="guest-options-menu">
+          
+          <div class="guest-option">
+            <span>Adultos</span>
+            <div class="counter">
+              <button (click)="changeCount('adultos', -1)">-</button>
+              <span>{{ huespedes.adultos }}</span>
+              <button (click)="changeCount('adultos', 1)">+</button>
+            </div>
+          </div>
+          
+          <div class="guest-option">
+            <span>Niños</span>
+            <div class="counter">
+              <button (click)="changeCount('ninos', -1)">-</button>
+              <span>{{ huespedes.ninos }}</span>
+              <button (click)="changeCount('ninos', 1)">+</button>
+            </div>
+          </div>
+
+          <div class="guest-option">
+            <span>Cuartos</span>
+            <div class="counter">
+              <button (click)="changeCount('habitaciones', -1)">-</button>
+              <span>{{ huespedes.habitaciones }}</span>
+              <button (click)="changeCount('habitaciones', 1)">+</button>
+            </div>
+          </div>
+          <button class="save-button" (click)="toggleGuestMenu()">Listo</button>
+        </div>
+      </div>
+    </ng-container>
+    
+    <ng-container *ngIf="tipoBusqueda === 'tours'">
+      <div class="input-group">
+        <label for="destino-tour">Destino</label>
+        <input type="text" id="destino-tour" placeholder="Lima, Perú" [(ngModel)]="destino" (input)="buscarSugerenciasTours()">
+      </div>
+
+      <div class="input-group">
+        <label for="categoria-tour">Categoría</label>
+        <input 
+          type="text" id="categoria-tour" placeholder="Aventura" [(ngModel)]="categoriaTour"> 
+      </div>
+
+      <div class="input-group">
+        <label for="check-in">Check In</label>
+        <input type="date" id="check-in" [min]="minDate" [(ngModel)]="checkInDate" (change)="onCheckInChange($event)">
+      </div>
+
+      <div class="input-group">
+        <label for="check-out">Check Out</label>
+        <input type="date" id="check-out" [min]="minCheckoutDate" [(ngModel)]="checkOutDate">
+      </div>
+      
+      <div class="input-group">
+        <label for="personas-tour">Personas</label>
+        <div class="guests-selector" (click)="toggleGuestMenuTour()">
+          {{ personas.total }} personas
+        </div>
+        <div *ngIf="showGuestMenuTour" class="guest-options-menu">
+          <div class="guest-option">
+            <span>Personas</span>
+            <div class="counter">
+              <button (click)="changeCountTour('total', -1)">-</button>
+              <span>{{ personas.total }}</span>
+              <button (click)="changeCountTour('total', 1)">+</button>
+            </div>
+          </div>
+          <button class="save-button" (click)="toggleGuestMenuTour()">Listo</button>
+        </div>
+      </div>
+    </ng-container>
+    <button 
+    class="search-button" 
+    (click)="mostrarLugares()" 
+    [disabled]="(tipoBusqueda === 'hoteles' && (!destino || !checkInDate || !checkOutDate)) || 
+                (tipoBusqueda === 'tours' && (!destino || !checkInDate || personas.total < 1))"> 
+    <i class="fa-solid" [ngClass]="{'fa-hotel': tipoBusqueda === 'hoteles', 'fa-compass': tipoBusqueda === 'tours'}"></i>
+    Mostrar {{ tipoBusqueda === 'hoteles' ? 'hoteles' : 'tours' }}
+  </button>
+  </div>
+</div>
