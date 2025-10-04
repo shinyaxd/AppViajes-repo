@@ -1,81 +1,149 @@
 {
-    "data": [{
-        "id": 1,
-        "tipo": "hotel",
-        "nombre": "Hessel-Heller Hotel",
-        "ubicacion": "Alemania",
-        "distrito": "Cesse",
-        "direccion": "31817 Lizzie Square Suite 949\nHaaghaven, NJ 35056-2146",
-        "estrellas": 4.9,
-        "precio_por_noche": 63.22,
-        "imagenUrl": [
-          "/public/img/Hoteles/HotelB/hotelB.jpg",
-          "/public/img/Hoteles/HotelB/HotelB-1.jpg",
-          "/public/img/Hoteles/HotelB/HotelB-2.jpg",
-          "/public/img/Hoteles/HotelB/HotelB-3.jpg"
-        ],
-        "descripcion": "Un hotel de prueba para el seeder.",
-        "disponibilidad": {
-          "desde": "2025-10-01",
-          "hasta": "2025-10-05"
+    "data": [
+        {
+            "id": 1,
+            "tipo": "hotel",
+            "nombre": "Hotel Cayetano",
+            "ciudad": "Lima",
+            "pais": "Perú",
+            "direccion": "7851 Douglas Mill\nWest Margarettefort, NY 98178-0936",
+            "estrellas": 4,
+            "precio_por_noche": 180.5,
+            "imagenUrl": [
+                "https://picsum.photos/seed/hotel-cayetano/640/480"
+            ],
+            "descripcion": "Un hotel de prueba para el seeder en Lima.",
+            "disponibilidad": {
+                "desde": "2025-10-01",
+                "hasta": "2025-10-05"
+            },
+            "filtros": {
+                "adultos": 1,
+                "ninos": 1,
+                "habitaciones": 1
+            },
+            "habitaciones": [
+                {
+                    "id": 2,
+                    "nombre": "Doble Room",
+                    "capacidad_adultos": 2,
+                    "capacidad_ninos": 1,
+                    "precio_por_noche": 180.5,
+                    "unidades_totales": 15,
+                    "unidades_disponibles": 15,
+                    "descripcion": "Cómoda para parejas."
+                },
+                {
+                    "id": 3,
+                    "nombre": "Familiar Room",
+                    "capacidad_adultos": 2,
+                    "capacidad_ninos": 2,
+                    "precio_por_noche": 250,
+                    "unidades_totales": 8,
+                    "unidades_disponibles": 8,
+                    "descripcion": "Perfecta para familias pequeñas."
+                },
+                {
+                    "id": 4,
+                    "nombre": "Suite Room",
+                    "capacidad_adultos": 3,
+                    "capacidad_ninos": 1,
+                    "precio_por_noche": 350,
+                    "unidades_totales": 5,
+                    "unidades_disponibles": 5,
+                    "descripcion": "Suite con sala y vista."
+                }
+            ]
         },
-        "filtros": {
-            "adultos": 5,
-            "ninos": 2,
-            "habitaciones": 5
+        {
+            "id": 2,
+            "tipo": "hotel",
+            "nombre": "Andes Boutique",
+            "ciudad": "Cusco",
+            "pais": "Perú",
+            "direccion": "4474 Makayla Fall\nLonieshire, IA 26634",
+            "estrellas": 3,
+            "precio_por_noche": 140,
+            "imagenUrl": [
+                "https://picsum.photos/seed/andes-boutique/640/480"
+            ],
+            "descripcion": "Boutique acogedor cerca del centro histórico.",
+            "disponibilidad": {
+                "desde": "2025-10-01",
+                "hasta": "2025-10-05"
+            },
+            "filtros": {
+                "adultos": 1,
+                "ninos": 1,
+                "habitaciones": 1
+            },
+            "habitaciones": [
+                {
+                    "id": 6,
+                    "nombre": "Doble Room",
+                    "capacidad_adultos": 2,
+                    "capacidad_ninos": 1,
+                    "precio_por_noche": 140,
+                    "unidades_totales": 14,
+                    "unidades_disponibles": 14,
+                    "descripcion": "Con desayuno incluido."
+                }
+            ]
         },
-        "habitaciones": [
-            {
-                "id": 1,
-                "nombre": "qui Room",
-                "capacidad_adultos": 2,
-                "capacidad_ninos": 1,
-                "precio_por_noche": 406.02,
-                "unidades_totales": 14,
-                "unidades_disponibles": 13,
-                "descripcion": "Enim et voluptatem est omnis fugiat ad ut sunt officiis."
+        {
+            "id": 3,
+            "tipo": "hotel",
+            "nombre": "Costa del Sol Arequipa",
+            "ciudad": "Arequipa",
+            "pais": "Perú",
+            "direccion": "404 Aufderhar Views\nShannafort, NM 52040-1189",
+            "estrellas": 5,
+            "precio_por_noche": 220,
+            "imagenUrl": [
+                "https://picsum.photos/seed/costa-sol-arequipa/640/480"
+            ],
+            "descripcion": "Hotel con piscina y vista al Misti.",
+            "disponibilidad": {
+                "desde": "2025-10-01",
+                "hasta": "2025-10-05"
             },
-            {
-                "id": 2,
-                "nombre": "sequi Room",
-                "capacidad_adultos": 4,
-                "capacidad_ninos": 3,
-                "precio_por_noche": 382.84,
-                "unidades_totales": 4,
-                "unidades_disponibles": 4,
-                "descripcion": "Deserunt vel explicabo et magnam aliquid qui."
+            "filtros": {
+                "adultos": 1,
+                "ninos": 1,
+                "habitaciones": 1
             },
-            {
-                "id": 3,
-                "nombre": "ut Room",
-                "capacidad_adultos": 2,
-                "capacidad_ninos": 3,
-                "precio_por_noche": 63.22,
-                "unidades_totales": 12,
-                "unidades_disponibles": 12,
-                "descripcion": "Nam incidunt nulla est magni qui corporis."
-            },
-            {
-                "id": 4,
-                "nombre": "autem Room",
-                "capacidad_adultos": 1,
-                "capacidad_ninos": 3,
-                "precio_por_noche": 342.39,
-                "unidades_totales": 5,
-                "unidades_disponibles": 2,
-                "descripcion": "Necessitatibus dolor soluta autem dolorem officiis."
-            },
-            {
-                "id": 5,
-                "nombre": "voluptatem Room",
-                "capacidad_adultos": 1,
-                "capacidad_ninos": 2,
-                "precio_por_noche": 209.91,
-                "unidades_totales": 7,
-                "unidades_disponibles": 7,
-                "descripcion": "Nostrum inventore exercitationem rem est est nihil eum perspiciatis occaecati."
-            }
-        ]
-    }
-  ]
+            "habitaciones": [
+                {
+                    "id": 8,
+                    "nombre": "Deluxe Room",
+                    "capacidad_adultos": 2,
+                    "capacidad_ninos": 1,
+                    "precio_por_noche": 220,
+                    "unidades_totales": 10,
+                    "unidades_disponibles": 10,
+                    "descripcion": "Amplia, con balcón."
+                },
+                {
+                    "id": 9,
+                    "nombre": "Suite Room",
+                    "capacidad_adultos": 2,
+                    "capacidad_ninos": 2,
+                    "precio_por_noche": 380,
+                    "unidades_totales": 6,
+                    "unidades_disponibles": 6,
+                    "descripcion": "Suite con jacuzzi."
+                },
+                {
+                    "id": 10,
+                    "nombre": "Family Room",
+                    "capacidad_adultos": 3,
+                    "capacidad_ninos": 2,
+                    "precio_por_noche": 420,
+                    "unidades_totales": 5,
+                    "unidades_disponibles": 5,
+                    "descripcion": "2 ambientes conectados."
+                }
+            ]
+        }
+    ]
 }

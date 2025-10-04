@@ -1,217 +1,163 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, map } from 'rxjs';
 
-// ----------------------------------------------------
-// --- 1. INTERFACES DE DATOS ---
-// ----------------------------------------------------
+// ==========================================================
+// 0. CONFIGURACIÓN DE SEGURIDAD (Bearer Token)
+// ==========================================================
+// 💡 CLAVE: Token de tu colección de Postman (Asumiendo que el token es fijo para la demo)
+const AUTH_TOKEN = '2|dhrfHu5A4DKCzIFNosj5VjgZm0T5EpHU83VpS8kh09bbcb58';
 
-// Interfaces Compartidas para filtros y capacidad
-export interface CapacidadHotel {
-    adultos: number;
-    ninos: number;
-    habitaciones: number; 
-}
+const API_HEADERS = new HttpHeaders({
+  'Accept': 'application/json',
+  'Authorization': `Bearer ${AUTH_TOKEN}`
+});
 
-export interface DisponibilidadHotel {
-    desde: string;
-    hasta: string;
-}
+// ==========================================================
+// 1. INTERFACES DE DATOS BÁSICAS (Modelo para el Frontend)
+// ==========================================================
 
-// Interfaces para HotelesComponent (Listado Básico)
-export interface Hotel {
-  id: number; 
-  nombre: string;
-  ubicacion: string; 
-  direccion?: string; 
-  estrellas_total?: number;
-  imagenUrl: string; 
-  estrellas: number; 
-  precio_por_noche: number;
-  etiqueta?: string; 
-}
-
-// Interfaces para ResultadosHOTELESComponent (Listado Detallado)
-export interface HotelListado {
-    id: number;
-    tipo: string;
-    nombre: string;
-    ubicacion: string;
-    distrito: string;
-    imagenUrl: string[];
-    estrellas: number;
-    amenidades: string;
-    precio_por_noche: number;
-    filtros: CapacidadHotel; 
-    disponibilidad: DisponibilidadHotel; 
-}
-
-// Interfaces para DetallesHotelComponent
+// Interfaz que describe una habitación de hotel
 export interface Habitacion {
-    id: number;
-    nombre: string; 
-    capacidad_adultos: number;
-    capacidad_ninos: number;
-    precio_por_noche: number;
-    unidades_totales: number;
-    unidades_disponibles: number;
-    descripcion: string;
-    seleccionada?: number; // Usada solo en el componente DetallesHotel
+  id: number;
+  nombre: string;
+  capacidad_adultos: number;
+  capacidad_ninos: number;
+  cantidad: number; // unidades totales (stock)
+  precio_por_noche: number;
+  descripcion?: string;
+  unidades_disponibles?: number;
+  seleccionada?: number
 }
 
+// Interfaz para el objeto base del Hotel (datos de Hotel + Servicio)
+// 💡 CORRECCIÓN: 'imagen_url' ahora es un string (la URL principal).
+// Añadimos 'galeria_imagenes' para guardar el array completo de la API.
 export interface HotelData {
+  id: number; // Corresponde al servicio_id en el backend
+  nombre: string;
+  ciudad: string;
+  pais: string;
+  direccion: string;
+  descripcion: string | null; // Aceptamos null si la API lo devuelve
+  estrellas: number;
+  imagen_url: string; // 💡 La URL principal para el frontend
+  galeria_imagenes: string[]; // El array completo de imágenes
+  precio_por_noche: number | null; // Aceptamos null si la API lo devuelve
+}
+
+// Interfaz del Hotel con sus habitaciones (Usada por los componentes)
+export interface HotelDetalles {
+  hotel: HotelData;
+  habitaciones: Habitacion[];
+}
+
+
+// ==========================================================
+// 2. INTERFACES DE RESPUESTA DE LA API (Adaptadas a Laravel)
+// ==========================================================
+
+// 2.1. Respuesta para LISTADOS (GET /api/hoteles)
+export interface HotelListApiRespuesta {
+  // Usamos un tipo para reflejar el objeto que viene dentro de 'data'
+  data: Array<{
     id: number;
-    tipo: string;
-    nombre: string;
-    ubicacion: string;
-    distrito: string;
     direccion: string;
     estrellas: number;
-    precio_por_noche: number;
-    imagenUrl: string[];
-    descripcion: string; 
-    disponibilidad: DisponibilidadHotel;
-    filtros: CapacidadHotel;
-    habitaciones: Habitacion[]; 
+    nombre: string;
+    ciudad: string;
+    pais: string;
+    precio_por_noche: number | null;
+    imagen_url: string[]; // Viene como array en la API
+    descripcion: string | null;
+  }>;
 }
 
-// Interfaces para PagosHotelesComponent (Payload de Reserva)
-export interface ReservaItem {
-  tipo: string;
-  cantidad: number;
-  precioNoche: number; 
-  precioTotalReserva: number;
-}
-export interface ReservaHabitacionPayload {
-    habitacionId: number;
-    cantidad: number;
-    precioNoche: number;
-}
-export interface ReservaPayload {
-    hotelId: number;
-    cliente: {
+// 2.2. Respuesta para DETALLES (GET /api/hoteles/{id})
+export interface HotelDetallesApiRespuesta {
+    hotel: {
+        servicio_id: number;
+        direccion: string;
+        estrellas: number;
         nombre: string;
-        email: string;
-        telefono: string;
+        ciudad: string;
+        pais: string;
+        precio_por_noche: number | null;
+        imagen_url: string[];
+        descripcion: string | null;
     };
-    checkIn: string;
-    checkOut: string;
-    noches: number;
-    precioTotal: number;
-    habitaciones: ReservaHabitacionPayload[];
+    habitaciones: Habitacion[];
 }
 
-
-// --- 2. INTERFACES DE RESPUESTA DE LA API (para mapeo de 'data') ---
-
-// Respuestas genéricas anidadas
-interface HotelApiRespuesta { data: Hotel[]; } 
-interface HotelListadoApiRespuesta { data: HotelListado[]; } 
-interface HotelDetalleApiRespuesta { data: HotelData; } 
-
-// ----------------------------------------------------
+// ==========================================================
+// 3. HOTEL SERVICE
+// ==========================================================
 
 @Injectable({
-  providedIn: 'root' 
+  providedIn: 'root'
 })
 export class HotelService {
-  
-  // 💡 Define los endpoints de tu API. Usa las URLs reales de tu backend.
-  private API_URL = '/public/hoteles-completo.json'; // Simulación de endpoint principal
-  private RESERVA_URL = '/api/reservas'; // Endpoint real de backend para POST
-
-  constructor(private http: HttpClient) { }
-  
-  // ----------------------------------------------------
-  // --- MÉTODOS DE BÚSQUEDA Y LISTADO ---
-  // ----------------------------------------------------
+  private http = inject(HttpClient);
 
   /**
-   * Obtiene la lista básica de hoteles (usada en el Buscador/Inicio).
+   * Obtiene la lista de todos los hoteles (o filtrados por disponibilidad).
+   * @param params Parámetros opcionales de búsqueda (check_in, check_out, etc.)
+   * @returns Un Observable que emite un array de hoteles.
    */
-  getHoteles(): Observable<Hotel[]> {
-    // Nota: Aunque el JSON devuelva más datos, aquí solo devolvemos la interfaz Hotel,
-    // asumiendo que un endpoint dedicado devolvería un array más ligero.
-    return this.http.get<HotelApiRespuesta>(this.API_URL).pipe(
-      map(response => Array.isArray(response.data) ? response.data.map(item => ({
-        id: item.id,
-        nombre: item.nombre,
-        ubicacion: item.ubicacion,
-        direccion: item.direccion,
-        estrellas: item.estrellas,
-        precio_por_noche: item.precio_por_noche,
-        imagenUrl: item.imagenUrl[0] // Tomar solo la primera imagen para el listado básico
-      })) : [])
+  getHoteles(params?: any): Observable<HotelData[]> {
+    // 💡 CLAVE: Incluimos los headers de autenticación
+    return this.http.get<HotelListApiRespuesta>(`/api/hoteles`, { headers: API_HEADERS, params }).pipe(
+      map(response => response.data.map(apiHotel => ({
+        id: apiHotel.id,
+        nombre: apiHotel.nombre,
+        ciudad: apiHotel.ciudad,
+        pais: apiHotel.pais,
+        direccion: apiHotel.direccion,
+        estrellas: apiHotel.estrellas,
+        // Tomamos la primera imagen del array como principal
+        imagen_url: apiHotel.imagen_url && apiHotel.imagen_url.length > 0 ? apiHotel.imagen_url[0] : 'assets/images/placeholder-hotel.jpg',
+        galeria_imagenes: apiHotel.imagen_url ?? [],
+        precio_por_noche: apiHotel.precio_por_noche ?? null,
+        descripcion: apiHotel.descripcion ?? null
+      } as HotelData)))
     );
   }
 
   /**
-   * Deriva destinos únicos a partir del listado básico de hoteles.
+   * Obtiene los detalles de un hotel por su ID de Servicio.
+   * @param id El ID del servicio del hotel.
+   * @returns Un Observable que emite la estructura HotelDetalles.
    */
-  getDestinos(): Observable<string[]> {
-    return this.getHoteles().pipe( 
-        map((hoteles: Hotel[]) => {
-            const ubicaciones = hoteles.map(hotel => hotel.ubicacion).filter(ubicacion => !!ubicacion);
-            return Array.from(new Set(ubicaciones));
-        })
-    );
-  }
-
-  /**
-   * Obtiene la lista detallada de hoteles para la página de resultados.
-   * Maneja el formato anidado 'data' o un array directo.
-   */
-  getHotelesListado(): Observable<HotelListado[]> {
-    // Usamos el tipado UNION para aceptar la nueva respuesta anidada o la antigua (array directo)
-    return this.http.get<HotelListadoApiRespuesta | HotelListado[]>(this.API_URL).pipe( 
+  getHotelDetalles(id: number): Observable<HotelDetalles> {
+    // 💡 CLAVE: Incluir los headers de autenticación
+    return this.http.get<HotelDetallesApiRespuesta>(`/api/hoteles/${id}`, { headers: API_HEADERS }).pipe(
       map(response => {
-        // Verifica si la propiedad 'data' existe y es un array
-        if ('data' in response && Array.isArray(response.data)) {
-          // Asumimos que response.data contiene HotelListado[]
-          return response.data as HotelListado[]; 
-        }
-        // Si la respuesta completa es el array (formato antiguo o sin anidar)
-        return response as HotelListado[];
+        const hotelApi = response.hotel;
+        
+        // Creamos el objeto HotelData (modelo de Frontend)
+        const hotelData: HotelData = {
+          id: hotelApi.servicio_id,
+          nombre: hotelApi.nombre,
+          ciudad: hotelApi.ciudad,
+          pais: hotelApi.pais,
+          direccion: hotelApi.direccion,
+          estrellas: hotelApi.estrellas,
+          
+          // 💡 CORRECCIÓN: Extraemos el primer elemento del array para la principal.
+          imagen_url: hotelApi.imagen_url && hotelApi.imagen_url.length > 0 ? hotelApi.imagen_url[0] : 'assets/images/placeholder-hotel.jpg',
+          galeria_imagenes: hotelApi.imagen_url ?? [],
+          
+          // 💡 Manejo de Nulos: Asignamos 'null' si la API lo devuelve vacío.
+          precio_por_noche: hotelApi.precio_por_noche ?? null,
+          descripcion: hotelApi.descripcion ?? null
+        };
+        
+        return {
+          hotel: hotelData,
+          habitaciones: response.habitaciones
+        };
       })
     );
-  }
-
-  /**
-   * Obtiene los detalles completos de un hotel por su ID (usado en DetallesHotelComponent).
-   * 🚨 Nota: En un backend real, harías una llamada específica como: `/api/hoteles/${id}`
-   * Aquí se simula extrayendo del JSON completo.
-   */
-  getHotelDetails(id: number): Observable<HotelData> {
-    // En un entorno de desarrollo con JSON local, cargamos el archivo completo y filtramos.
-    return this.http.get<HotelDetalleApiRespuesta | HotelData[]>(this.API_URL).pipe(
-      map((response: any) => {
-          const hotelesArray = Array.isArray(response.data) ? response.data : 
-                               Array.isArray(response) ? response : [];
-          
-          const hotelData = hotelesArray.find((h: HotelData) => h.id === id);
-          
-          if (!hotelData) {
-            throw new Error(`Hotel con ID ${id} no encontrado.`);
-          }
-          return hotelData as HotelData;
-      })
-    );
-  }
-  
-  // ----------------------------------------------------
-  // --- MÉTODOS DE TRANSACCIÓN ---
-  // ----------------------------------------------------
-
-  /**
-   * Envía los datos de la reserva al backend para su procesamiento y confirmación.
-   * @param payload Los datos completos de la reserva y el cliente.
-   * @returns Un Observable con la respuesta del backend (ej: un ID de confirmación).
-   */
-  confirmarReserva(payload: ReservaPayload): Observable<any> {
-    console.log('--- ENVIANDO RESERVA A BACKEND ---', payload);
-    // 💡 Usa POST para crear un nuevo recurso (la reserva).
-    // El backend debería devolver un objeto con el ID de la reserva.
-    return this.http.post<any>(this.RESERVA_URL, payload);
   }
 }
+

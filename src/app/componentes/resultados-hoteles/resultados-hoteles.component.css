@@ -2,6 +2,13 @@ app-buscador-dinamico {
   margin-top: 30px; /* Ejemplo: agrega un espacio para que se vea bien debajo del header */
 }
 
+/* 💡 NUEVA CLASE: Contenedor para centrar los resultados */
+.results-container {
+  max-width: 1100px; /* Define un ancho máximo para centrar */
+  margin: 20px auto; /* Centra el contenedor horizontalmente */
+  padding: 0 20px; /* Añade padding para móviles */
+}
+
 /* Contenedor principal para los botones y el contenido */
 .content-container {
   max-width: 900px;
@@ -63,7 +70,16 @@ app-buscador-dinamico {
 .results-list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 70px;
+  /* La lista ya no necesita un ancho máximo si está dentro de .results-container */
+}
+
+.hotel-container{
+    margin-bottom: 30px; 
+    max-width: 900px;
+    margin-left: 480px;
+    margin-top: 70px;
+    margin-right: auto;
 }
 
 .hotel-card {

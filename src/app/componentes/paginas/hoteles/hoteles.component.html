@@ -12,11 +12,17 @@
 
   <div class="lista-hoteles">
     <div *ngFor="let hotel of hotelesRecientes" class="hotel-item">
-      <img [src]="hotel.imagenUrl[0]" alt="Foto del {{hotel.nombre}}">
+        <img *ngIf="hotel.imagen_url && hotel.imagen_url.length > 0" 
+       [src]="hotel.imagen_url[0]" 
+       alt="Foto del {{hotel.nombre}}">
+  
+    <div *ngIf="!hotel.imagen_url || hotel.imagen_url.length === 0" class="no-image-placeholder">
+        No hay imagen disponible
+    </div>
 
       <div>
         <p class="nombre-hotel">{{hotel.nombre}}</p>
-        <p class="ubicacion-hotel">{{hotel.ubicacion}}</p>
+        <p class="ubicacion-hotel">{{hotel.ciudad}}</p>
       </div>  
     </div>
   </div>
@@ -31,7 +37,13 @@
 
   <div class="populares-cards">
     <div *ngFor="let hotel of hotelesPopulares" class="hotel-card">
-      <img [src]="hotel.imagenUrl[0]" alt="{{ hotel.nombre }}">
+        <img *ngIf="hotel.imagen_url && hotel.imagen_url.length > 0" 
+       [src]="hotel.imagen_url[0]" 
+       alt="Foto del {{hotel.nombre}}">
+  
+      <div *ngIf="!hotel.imagen_url || hotel.imagen_url.length === 0" class="no-image-placeholder">
+          No hay imagen disponible
+      </div>
       <div class="card-overlay">
         
         <div class="price-name-group">

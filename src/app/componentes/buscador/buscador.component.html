@@ -4,8 +4,16 @@
 
     <ng-container *ngIf="tipoBusqueda === 'hoteles'">
       <div class="input-group">
-        <label for="destino">Destino</label>
-        <input type="text" id="destino" placeholder="Lima, Perú" [(ngModel)]="destino" (input)="buscarSugerencias()">
+        <label for="destino">Destino (Ciudad)</label>
+        <!-- El ngModel se enlaza a 'destino' que ahora es la ciudad -->
+        <input 
+          type="text" 
+          id="destino" 
+          placeholder="Lima, Perú" 
+          [(ngModel)]="destino" 
+          (input)="buscarSugerencias()"
+          autocomplete="off">
+        
         <ul *ngIf="sugerencias.length > 0" class="sugerencias-lista">
           <li *ngFor="let sugerencia of sugerencias" (click)="seleccionarDestino(sugerencia)">
             {{sugerencia}}
@@ -28,32 +36,35 @@
         <div class="guests-selector" (click)="toggleGuestMenu()">
           {{ huespedes.habitaciones }} cuartos, {{ huespedes.adultos }} adultos y {{ huespedes.ninos }} niños
         </div>
+        
+        <!-- Menú de Opciones de Huéspedes -->
         <div *ngIf="showGuestMenu" class="guest-options-menu">
           
           <div class="guest-option">
             <span>Adultos</span>
             <div class="counter">
-              <button (click)="changeCount('adultos', -1)">-</button>
+              <!-- Usamos type="button" para evitar envío de formulario, y removemos (click)="toggleGuestMenu()" -->
+              <button type="button" (click)="changeCount('adultos', -1)">-</button>
               <span>{{ huespedes.adultos }}</span>
-              <button (click)="changeCount('adultos', 1)">+</button>
+              <button type="button" (click)="changeCount('adultos', 1)">+</button>
             </div>
           </div>
           
           <div class="guest-option">
             <span>Niños</span>
             <div class="counter">
-              <button (click)="changeCount('ninos', -1)">-</button>
+              <button type="button" (click)="changeCount('ninos', -1)">-</button>
               <span>{{ huespedes.ninos }}</span>
-              <button (click)="changeCount('ninos', 1)">+</button>
+              <button type="button" (click)="changeCount('ninos', 1)">+</button>
             </div>
           </div>
 
           <div class="guest-option">
             <span>Cuartos</span>
             <div class="counter">
-              <button (click)="changeCount('habitaciones', -1)">-</button>
+              <button type="button" (click)="changeCount('habitaciones', -1)">-</button>
               <span>{{ huespedes.habitaciones }}</span>
-              <button (click)="changeCount('habitaciones', 1)">+</button>
+              <button type="button" (click)="changeCount('habitaciones', 1)">+</button>
             </div>
           </div>
           <button class="save-button" (click)="toggleGuestMenu()">Listo</button>
@@ -65,6 +76,11 @@
       <div class="input-group">
         <label for="destino-tour">Destino</label>
         <input type="text" id="destino-tour" placeholder="Lima, Perú" [(ngModel)]="destino" (input)="buscarSugerenciasTours()">
+        <ul *ngIf="sugerencias.length > 0" class="sugerencias-lista">
+          <li *ngFor="let sugerencia of sugerencias" (click)="seleccionarDestino(sugerencia)">
+            {{sugerencia}}
+          </li>
+        </ul>
       </div>
 
       <div class="input-group">
@@ -74,12 +90,13 @@
       </div>
 
       <div class="input-group">
-        <label for="check-in">Check In</label>
+        <label for="check-in">Fecha de Tour</label>
         <input type="date" id="check-in" [min]="minDate" [(ngModel)]="checkInDate" (change)="onCheckInChange($event)">
       </div>
 
+      <!-- Para tours, la fecha de salida (check-out) no suele aplicarse, pero la mantengo si la lógica de tu API lo requiere -->
       <div class="input-group">
-        <label for="check-out">Check Out</label>
+        <label for="check-out">Fecha de Salida (Opcional)</label>
         <input type="date" id="check-out" [min]="minCheckoutDate" [(ngModel)]="checkOutDate">
       </div>
       
@@ -92,9 +109,9 @@
           <div class="guest-option">
             <span>Personas</span>
             <div class="counter">
-              <button (click)="changeCountTour('total', -1)">-</button>
+              <button type="button" (click)="changeCountTour('total', -1)">-</button>
               <span>{{ personas.total }}</span>
-              <button (click)="changeCountTour('total', 1)">+</button>
+              <button type="button" (click)="changeCountTour('total', 1)">+</button>
             </div>
           </div>
           <button class="save-button" (click)="toggleGuestMenuTour()">Listo</button>

@@ -1,3 +1,5 @@
+/* app.routes.ts */
+
 import { Routes } from "@angular/router";
 import { HotelesComponent } from "./componentes/paginas/hoteles/hoteles.component";
 import { TourComponent } from "./componentes/paginas/tour/tour.component";
@@ -6,15 +8,25 @@ import { DetallesHotelComponent } from "./componentes/detalles-hotel/detalles-ho
 import { PagosHotelesComponent } from "./componentes/pagos-hoteles/pagos-hoteles.component";
 
 
-
-/* import { Component } from '@angular/core'; */
-
-
 export const routes: Routes = [
+  // 1. Redirección de la ruta raíz (/) a /hoteles
+  { path: '', redirectTo: 'hoteles', pathMatch: 'full' }, 
+  
+  // 2. Página principal de búsqueda
   { path: 'hoteles', component: HotelesComponent },
-  { path: 'tour', component: TourComponent },
+  
+  // 3. Página de listado de resultados
   { path: 'resultadosHoteles', component: ResultadosHOTELESComponent},
-  { path: 'detallesHotel/:id', component: DetallesHotelComponent},
+  
+  // 4. Detalle del hotel, usando :servicio_id como parámetro (coherente con tu backend)
+  { path: 'detallesHotel/:servicio_id', component: DetallesHotelComponent}, 
+  
+  // 5. Página de pago
   { path: 'pagos-hoteles', component: PagosHotelesComponent},
-  { path: '**', redirectTo: 'hoteles' }                // Redirección a home si ruta no existe
+  
+  // 6. Página de tours
+  { path: 'tour', component: TourComponent },
+
+  // 7. Wildcard para rutas no encontradas
+  { path: '**', redirectTo: 'hoteles' }                
 ];

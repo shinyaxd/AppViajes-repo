@@ -3,14 +3,14 @@
   <div class="header-section">
     <div class="breadcrumb">
       <a [routerLink]="['/resultadosHoteles']" [queryParams]="{ 
-          query: hotel.ubicacion, 
+          query: hotel.ciudad,
           checkIn: checkInDate, 
           checkOut: checkOutDate, 
           adultos: adultos, 
           ninos: ninos, 
           habitaciones: habitaciones 
       }">
-        <span>{{ hotel.ubicacion }}</span>
+        <span>{{ hotel.ciudad }}</span>
       </a> &gt; <span>{{ hotel.nombre }}</span>
     </div>
 
@@ -18,18 +18,23 @@
       <div class="main-info">
         <h1>{{ hotel.nombre }}</h1>
         <p class="location-text">
-          <i class="fa-solid fa-location-dot"></i> {{ hotel.distrito }}, {{ hotel.ubicacion }}
+          <i class="fa-solid fa-location-dot"></i> {{ hotel.pais }}, {{ hotel.ciudad }}
         </p>
         <p class = "location-direct"> {{ hotel.direccion }}</p>
         <div class="rating-info">
           <p class="rating-text"> {{ hotel.estrellas }} / 5</p>
-          <span class="estrellas">{{ '⭐'.repeat(5) }}</span>
+          <span class="estrellas">{{ '⭐'.repeat(hotel.estrellas) }}</span> 
         </div>
       </div>
+      
+      <!-- 🔑 CORRECCIÓN 1: Precio - Aseguramos que se muestre solo si el valor es positivo -->
       <div class="price-and-reserve">
-        <p class="price-text">
+        <p *ngIf="hotel.precio_por_noche && hotel.precio_por_noche > 0" class="price-text">
           {{ hotel.precio_por_noche | currency:'PEN':'symbol':'1.0-0' }}
           <span class="price-per-night-header">/noche</span>
+        </p>
+        <p *ngIf="!hotel.precio_por_noche || hotel.precio_por_noche <= 0" class="price-text text-red-500">
+          Precio no disponible
         </p>
         <a class="reserve-button" href="#seccion-habitaciones">Reservar</a>
       </div>
@@ -38,20 +43,20 @@
 
   <div class="image-gallery">
     <div class="main-image">
-      <img [src]="hotel.imagenUrl[0]" alt="Imagen principal de {{ hotel.nombre }}">
-    </div>
-
-    <div class="thumbnail-gallery">
-      <div *ngFor="let imagen of hotel.imagenUrl?.slice(1,3)" class="thumbnail">
-        <img [src]="imagen" alt="Imagen de {{ hotel.nombre }}">
-      </div>
+      <!-- 🔑 CORRECCIÓN 2: Imagen - 'imagen_url' ahora es un STRING simple, no un array -->
+      <img [src]="hotel.imagen_url || 'assets/images/placeholder-hotel.jpg'" 
+           alt="Imagen principal de {{ hotel.nombre }}">
     </div>
   </div>
 
   <div class="content-section">
     <div class="summary">
       <h2>Resumen</h2>
-      <p>{{ hotel.descripcion }}</p>
+      <!-- 🔑 CORRECCIÓN 3: Descripción - Solo se muestra si no está vacía -->
+      <p *ngIf="hotel.descripcion && hotel.descripcion.length > 0">{{ hotel.descripcion }}</p>
+      <p *ngIf="!hotel.descripcion || hotel.descripcion.length === 0" class="italic text-gray-500">
+          No hay un resumen detallado disponible para este hotel.
+      </p>
     </div>
   </div>
 
@@ -89,7 +94,7 @@
           <span>{{ habitacion.seleccionada || 0 }}</span>
           <button 
               (click)="actualizarSeleccion(habitacion, 1)" 
-              [disabled]="habitacion.seleccionada && habitacion.seleccionada >= habitacion.unidades_disponibles"
+              [disabled]="habitacion.seleccionada && habitacion.seleccionada >= (habitacion.unidades_disponibles ?? 0)"
           >+</button>
         </div>
       </div>

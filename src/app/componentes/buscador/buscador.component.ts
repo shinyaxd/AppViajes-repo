@@ -1,12 +1,16 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-// 💡 Importamos 'take' para asegurar una sola emisión
-import { take } from 'rxjs/operators'; 
 
-// 💡 IMPORTAMOS EL SERVICIO
-import { HotelService } from '../../componentes/paginas/hoteles/services/hoteles.service'; 
+// 🔑 Importamos el servicio y la interfaz Hotel del servicio
+// NOTA: La interfaz que importas aquí es 'Hotel'
+import { HotelService, Habitacion, HotelData, HotelDetalles } from '../paginas/hoteles/services/hoteles.service'; 
+// He ajustado la importación de 'hoteles.service' para usar los nombres correctos
+// En tu código anterior usabas 'Hotel' aquí, pero parece que la interfaz se llama 'HotelData' ahora.
+// Usaré el nombre 'HotelData' para ser consistente con el resto de tus archivos.
+
+// --- Interfaces para Tipado (Específicas del componente) ---
 
 // Define la estructura de los filtros para Hoteles
 interface FiltroHotel {
@@ -19,6 +23,8 @@ interface FiltroHotel {
 interface FiltroTour {
   total: number;
 }
+
+// -----------------------------------------------------------------
 
 @Component({
   selector: 'app-buscador-dinamico',
@@ -33,15 +39,19 @@ interface FiltroTour {
 })
 export class BuscadorComponent implements OnInit {
 
+  // 🔑 Inyección de servicios usando inject()
+  private router = inject(Router);
+  private hotelService = inject(HotelService); 
+
+  // La propiedad de entrada para determinar qué tipo de buscador mostrar
   @Input() tipoBusqueda: 'hoteles' | 'tours' | undefined;
 
-  destino: string = '';
+  // Propiedades del buscador
+  destino: string = ''; // Ahora representa la ciudad
   sugerencias: string[] = [];
-  lugaresDisponibles: string[] = [];
-  
-  // 💡 NUEVA PROPIEDAD: Bandera para asegurar que la carga solo ocurra una vez
-  private destinosCargados = false; 
+  lugaresDisponibles: string[] = []; 
 
+  // Propiedades para fechas
   checkInDate: string = '';
   checkOutDate: string = '';
   minDate: string;
@@ -49,8 +59,8 @@ export class BuscadorComponent implements OnInit {
 
   // Propiedades para huéspedes y cuartos de HOTELES
   huespedes: FiltroHotel = {
-    adultos: 1, 
-    ninos: 0,   
+    adultos: 1, // Mínimo 1 adulto
+    ninos: 0,   // Mínimo 0 niños
     habitaciones: 1
   };
   showGuestMenu = false;
@@ -62,10 +72,7 @@ export class BuscadorComponent implements OnInit {
   };
   showGuestMenuTour = false;
 
-  constructor(
-    private router: Router, 
-    private hotelService: HotelService // 👈 ¡Inyectamos el servicio!
-  ) {
+  constructor() {
     this.minDate = new Date().toISOString().split('T')[0];
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
@@ -73,37 +80,42 @@ export class BuscadorComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // 💡 CORRECCIÓN 1: Llamar a la carga solo si aún no se ha hecho
-    if (!this.destinosCargados) {
-      this.cargarDestinosDisponibles();
-    }
+    this.cargarDestinosDisponibles();
   }
 
   /**
-   * Carga la lista de destinos llamando al método del HotelService.
-   * Se añade 'take(1)' para evitar múltiples llamadas en modo estricto de Angular.
+   * Carga la lista de ciudades disponibles desde la API de Hoteles.
+   * Utiliza hotelService.getHoteles() y extrae la propiedad 'ciudad'.
    */
   cargarDestinosDisponibles() {
-    this.hotelService.getDestinos().pipe(
-      // Usamos take(1) para asegurar que la suscripción solo se procese una vez.
-      take(1)
-    ).subscribe({
-      next: (ubicacionesUnicas: string[]) => {
-        this.lugaresDisponibles = ubicacionesUnicas;
-        this.destinosCargados = true; // 💡 CORRECCIÓN 2: Establecer bandera al completar la carga
-        console.log('Destinos disponibles cargados (ubicaciones únicas):', this.lugaresDisponibles);
+    // CORRECCIÓN CLAVE: Usar HotelData (o el nombre correcto de la interfaz de tu servicio)
+    // Asumo que el nombre correcto es HotelData, como lo definiste en el servicio corregido.
+    this.hotelService.getHoteles().subscribe({
+      next: (hoteles: HotelData[]) => { // <-- ¡CORREGIDO!
+        // 1. Mapeamos para obtener solo el campo 'ciudad' de cada hotel
+        const ciudades = hoteles
+          .map(hotel => hotel.ciudad)
+          // 2. Usamos Set para obtener solo valores únicos (sin duplicados)
+          .filter(ciudad => !!ciudad);
+
+        this.lugaresDisponibles = Array.from(new Set(ciudades));
+
+        console.log('Ciudades disponibles cargadas desde la API:', this.lugaresDisponibles);
       },
       error: (error: any) => {
-        console.error('Error al cargar la lista de ubicaciones desde la API (a través del servicio)', error);
-        this.lugaresDisponibles = [];
+        console.error('Error al cargar la lista de ciudades desde la API:', error);
+        // Fallback en caso de que la API falle
+        this.lugaresDisponibles = ['Lima', 'Cusco', 'Arequipa']; 
       }
     });
   }
 
-  // Métodos del buscador (el resto de la lógica permanece igual)
+  // ... (Resto de métodos sin cambios) ...
+
   buscarSugerencias() {
     if (this.destino.length > 2) {
       this.sugerencias = this.lugaresDisponibles.filter(lugar =>
+        // Filtramos por ciudad (antes ubicación)
         lugar.toLowerCase().includes(this.destino.toLowerCase())
       );
     } else {
@@ -127,14 +139,17 @@ export class BuscadorComponent implements OnInit {
     this.minCheckoutDate = nextDay.toISOString().split('T')[0];
   }
 
+  // Método de Hoteles
   toggleGuestMenu() {
     this.showGuestMenu = !this.showGuestMenu;
   }
 
+  // Método de Tours
   toggleGuestMenuTour() {
     this.showGuestMenuTour = !this.showGuestMenuTour;
   }
 
+  // Método de Hoteles (Alineado con 'habitaciones')
   changeCount(tipo: 'adultos' | 'ninos' | 'habitaciones', cambio: number) {
     if (tipo === 'adultos') {
       this.huespedes.adultos = Math.max(1, this.huespedes.adultos + cambio);
@@ -145,18 +160,24 @@ export class BuscadorComponent implements OnInit {
     }
   }
 
+  // Método de Tours
   changeCountTour(tipo: 'total', cambio: number) {
     if (tipo === 'total') {
       this.personas.total = Math.max(1, this.personas.total + cambio);
     }
   }
 
+  /**
+   * Método para la navegación a resultados de hoteles/tours.
+   * Pasa los filtros como Query Parameters.
+   */
   mostrarLugares() {
     console.log('Navegando a la página de resultados...');
     if (this.tipoBusqueda === 'hoteles') {
       this.router.navigate(['/resultadosHoteles'], {
         queryParams: {
-          query: this.destino,
+          // 🔑 CAMBIO: Ahora enviamos 'ciudad' como filtro
+          ciudad: this.destino, 
           checkIn: this.checkInDate,
           checkOut: this.checkOutDate,
           adultos: this.huespedes.adultos,

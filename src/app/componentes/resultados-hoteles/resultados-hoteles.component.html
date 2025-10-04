@@ -1,41 +1,27 @@
 <app-buscador-dinamico [tipoBusqueda]="'hoteles'"></app-buscador-dinamico>
 
-<div class="content-container">
-  <div class="filter-buttons">
-    <button [class.active]="filtroSeleccionado === 'hoteles'" (click)="aplicarFiltro('hoteles')">
-      Hoteles
-      <span> {{ conteos['hoteles'] }} lugares</span>
-    </button>
-    <button [class.active]="filtroSeleccionado === 'moteles'" (click)="aplicarFiltro('moteles')">
-      Moteles
-      <span> {{ conteos['moteles'] }} lugares</span>
-    </button>
-    <button [class.active]="filtroSeleccionado === 'resorts'" (click)="aplicarFiltro('resorts')">
-      Resorts
-      <span> {{ conteos['resorts'] }} lugares</span>
-    </button>
-  </div>
+<ng-container *ngIf="hoteles$ | async as hoteles">
+  <div class="hotel-container">
 
   <div class="results-info">
-    <p>Mostrando {{ hotelesFiltrados.length }} de {{ todosLosHoteles.length }} lugares</p>
+    <p>Mostrando {{ hoteles.length }} lugares</p>
   </div>
 
   <div class="results-list">
-    <div *ngIf="hotelesFiltrados.length === 0" class="no-results-message">
+    <div *ngIf="hoteles.length === 0" class="no-results-message">
         <p>No se encontraron hoteles para su búsqueda.</p>
     </div>
     
-    <div *ngFor="let hotel of hotelesFiltrados" class="hotel-card">
+    <div *ngFor="let hotel of hoteles" class="hotel-card">
         <div class="hotel-image">
-            <img [src]="hotel.imagenUrl[0]" alt="Imagen de {{ hotel.nombre }}">
+             <img [src]="hotel.imagen_url " alt="Imagen de {{ hotel.nombre }}">
         </div>
         <div class="hotel-info">
             <h4 class="hotel-name">{{ hotel.nombre }}</h4>
-            <p class="hotel-location"><i class="fa-solid fa-location-dot"></i> {{ hotel.ubicacion }} - {{ hotel.distrito }}</p>
+            <p class="hotel-location"><i class="fa-solid fa-location-dot"></i> {{ hotel.pais }} - {{ hotel.ciudad }}</p>
             <div class="hotel-rating">
-                <span>Calificación: {{ hotel.estrellas }} / 5 <span class="estrellas">{{ '⭐'.repeat(5) }}</span></span>
+                <span>Calificación: {{ hotel.estrellas }} / 5 <span class="estrellas">{{ '⭐'.repeat(hotel.estrellas) }}</span></span>
             </div>
-            <p class="hotel-amenidades"><i class="fa-solid fa-beer-mug-empty"></i> {{ hotel.amenidades}} amenidades</p>
             <div class="hotel-price">
                 <span>Precio por noche: {{ hotel.precio_por_noche | currency:'PEN':'symbol':'1.0-0' }}</span>
             </div>
@@ -54,5 +40,6 @@
 
         </div>
     </div>
+    </div>
    </div>
-</div>
+</ng-container>
