@@ -10,20 +10,23 @@
 <div class="hoteles-container">
   <h2>Hoteles que viste recientemente</h2>
 
+  <div *ngIf="mensajeError" class="error">{{ mensajeError }}</div>
+
   <div class="lista-hoteles">
     <div *ngFor="let hotel of hotelesRecientes" class="hotel-item">
-        <img *ngIf="hotel.imagen_url && hotel.imagen_url.length > 0" 
-       [src]="hotel.imagen_url[0]" 
-       alt="Foto del {{hotel.nombre}}">
-  
-    <div *ngIf="!hotel.imagen_url || hotel.imagen_url.length === 0" class="no-image-placeholder">
-        No hay imagen disponible
-    </div>
+      <img
+        *ngIf="hotel.galeria_imagenes?.length; else noImage"
+        [src]="hotel.galeria_imagenes[0]"
+        alt="Imagen de {{ hotel.nombre }}"
+        />
+        <ng-template #noImage>
+          <div class="no-image-placeholder">No hay imagen disponible</div>
+        </ng-template>
 
       <div>
-        <p class="nombre-hotel">{{hotel.nombre}}</p>
-        <p class="ubicacion-hotel">{{hotel.ciudad}}</p>
-      </div>  
+        <p class="nombre-hotel">{{ hotel.nombre }}</p>
+        <p class="ubicacion-hotel">{{ hotel.ciudad }}, {{ hotel.pais }}</p>
+      </div>
     </div>
   </div>
 </div>
@@ -31,28 +34,39 @@
 <div class="populares-section">
   <div class="populares-header">
     <h2>¡Hoteles más populares!</h2>
-    <p>Going somewhere to celebrate this season? Whether you're going home or somewhere to roam, we've got the travel tools to get you to your destination.</p>
+    <p>
+      Going somewhere to celebrate this season? Whether you're going home or
+      somewhere to roam, we've got the travel tools to get you to your
+      destination.
+    </p>
     <button class="see-all-button">See All</button>
   </div>
 
   <div class="populares-cards">
     <div *ngFor="let hotel of hotelesPopulares" class="hotel-card">
-        <img *ngIf="hotel.imagen_url && hotel.imagen_url.length > 0" 
-       [src]="hotel.imagen_url[0]" 
-       alt="Foto del {{hotel.nombre}}">
-  
-      <div *ngIf="!hotel.imagen_url || hotel.imagen_url.length === 0" class="no-image-placeholder">
-          No hay imagen disponible
-      </div>
+      <img
+        *ngIf="hotel.galeria_imagenes?.length; else noImage"
+        [src]="hotel.galeria_imagenes[0]"
+        alt="Imagen de {{ hotel.nombre }}"
+        />
+        <ng-template #noImage>
+          <div class="no-image-placeholder">No hay imagen disponible</div>
+        </ng-template>
+
       <div class="card-overlay">
-        
         <div class="price-name-group">
-            <h3 class="card-title">{{ hotel.nombre }}</h3>
-            <p class="card-price">{{ hotel.precio_por_noche | currency:'PEN':'symbol':'1.0-0' }}</p>
+          <h3 class="card-title">{{ hotel.nombre }}</h3>
+          <p class="card-price">
+            {{ hotel.precio_por_noche | currency:'PEN':'symbol':'1.0-0' }}
+          </p>
         </div>
-        
       </div>
-      <button class="reserve-button" [routerLink]="['/detallesHotel', hotel.id]">Reservar hotel</button>
+
+      <button
+        class="reserve-button"
+        [routerLink]="['/detallesHotel', hotel.id]">
+        Reservar hotel
+      </button>
     </div>
   </div>
 </div>

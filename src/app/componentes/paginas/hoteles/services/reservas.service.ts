@@ -1,8 +1,17 @@
+// src/app/services/reservas.service.ts
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable } from 'rxjs';
 
-// Interfaces básicas para Reserva y Usuario
+// ==========================================================
+// 0. CONFIGURACIÓN
+// ==========================================================
+const API_URL = 'http://localhost:8000/api';
+
+// ==========================================================
+// 1. INTERFACES
+// ==========================================================
+
 export interface Usuario {
   id: number;
   nombre: string;
@@ -12,42 +21,33 @@ export interface Usuario {
 
 export interface Reserva {
   id: number;
-  codigo_reserva: string;
-  usuario_id: number;
-  servicio_id: number;
-  fecha_inicio: string;
-  fecha_fin: string;
-  huespedes: number;
-  estado: string;
+  codigo_reserva?: string;
+  usuario_id?: number;
+  servicio_id?: number;
+  habitacion_id?: number;
+  fecha_inicio?: string;
+  fecha_fin?: string;
+  cantidad?: number;
+  personas?: number;
+  estado?: string;
   created_at?: string;
   updated_at?: string;
   usuario?: Usuario;
-  // Puedes agregar más campos según lo que devuelva tu API
 }
 
-// Respuesta para listado de reservas
-export interface ReservaListApiRespuesta {
-  data: Reserva[];
-  total: number;
+export interface ReservaApiRespuesta {
+  message?: string;
+  data?: Reserva;
 }
 
-// Respuesta para una reserva específica
-export interface ReservaDetallesApiRespuesta {
-  message: string;
-  data: Reserva;
+export interface MisReservasRespuesta {
+  data?: Reserva[];
+  total?: number;
 }
 
-// Respuesta para reservas por usuario
-export interface ReservasPorUsuarioApiRespuesta {
-  usuario: Usuario;
-  reservas: Reserva[];
-  total_reservas: number;
-  estadisticas: {
-    pendientes: number;
-    confirmadas: number;
-    canceladas: number;
-  };
-}
+// ==========================================================
+// 2. SERVICIO
+// ==========================================================
 
 @Injectable({
   providedIn: 'root'
@@ -55,43 +55,64 @@ export interface ReservasPorUsuarioApiRespuesta {
 export class ReservasService {
   private http = inject(HttpClient);
 
-  // Listar todas las reservas (con filtros opcionales)
-  getReservas(params?: any): Observable<ReservaListApiRespuesta> {
-    return this.http.get<ReservaListApiRespuesta>(`/api/reservas`, { params });
+  // ========================================================
+  // 🏨 RESERVAS DE HABITACIONES
+  // ========================================================
+
+  /**
+   * Crear una reserva de habitación
+   */
+  crearReservaHotel(data: {
+    habitacion_id: number;
+    fecha_inicio: string;
+    fecha_fin: string;
+    cantidad: number;
+  }): Observable<ReservaApiRespuesta> {
+    return this.http.post<ReservaApiRespuesta>(
+      `${API_URL}/reservas-habitaciones`,
+      data
+    );
   }
 
-  // Crear una nueva reserva
-  crearReserva(data: any): Observable<ReservaDetallesApiRespuesta> {
-    return this.http.post<ReservaDetallesApiRespuesta>(`/api/reservas`, data);
+  /**
+   * Cancelar una reserva de habitación
+   */
+  cancelarReservaHotel(id: number): Observable<any> {
+    return this.http.post(`${API_URL}/reservas-habitaciones/${id}/cancelar`, {});
   }
 
-  // Obtener detalles de una reserva por ID
-  getReserva(id: number): Observable<ReservaDetallesApiRespuesta> {
-    return this.http.get<ReservaDetallesApiRespuesta>(`/api/reservas/${id}`);
+  /**
+   * Obtener las reservas del usuario autenticado (habitaciones)
+   */
+  getMisReservasHoteles(): Observable<MisReservasRespuesta> {
+    return this.http.get<MisReservasRespuesta>(`${API_URL}/mis-reservas`);
   }
 
-  // Actualizar estado de una reserva
-  actualizarEstado(id: number, estado: string): Observable<any> {
-    return this.http.patch(`/api/reservas/${id}/estado`, { estado });
+  // ========================================================
+  // 🏞️ RESERVAS DE TOURS
+  // ========================================================
+
+  /**
+   * Crear reserva en un tour (para viajeros)
+   */
+  crearReservaTour(salidaId: number, personas: number): Observable<ReservaApiRespuesta> {
+    return this.http.post<ReservaApiRespuesta>(
+      `${API_URL}/tours/salidas/${salidaId}/reservas`,
+      { personas }
+    );
   }
 
-  // Cancelar una reserva
-  cancelarReserva(id: number, motivo?: string): Observable<any> {
-    return this.http.post(`/api/reservas/${id}/cancelar`, { motivo });
+  /**
+   * Cancelar reserva de tour
+   */
+  cancelarReservaTour(reservaId: number): Observable<any> {
+    return this.http.post(`${API_URL}/tours/reservas/${reservaId}/cancelar`, {});
   }
 
-  // Obtener reservas de un usuario específico
-  getReservasPorUsuario(usuario_id: number): Observable<ReservasPorUsuarioApiRespuesta> {
-    return this.http.get<ReservasPorUsuarioApiRespuesta>(`/api/usuarios/${usuario_id}/reservas`);
-  }
-
-  // Obtener reservas de un servicio específico
-  getReservasPorServicio(servicio_id: number): Observable<any> {
-    return this.http.get(`/api/servicios/${servicio_id}/reservas`);
-  }
-
-  // Buscar reserva por código
-  buscarPorCodigo(codigo: string): Observable<ReservaDetallesApiRespuesta> {
-    return this.http.get<ReservaDetallesApiRespuesta>(`/api/reservas/buscar/${codigo}`);
+  /**
+   * Obtener las reservas del usuario autenticado (tours)
+   */
+  getMisReservasTours(): Observable<MisReservasRespuesta> {
+    return this.http.get<MisReservasRespuesta>(`${API_URL}/tours/mis-reservas`);
   }
 }

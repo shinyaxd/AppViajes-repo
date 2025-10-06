@@ -1,111 +1,127 @@
 <div *ngIf="hotel" class="hotel-detalle-container">
-  
-  <div class="header-section">
-    <div class="breadcrumb">
-      <a [routerLink]="['/resultadosHoteles']" [queryParams]="{ 
-          query: hotel.ciudad,
-          checkIn: checkInDate, 
-          checkOut: checkOutDate, 
-          adultos: adultos, 
-          ninos: ninos, 
-          habitaciones: habitaciones 
-      }">
-        <span>{{ hotel.ciudad }}</span>
-      </a> &gt; <span>{{ hotel.nombre }}</span>
-    </div>
 
+  <!-- 🔙 Botón para volver -->
+  <button class="back-button" (click)="volverAResultados()">← Volver a resultados</button>
+
+  <!-- ======================= -->
+  <!-- ENCABEZADO DEL HOTEL -->
+  <!-- ======================= -->
+  <div class="header-section">
     <div class="hotel-info-header">
       <div class="main-info">
         <h1>{{ hotel.nombre }}</h1>
         <p class="location-text">
           <i class="fa-solid fa-location-dot"></i> {{ hotel.pais }}, {{ hotel.ciudad }}
         </p>
-        <p class = "location-direct"> {{ hotel.direccion }}</p>
+        <p class="location-direct">{{ hotel.direccion }}</p>
         <div class="rating-info">
-          <p class="rating-text"> {{ hotel.estrellas }} / 5</p>
-          <span class="estrellas">{{ '⭐'.repeat(hotel.estrellas) }}</span> 
+          <p class="rating-text">{{ hotel.estrellas }} / 5</p>
+          <span class="estrellas">{{ '⭐'.repeat(hotel.estrellas) }}</span>
         </div>
       </div>
-      
-      <!-- 🔑 CORRECCIÓN 1: Precio - Aseguramos que se muestre solo si el valor es positivo -->
+
       <div class="price-and-reserve">
-        <p *ngIf="hotel.precio_por_noche && hotel.precio_por_noche > 0" class="price-text">
-          {{ hotel.precio_por_noche | currency:'PEN':'symbol':'1.0-0' }}
+        <p *ngIf="precioHotelMostrado !== null" class="price-text">
+          {{ precioHotelMostrado | currency:'PEN':'symbol':'1.0-0' }}
           <span class="price-per-night-header">/noche</span>
         </p>
-        <p *ngIf="!hotel.precio_por_noche || hotel.precio_por_noche <= 0" class="price-text text-red-500">
+        <p *ngIf="precioHotelMostrado === null" class="price-text text-red-500">
           Precio no disponible
         </p>
-        <a class="reserve-button" href="#seccion-habitaciones">Reservar</a>
+        <a class="reserve-button" [routerLink]="[]" fragment="seccion-habitaciones">Reservar</a>
+
       </div>
     </div>
   </div>
 
+  <!-- ======================= -->
+  <!-- IMAGEN PRINCIPAL -->
+  <!-- ======================= -->
   <div class="image-gallery">
     <div class="main-image">
-      <!-- 🔑 CORRECCIÓN 2: Imagen - 'imagen_url' ahora es un STRING simple, no un array -->
-      <img [src]="hotel.imagen_url || 'assets/images/placeholder-hotel.jpg'" 
-           alt="Imagen principal de {{ hotel.nombre }}">
+      <!-- ✅ Versión sin warnings -->
+      <img 
+        *ngIf="hotel.galeria_imagenes && hotel.galeria_imagenes.length > 0; else noImage"
+        [src]="hotel.galeria_imagenes[0]"
+        alt="Imagen principal de {{ hotel.nombre }}">
+      <ng-template #noImage>
+        <img src="assets/images/placeholder-hotel.jpg" alt="Sin imagen disponible">
+      </ng-template>
     </div>
   </div>
 
+  <!-- ======================= -->
+  <!-- DESCRIPCIÓN -->
+  <!-- ======================= -->
   <div class="content-section">
     <div class="summary">
       <h2>Resumen</h2>
-      <!-- 🔑 CORRECCIÓN 3: Descripción - Solo se muestra si no está vacía -->
-      <p *ngIf="hotel.descripcion && hotel.descripcion.length > 0">{{ hotel.descripcion }}</p>
+      <p *ngIf="hotel.descripcion && hotel.descripcion.length > 0">
+        {{ hotel.descripcion }}
+      </p>
       <p *ngIf="!hotel.descripcion || hotel.descripcion.length === 0" class="italic text-gray-500">
-          No hay un resumen detallado disponible para este hotel.
+        No hay un resumen detallado disponible para este hotel.
       </p>
     </div>
   </div>
 
+  <!-- ======================= -->
+  <!-- HABITACIONES DISPONIBLES -->
+  <!-- ======================= -->
   <div class="available-rooms" id="seccion-habitaciones">
     <h2>Habitaciones disponibles</h2>
 
     <div *ngIf="habitacionesFiltradas.length === 0" class="no-rooms-message">
-        <p>No se encontraron habitaciones que cumplan con los requisitos de **{{ adultos }} adultos y {{ ninos }} niños**.</p>
-        <p>Intenta modificar los filtros de huéspedes.</p>
+      <p>No se encontraron habitaciones que cumplan con los requisitos.</p>
     </div>
 
-    <div class="room-header-row" *ngIf="habitacionesFiltradas.length > 0">
-      <div class="room-type-title">Tipo de habitación</div>
-      <div class="room-selection-title">Seleccionar habitaciones</div>
-    </div>
-    
     <div *ngFor="let habitacion of habitacionesFiltradas" class="room-card">
       <div class="room-details">
-        <h4>{{ habitacion.nombre }}</h4> 
-        
-        <p class="room-capacity">
-            <i class="fa-solid fa-user-group"></i> Capacidad: {{ habitacion.capacidad_adultos }} adultos / {{ habitacion.capacidad_ninos }} niños
+        <h4>{{ habitacion.nombre }}</h4>
+        <p>
+          <i class="fa-solid fa-user-group"></i>
+          Capacidad: {{ habitacion.capacidad_adultos }} adultos / {{ habitacion.capacidad_ninos }} niños
         </p>
-        <p class="room-units">Unidades disponibles: {{ habitacion.unidades_disponibles }}</p>
-        <p class="room-description"> {{ habitacion.descripcion }}</p>
+        <p>
+          Unidades disponibles:
+          {{ habitacion.unidades_disponibles ?? habitacion.cantidad ?? 0 }}
+        </p>
+        <p>{{ habitacion.descripcion || 'Sin descripción disponible.' }}</p>
       </div>
 
       <div class="room-selection-controls">
-        <p class="price-text">{{ habitacion.precio_por_noche | currency:'PEN':'symbol':'1.0-0' }}<span class="price-per-night">/noche</span></p>
+        <p class="price-text">
+          {{ habitacion.precio_por_noche | currency:'PEN':'symbol':'1.0-0' }}
+          <span class="price-per-night">/noche</span>
+        </p>
         <div class="quantity-controls">
           <button 
-              (click)="actualizarSeleccion(habitacion, -1)" 
-              [disabled]="!habitacion.seleccionada || habitacion.seleccionada === 0"
-          >-</button>
+            (click)="actualizarSeleccion(habitacion, -1)" 
+            [disabled]="(habitacion.seleccionada ?? 0) === 0"
+          >−</button>
+
           <span>{{ habitacion.seleccionada || 0 }}</span>
+
           <button 
-              (click)="actualizarSeleccion(habitacion, 1)" 
-              [disabled]="habitacion.seleccionada && habitacion.seleccionada >= (habitacion.unidades_disponibles ?? 0)"
+            (click)="actualizarSeleccion(habitacion, 1)" 
+            [disabled]="habitacion.seleccionada! >= (habitacion.unidades_disponibles ?? habitacion.cantidad ?? 0)"
           >+</button>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- ======================= -->
+  <!-- BOTÓN FINAL DE RESERVA -->
+  <!-- ======================= -->
   <div *ngIf="mostrarBotonReservar" class="final-reserve-section">
-      <button class="final-reserve-button" (click)="reservarHotelFinal()">Reservar</button>
+    <button class="final-reserve-button" (click)="reservarHotelFinal()">Reservar</button>
   </div>
 </div>
 
+<!-- ======================= -->
+<!-- MENSAJE DE CARGA -->
+<!-- ======================= -->
 <div *ngIf="!hotel" class="loading-message">
   <p>Cargando detalles del hotel...</p>
 </div>

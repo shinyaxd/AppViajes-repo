@@ -5,11 +5,7 @@ import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { BuscadorComponent } from '../buscador/buscador.component';
 import { tap, switchMap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-
-// 🔑 Importamos el servicio y la interfaz Hotel
 import { HotelService, HotelData } from '../paginas/hoteles/services/hoteles.service';
-
-// --- INTERFACES ---
 
 interface BusquedaHotelParams {
   ciudad: string;
@@ -19,8 +15,6 @@ interface BusquedaHotelParams {
   ninos: number;
   habitaciones: number; 
 }
-
-// ------------------------------------
 
 @Component({
   selector: 'app-resultados-hoteles',
@@ -34,19 +28,15 @@ interface BusquedaHotelParams {
     BuscadorComponent
   ]
 })
-
 export class ResultadosHOTELESComponent implements OnInit {
-  
-  // 🔑 Inyección de dependencias
+
   private hotelService = inject(HotelService);
   private router = inject(Router);
   private route = inject(ActivatedRoute); 
 
-  // Hoteles a mostrar (ahora se cargan directamente filtrados)
   hotelesFiltrados: HotelData[] = [];
-  hoteles$!: Observable<HotelData[]>; // Opción con Observable para carga asíncrona
+  hoteles$!: Observable<HotelData[]>;
 
-  // Propiedades para guardar los filtros de la URL
   ciudad: string = '';
   checkInDate: string = '';
   checkOutDate: string = '';
@@ -58,13 +48,8 @@ export class ResultadosHOTELESComponent implements OnInit {
     this.cargarHotelesConFiltrosDeRuta();
   }
 
-  /**
-   * Carga los hoteles utilizando los filtros de los Query Params de la URL.
-   * Utiliza switchMap para cancelar peticiones viejas si los parámetros cambian.
-   */
   cargarHotelesConFiltrosDeRuta(): void {
     this.hoteles$ = this.route.queryParams.pipe(
-      // 1. Guarda los parámetros de búsqueda localmente
       tap(params => {
         this.ciudad = params['ciudad'] || '';
         this.checkInDate = params['checkIn'] || '';
@@ -73,36 +58,26 @@ export class ResultadosHOTELESComponent implements OnInit {
         this.ninos = +params['ninos'] || 0;
         this.habitaciones = +params['habitaciones'] || 1;
       }),
-      // 2. Mapea los Query Params a la estructura esperada por la API
       switchMap(params => {
-        // Renombra los Query Params de Angular al formato de Laravel (check_in, check_out)
         const apiParams = {
           ciudad: params['ciudad'],
-          check_in: params['checkIn'], // <-- ¡CRUCIAL!
-          check_out: params['checkOut'], // <-- ¡CRUCIAL!
+          check_in: params['checkIn'],
+          check_out: params['checkOut'],
           adultos: params['adultos'],
           ninos: params['ninos'],
           habitaciones: params['habitaciones']
         };
-        // 3. Llama al servicio con los parámetros
         return this.hotelService.getHoteles(apiParams);
       }),
-      // 4. Guarda los resultados en la propiedad local (si no usas async pipe)
       tap(hoteles => {
         this.hotelesFiltrados = hoteles;
         console.log(`Hoteles encontrados: ${hoteles.length}`);
       })
     );
-    
-    // Opcional: Suscribirse directamente si no se usa async pipe en el HTML
+
     this.hoteles$.subscribe();
   }
 
-  /**
-   * Método que se puede llamar desde un componente Buscador anidado 
-   * para actualizar la ruta y recargar los resultados.
-   * @param params Los nuevos filtros de búsqueda.
-   */
   actualizarBusqueda(params: BusquedaHotelParams): void {
     this.router.navigate([], {
       relativeTo: this.route,
@@ -113,6 +88,20 @@ export class ResultadosHOTELESComponent implements OnInit {
         adultos: params.adultos,
         ninos: params.ninos,
         habitaciones: params.habitaciones
+      }
+    });
+  }
+
+  // ✅ NUEVO: volver conservando filtros
+  volverAResultados(): void {
+    this.router.navigate(['/resultadosHoteles'], {
+      queryParams: {
+        ciudad: this.ciudad,
+        checkIn: this.checkInDate,
+        checkOut: this.checkOutDate,
+        adultos: this.adultos,
+        ninos: this.ninos,
+        habitaciones: this.habitaciones
       }
     });
   }

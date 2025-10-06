@@ -1,14 +1,11 @@
+// src/app/componentes/hoteles/hoteles.component.ts
 import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { BuscadorComponent } from '../../buscador/buscador.component';
-// 🛑 Importamos solo lo necesario del servicio. Las interfaces locales se eliminaron.
-import { HotelService, HotelData } from './services/hoteles.service'; 
-
-// Las interfaces locales HotelApiRespuesta y Hotel han sido eliminadas
-// ya que ya están definidas o transformadas en HotelService.
+import { HotelService, HotelData } from './services/hoteles.service';
 
 @Component({
   selector: 'app-hoteles',
@@ -23,16 +20,16 @@ import { HotelService, HotelData } from './services/hoteles.service';
     BuscadorComponent
   ]
 })
-
 export class HotelesComponent implements OnInit {
   hotelesRecientes: HotelData[] = [];
   hotelesPopulares: HotelData[] = [];
+  mensajeError: string | null = null;
+
   private readonly UMBRAL_POPULARIDAD = 4.7;
 
-  // 💡 El 'router' se inyecta pero no se usa en este código. Lo mantengo por si lo usas en el futuro.
   constructor(
-    private hotelService: HotelService, 
-    @Inject(PLATFORM_ID) private platformId: Object, 
+    private hotelService: HotelService,
+    @Inject(PLATFORM_ID) private platformId: Object,
     private router: Router
   ) {}
 
@@ -43,16 +40,16 @@ export class HotelesComponent implements OnInit {
   }
 
   cargarHotelesDesdeApi() {
-    // El servicio ahora garantiza que cada objeto HotelData[] tiene 'imagen_principal'
     this.hotelService.getHoteles().subscribe({
       next: (hoteles: HotelData[]) => {
-        // La propiedad 'estrellas' debería ser de tipo number en HotelData
-        const hotelesValidos = hoteles.filter(h => typeof h.id === 'number');
-        this.hotelesRecientes = hotelesValidos.slice(0, 4);
-        this.hotelesPopulares = hotelesValidos.filter(hotel => (hotel.estrellas ?? 0) >= this.UMBRAL_POPULARIDAD);
+        this.hotelesRecientes = hoteles.slice(0, 4);
+        this.hotelesPopulares = hoteles.filter(
+          hotel => (hotel.estrellas ?? 0) >= this.UMBRAL_POPULARIDAD
+        );
       },
       error: (error) => {
         console.error('Error al cargar hoteles desde la API:', error);
+        this.mensajeError = 'Ocurrió un error al cargar los hoteles. Intenta nuevamente.';
       }
     });
   }
