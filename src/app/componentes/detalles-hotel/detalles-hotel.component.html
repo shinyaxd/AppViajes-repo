@@ -124,3 +124,40 @@
 <div *ngIf="!hotel" class="loading-message">
   <p>Cargando detalles del hotel...</p>
 </div>
+
+<!-- 🟢 Formulario emergente de fechas -->
+<div *ngIf="mostrarFormularioFechas" class="modal-fechas">
+  <div class="contenido-modal">
+    <h3>Selecciona tus fechas de estadía</h3>
+
+    <label>Check-in:</label>
+    <input
+      type="date"
+      [min]="fechaMinimaHoy"
+      [(ngModel)]="checkInDate"
+      (change)="onFechaCheckInChange($event)"
+    />
+
+    <label>Check-out:</label>
+    <input
+      type="date"
+      [min]="fechaMinimaCheckOut || fechaMinimaHoy"
+      [(ngModel)]="checkOutDate"
+      (change)="onFechaCheckOutChange($event)"
+    />
+
+    <div class="botones-modal">
+      <button (click)="guardarFechas()">Confirmar</button>
+      <button (click)="cancelarFormularioFechas()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ======================= -->
+<!-- MENSAJE SIN DISPONIBILIDAD -->
+<!-- ======================= -->
+<div *ngIf="mensajeDisponibilidad" class="sin-disponibilidad">
+  <p>{{ mensajeDisponibilidad }}</p>
+</div>
+

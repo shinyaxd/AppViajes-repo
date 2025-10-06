@@ -31,6 +31,11 @@
   margin-top: -3px;
 }
 
+/* buscador */
+
+.search-bar-container{
+  margin-top: -150px;
+}
 
 /* hoteles */
 .hoteles-container {

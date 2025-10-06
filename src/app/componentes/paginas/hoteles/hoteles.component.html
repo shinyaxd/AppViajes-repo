@@ -5,7 +5,9 @@
   </div>
 </div>
 
-<app-buscador-dinamico [tipoBusqueda]="'hoteles'"></app-buscador-dinamico>
+<div class="search-bar-container">
+  <app-buscador-dinamico [tipoBusqueda]="'hoteles'"></app-buscador-dinamico>
+</div>
 
 <div class="hoteles-container">
   <h2>Hoteles que viste recientemente</h2>
@@ -65,7 +67,7 @@
       <button
         class="reserve-button"
         [routerLink]="['/detallesHotel', hotel.id]">
-        Reservar hotel
+        Ver detalles
       </button>
     </div>
   </div>

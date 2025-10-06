@@ -277,3 +277,109 @@ h2 {
   color: #000000;
   margin-top: 50px;
 }
+
+/* ======================= */
+/* MENSAJE SIN DISPONIBILIDAD */
+/* ======================= */
+.sin-disponibilidad {
+  background-color: #ffe5e5;
+  border: 1px solid #f5bcbc;
+  padding: 15px;
+  border-radius: 8px;
+  color: #b30000;
+  font-weight: bold;
+  margin-top: 20px;
+  text-align: center;
+}
+
+/* ======================= */
+/* MODAL DE FECHAS */
+/* ======================= */
+.modal-fechas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.contenido-modal {
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 25px 35px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  animation: aparecerModal 0.3s ease;
+}
+
+@keyframes aparecerModal {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.contenido-modal h3 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.contenido-modal label {
+  display: block;
+  margin-top: 10px;
+  color: #444;
+  font-weight: bold;
+}
+
+.contenido-modal input[type="date"] {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.botones-modal {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.botones-modal button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.botones-modal button:first-child {
+  background-color: #8ed1b2;
+  color: #000;
+}
+
+.botones-modal button:first-child:hover {
+  background-color: #79bf9f;
+}
+
+.botones-modal button:last-child {
+  background-color: #ddd;
+  color: #333;
+}
+
+.botones-modal button:last-child:hover {
+  background-color: #ccc;
+}
