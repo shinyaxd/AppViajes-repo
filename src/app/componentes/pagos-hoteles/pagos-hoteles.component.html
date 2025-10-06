@@ -44,7 +44,7 @@
                 <div *ngFor="let reserva of reservas" class="detalle-reserva-multiple">
                     <p class="tipo-cuarto">
                         <strong>{{ reserva.cantidad }}x {{ reserva.tipo }}</strong>
-                        <span class="precio-unitario">{{ reserva.precioNoche | currency:'PEN':'symbol':'1.0-0' }} / noche</span>
+                        <span class="precio-unitario">{{ reserva.precioNoche | currency:'PEN':'symbol':'1.2-2' }} / noche</span>
                     </p>
                 </div>
 
@@ -54,17 +54,17 @@
                 
                 <div class="desglose-item">
                     <span>Tarifa Básica ({{ totalNoches }} noches)</span>
-                    <span>{{ tarifaBasica | currency:'PEN':'symbol':'1.0-0' }}</span>
+                    <span>{{ tarifaBasica | currency:'PEN':'symbol':'1.2-2' }}</span>
                 </div>
                 
                 <div class="desglose-item tax">
                     <span>Impuesto (IGV {{ impuesto * 100 }}%)</span>
-                    <span>{{ montoImpuesto | currency:'PEN':'symbol':'1.0-0' }}</span>
+                    <span>{{ montoImpuesto | currency:'PEN':'symbol':'1.2-2' }}</span>
                 </div>
 
                 <div class="total-final">
                     <h4>Total a Pagar</h4>
-                    <h4 class="precio-total">{{ totalPagar | currency:'PEN':'symbol':'1.0-0' }}</h4>
+                    <h4 class="precio-total">{{ totalPagar | currency:'PEN':'symbol':'1.2-2' }}</h4>
                 </div>
             </div>
             

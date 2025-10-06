@@ -25,7 +25,7 @@ export class HotelesComponent implements OnInit {
   hotelesPopulares: HotelData[] = [];
   mensajeError: string | null = null;
 
-  private readonly UMBRAL_POPULARIDAD = 4.7;
+  private readonly UMBRAL_POPULARIDAD = 1;
 
   constructor(
     private hotelService: HotelService,

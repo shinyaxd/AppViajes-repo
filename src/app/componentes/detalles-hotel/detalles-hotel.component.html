@@ -1,7 +1,7 @@
 <div *ngIf="hotel" class="hotel-detalle-container">
 
   <!-- 🔙 Botón para volver -->
-  <button class="back-button" (click)="volverAResultados()">← Volver a resultados</button>
+  <button class="back-button" (click)="volverAResultados()"> ← Volver a resultados </button>
 
   <!-- ======================= -->
   <!-- ENCABEZADO DEL HOTEL -->
@@ -22,7 +22,7 @@
 
       <div class="price-and-reserve">
         <p *ngIf="precioHotelMostrado !== null" class="price-text">
-          {{ precioHotelMostrado | currency:'PEN':'symbol':'1.0-0' }}
+          {{ precioHotelMostrado | currency:'PEN':'symbol':'1.2-2' }}
           <span class="price-per-night-header">/noche</span>
         </p>
         <p *ngIf="precioHotelMostrado === null" class="price-text text-red-500">
@@ -39,7 +39,6 @@
   <!-- ======================= -->
   <div class="image-gallery">
     <div class="main-image">
-      <!-- ✅ Versión sin warnings -->
       <img 
         *ngIf="hotel.galeria_imagenes && hotel.galeria_imagenes.length > 0; else noImage"
         [src]="hotel.galeria_imagenes[0]"
@@ -91,21 +90,21 @@
 
       <div class="room-selection-controls">
         <p class="price-text">
-          {{ habitacion.precio_por_noche | currency:'PEN':'symbol':'1.0-0' }}
+          {{ habitacion.precio_por_noche | currency:'PEN':'symbol':'1.2-2' }}
           <span class="price-per-night">/noche</span>
         </p>
         <div class="quantity-controls">
           <button 
             (click)="actualizarSeleccion(habitacion, -1)" 
             [disabled]="(habitacion.seleccionada ?? 0) === 0"
-          >−</button>
+          > - </button>
 
           <span>{{ habitacion.seleccionada || 0 }}</span>
 
           <button 
             (click)="actualizarSeleccion(habitacion, 1)" 
             [disabled]="habitacion.seleccionada! >= (habitacion.unidades_disponibles ?? habitacion.cantidad ?? 0)"
-          >+</button>
+          > + </button>
         </div>
       </div>
     </div>

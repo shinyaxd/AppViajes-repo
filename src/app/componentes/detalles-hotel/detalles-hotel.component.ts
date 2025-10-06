@@ -53,43 +53,23 @@ export class DetallesHotelComponent implements OnInit {
     });
   }
 
-// ==========================================================
-// 🔹 Obtener detalles del hotel desde la API
-// ==========================================================
 getHotelDetails(id: number): void {
-  console.log(`Cargando detalles para el hotel ID: ${id}`);
+  console.log(`Cargando detalles combinados para el hotel ID: ${id}`);
 
-  this.hotelService.getHotelDetalles(id).subscribe({
+  this.hotelService.getHotelCompleto(id).subscribe({
     next: (detalle) => {
-      console.log("✅ Detalles del hotel recibidos:", detalle);
+      console.log("✅ Hotel combinado:", detalle);
 
-      // ✅ Ajuste: garantizamos valores mínimos
-      this.hotel = {
-        ...detalle.hotel,
-        imagen_url: detalle.hotel.imagen_url || 'assets/images/placeholder-hotel.jpg',
-        descripcion: detalle.hotel.descripcion ?? 'Descripción no disponible',
-        precio_por_noche: detalle.hotel.precio_por_noche ?? 0
-      };
-
-      // ✅ Filtramos las habitaciones según adultos / niños
-      const habitacionesCompatibles = detalle.habitaciones.filter(hab =>
-        hab.capacidad_adultos >= this.adultos &&
-        hab.capacidad_ninos >= this.ninos
-      );
-
-      // ✅ Asignamos habitaciones filtradas
-      this.habitacionesFiltradas = habitacionesCompatibles.map(hab => ({
-        ...hab,
-        unidades_disponibles: hab.cantidad,
+      this.hotel = detalle.hotel;
+      this.habitacionesFiltradas = detalle.habitaciones.map(h => ({
+        ...h,
         seleccionada: 0
       }));
-
-      console.log(`🛏️ Habitaciones filtradas (${this.habitacionesFiltradas.length})`, this.habitacionesFiltradas);
 
       this.verificarSeleccion();
     },
     error: (error) => {
-      console.error(`❌ Error al cargar el detalle del hotel ID ${id}:`, error);
+      console.error(`❌ Error al cargar el hotel combinado ID ${id}:`, error);
       this.hotel = undefined;
       this.habitacionesFiltradas = [];
     }
@@ -118,7 +98,7 @@ getHotelDetails(id: number): void {
   // 🔸 Selección de habitaciones
   // ==========================================================
   actualizarSeleccion(habitacion: Habitacion, cambio: number): void {
-    const limite = habitacion.unidades_disponibles ?? habitacion.cantidad ?? 0;
+    const limite = habitacion.cantidad ?? habitacion.cantidad ?? 0;
     habitacion.seleccionada = Math.max(
       0,
       Math.min((habitacion.seleccionada ?? 0) + cambio, limite)

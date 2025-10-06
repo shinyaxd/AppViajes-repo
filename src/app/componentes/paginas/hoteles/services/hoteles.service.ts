@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, forkJoin, map } from 'rxjs';
 
 // ==========================================================
 // 0. CONFIGURACIÓN
@@ -55,7 +55,7 @@ export interface HotelListApiRespuesta {
     ciudad: string;
     pais: string;
     precio_por_noche: number | null;
-    imagenUrl: string[]; // 👈 Tu API devuelve esto como array
+    imagenUrl: string[]; 
     descripcion: string | null;
   }>;
 }
@@ -70,7 +70,7 @@ export class HotelService {
   private http = inject(HttpClient);
 
   /**
-   * Obtener lista de hoteles
+   * Obtener lista de hoteles (solo datos generales)
    */
   getHoteles(params?: Record<string, any>): Observable<HotelData[]> {
     const httpParams = new HttpParams({ fromObject: params || {} });
@@ -86,8 +86,8 @@ export class HotelService {
             pais: apiHotel.pais,
             direccion: apiHotel.direccion,
             estrellas: apiHotel.estrellas,
-            imagen_url: apiHotel.imagenUrl?.[0] || 'no hay foto', // ✅ primera imagen
-            galeria_imagenes: apiHotel.imagenUrl ?? [], // ✅ el array completo
+            imagen_url: apiHotel.imagenUrl?.[0] || 'no hay foto',
+            galeria_imagenes: apiHotel.imagenUrl ?? [],
             precio_por_noche: apiHotel.precio_por_noche ?? null,
             descripcion: apiHotel.descripcion ?? null,
           }))
@@ -96,7 +96,7 @@ export class HotelService {
   }
 
   /**
-   * Obtener los detalles de un hotel específico
+   * Obtener los detalles de un hotel específico (habitaciones)
    */
   getHotelDetalles(id: number): Observable<HotelDetalles> {
     return this.http
@@ -107,6 +107,7 @@ export class HotelService {
           if (!h) {
             throw new Error('Formato de respuesta inesperado al obtener detalles del hotel.');
           }
+
           const hotel: HotelData = {
             id: h.servicio_id,
             nombre: h.nombre,
@@ -114,15 +115,46 @@ export class HotelService {
             pais: h.pais,
             direccion: h.direccion,
             estrellas: h.estrellas,
-            imagen_url: h.imagenUrl?.[0] || 'no hay foto',
-            galeria_imagenes: h.imagenUrl ?? [],
-            precio_por_noche: h.precio_por_noche ?? null,
-            descripcion: h.descripcion ?? null,
+            imagen_url: '',            // Lo completaremos en getHotelCompleto
+            galeria_imagenes: [],      // Lo completaremos en getHotelCompleto
+            precio_por_noche: null,    // Lo completaremos en getHotelCompleto
+            descripcion: null          // Lo completaremos en getHotelCompleto
           };
-          const habitaciones = h.habitaciones ?? res.habitaciones ?? [];
+
+          const habitaciones: Habitacion[] = (h.habitaciones ?? res.habitaciones ?? []).map((r: any) => ({
+            id: r.id,
+            nombre: r.nombre ?? '',
+            capacidad_adultos: r.capacidad_adultos,
+            capacidad_ninos: r.capacidad_ninos,
+            cantidad: r.cantidad ?? r.unidades_disponibles ?? 0,
+            precio_por_noche: r.precio_por_noche,
+            descripcion: r.descripcion ?? ''
+          }));
 
           return { hotel, habitaciones };
         })
       );
+  }
+
+  /**
+   * Combina getHoteles + getHotelDetalles
+   */
+  getHotelCompleto(id: number): Observable<HotelDetalles> {
+    return forkJoin({
+      lista: this.getHoteles(),
+      detalle: this.getHotelDetalles(id)
+    }).pipe(
+      map(({ lista, detalle }) => {
+        const hotelLista = lista.find(h => h.id === id);
+
+        if (hotelLista) {
+          detalle.hotel = {
+            ...hotelLista, // Sobrescribe con los datos de la lista (imagen, descripcion, precio)
+          };
+        }
+
+        return detalle;
+      })
+    );
   }
 }
