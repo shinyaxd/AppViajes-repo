@@ -1,0 +1,14 @@
+services:
+  # Frontend Angular para desarrollo
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "4200:4200"
+    volumes:
+      # Mapear el código fuente para hot reload
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development

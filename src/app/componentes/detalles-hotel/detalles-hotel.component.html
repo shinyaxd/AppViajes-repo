@@ -29,7 +29,6 @@
           Precio no disponible
         </p>
         <a class="reserve-button" [routerLink]="[]" fragment="seccion-habitaciones">Reservar</a>
-
       </div>
     </div>
   </div>
@@ -83,7 +82,7 @@
         </p>
         <p>
           Unidades disponibles:
-          {{ habitacion.unidades_disponibles ?? habitacion.cantidad ?? 0 }}
+          {{ habitacion.unidades_disponibles || habitacion.cantidad || 0 }}
         </p>
         <p>{{ habitacion.descripcion || 'Sin descripción disponible.' }}</p>
       </div>
@@ -103,7 +102,7 @@
 
           <button 
             (click)="actualizarSeleccion(habitacion, 1)" 
-            [disabled]="habitacion.seleccionada! >= (habitacion.unidades_disponibles ?? habitacion.cantidad ?? 0)"
+            [disabled]="habitacion.seleccionada! >= (habitacion.unidades_disponibles || habitacion.cantidad || 0)"
           > + </button>
         </div>
       </div>
@@ -153,11 +152,9 @@
   </div>
 </div>
 
-
 <!-- ======================= -->
 <!-- MENSAJE SIN DISPONIBILIDAD -->
 <!-- ======================= -->
 <div *ngIf="mensajeDisponibilidad" class="sin-disponibilidad">
-  <p>{{ mensajeDisponibilidad }}</p>
+  <p>{{ mensajeDisponibilidad }}</p>
 </div>
-

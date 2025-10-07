@@ -8,8 +8,12 @@
 
 # Node
 /node_modules
-npm-debug.log
-yarn-error.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.npm
+.eslintcache
 
 # IDEs and editors
 .idea/
@@ -37,6 +41,98 @@ yarn-error.log
 testem.log
 /typings
 
-# System files
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.environment
+environment.ts.local
+environment.prod.ts.local
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*~
+*.swp
+*.swo
+
+# Editor backup files
+*~
+.#*
+\#*#
+
+
+
+# Docker
+docker-compose.override.yml
+.dockerenv
+
+# Logs
+logs/
+*.log
+.pnpm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+nyc_output/
+
+# Dependency directories (already covered above but good to be explicit)
+jspm_packages/
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# Angular specific
+.ng_pkg_build/
+*.ngfactory.ts
+*.ngsummary.json
+*.shim.ts
+
+# Package manager lock files (keep package-lock.json, ignore others if not used)
+# yarn.lock (uncomment if not using yarn)
+# pnpm-lock.yaml (uncomment if not using pnpm)
+
+# Build artifacts
+*.tsbuildinfo
+
+# OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+Desktop.ini
+
+# Security and credentials
+*.pem
+*.key
+*.crt
+*.csr
+auth.json
+credentials.json
+
+# Local configuration files that shouldn't be shared
+config.local.json
+.vscode/settings.json.local
+
+# Test results
+/test-results/
+/playwright-report/
+/blob-report/

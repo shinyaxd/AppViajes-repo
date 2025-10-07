@@ -7,7 +7,10 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:angular-proyecto": "node dist/angular-proyecto/server/server.mjs"
+    "serve:ssr:angular-proyecto": "node dist/angular-proyecto/server/server.mjs",
+    "docker:dev": "docker-compose up --build",
+    "docker:stop": "docker-compose down",
+    "docker:clean": "docker-compose down -v --remove-orphans && docker system prune -f"
   },
   "private": true,
   "dependencies": {

@@ -1,0 +1,39 @@
+# Archivos y directorios a ignorar por Docker
+
+# Dependencias (se instalan en el contenedor)
+node_modules/
+npm-debug.log*
+
+# Archivos de build
+/dist
+/tmp
+/out-tsc
+
+# Archivos de IDE
+.vscode/
+.idea/
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Variables de entorno
+.env
+
+# Logs
+*.log
+
+# Coverage de pruebas
+/coverage
+
+# Angular cache
+/.angular/cache
+
+# Git
+.git/
+.gitignore
+
+# Docker
+docker-compose*
+.dockerignore
+DOCKER-README.md

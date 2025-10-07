@@ -1,12 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, forkJoin, map } from 'rxjs';
+import { environment } from '../../../../../environments/environment';
 
 // ==========================================================
 // 0. CONFIGURACIÓN
 // ==========================================================
-const API_URL = 'http://localhost:8000/api';
-const AUTH_TOKEN = '2|dhrfHu5A4DKCzIFNosj5VjgZm0T5EpHU83VpS8kh09bbcb58';
+const API_URL = environment.apiUrl;
+const AUTH_TOKEN = environment.authToken;
 
 const API_HEADERS = new HttpHeaders({
   'Accept': 'application/json',
