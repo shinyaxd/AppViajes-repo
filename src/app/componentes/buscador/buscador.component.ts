@@ -3,14 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 
-// 🔑 Importamos el servicio y la interfaz Hotel del servicio
-// NOTA: La interfaz que importas aquí es 'Hotel'
 import { HotelService, Habitacion, HotelData, HotelDetalles } from '../paginas/hoteles/services/hoteles.service'; 
-// He ajustado la importación de 'hoteles.service' para usar los nombres correctos
-// En tu código anterior usabas 'Hotel' aquí, pero parece que la interfaz se llama 'HotelData' ahora.
-// Usaré el nombre 'HotelData' para ser consistente con el resto de tus archivos.
-
-// --- Interfaces para Tipado (Específicas del componente) ---
 
 // Define la estructura de los filtros para Hoteles
 interface FiltroHotel {
@@ -88,8 +81,6 @@ export class BuscadorComponent implements OnInit {
    * Utiliza hotelService.getHoteles() y extrae la propiedad 'ciudad'.
    */
   cargarDestinosDisponibles() {
-    // CORRECCIÓN CLAVE: Usar HotelData (o el nombre correcto de la interfaz de tu servicio)
-    // Asumo que el nombre correcto es HotelData, como lo definiste en el servicio corregido.
     this.hotelService.getHoteles().subscribe({
       next: (hoteles: HotelData[]) => { // <-- ¡CORREGIDO!
         // 1. Mapeamos para obtener solo el campo 'ciudad' de cada hotel
@@ -109,8 +100,6 @@ export class BuscadorComponent implements OnInit {
       }
     });
   }
-
-  // ... (Resto de métodos sin cambios) ...
 
   buscarSugerencias() {
     if (this.destino.length > 2) {
@@ -176,7 +165,6 @@ export class BuscadorComponent implements OnInit {
     if (this.tipoBusqueda === 'hoteles') {
       this.router.navigate(['/resultadosHoteles'], {
         queryParams: {
-          // 🔑 CAMBIO: Ahora enviamos 'ciudad' como filtro
           ciudad: this.destino, 
           checkIn: this.checkInDate,
           checkOut: this.checkOutDate,
