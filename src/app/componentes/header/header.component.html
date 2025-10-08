@@ -19,11 +19,37 @@
       </a>
     </div>
 
-    <!-- Inicio y registro -->
+    <!-- Inicio y registro (Lógica Condicional) -->
     <div class="sesreg">
-      <a href="alojamiento.html" target="_blank" class="btn">Registra tu alojamiento</a>
-      <a href="sesion.html" target="_blank" class="btn">Iniciar sesión</a>
-      <a href="registro.html" target="_blank" class="btn">Registrarse</a>
+      
+      <!-- Si el usuario está autenticado, muestra el menú desplegable -->
+      <ng-container *ngIf="isAuthenticated$ | async; else authButtons">
+        
+        <!-- Contenedor del Dropdown de Usuario -->
+        <div class="dropdown-usuario">
+          <!-- Botón o Texto que abre el menú -->
+          <button class="bienvenida dropdown-toggle">
+            Hola, {{ currentUser?.nombre || 'Usuario' }}
+            <i class="fa-solid fa-caret-down fa-xs"></i>
+          </button>
+          
+          <!-- Contenido del Menú Desplegable -->
+          <div class="dropdown-menu">
+            <button (click)="logout()" class="dropdown-item">
+              <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+            </button>
+          </div>
+        </div>
+        
+      </ng-container>
+
+      <!-- Si el usuario NO está autenticado, muestra los enlaces originales -->
+      <ng-template #authButtons>
+        <a routerLink="/login" class="btn">Registra tu alojamiento, proveedor</a>
+        <a routerLink="/login" class="btn">Iniciar sesión</a>
+        <a routerLink="/registro" class="btn">Registrarse</a>
+      </ng-template>
+
     </div>
   </div>
 </header>

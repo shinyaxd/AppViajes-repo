@@ -2,17 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, forkJoin, map } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
-
-// ==========================================================
-// 0. CONFIGURACIÓN
-// ==========================================================
-const API_URL = environment.apiUrl;
-const AUTH_TOKEN = environment.authToken;
-
-const API_HEADERS = new HttpHeaders({
-  'Accept': 'application/json',
-  'Authorization': `Bearer ${AUTH_TOKEN}`
-});
+import { AuthService } from './auth.service'; // 👈 Importa el AuthService dinámico
 
 // ==========================================================
 // 1. INTERFACES
@@ -37,8 +27,8 @@ export interface HotelData {
   direccion: string;
   descripcion: string | null;
   estrellas: number;
-  imagen_url: string; // principal
-  galeria_imagenes: string[]; // array completo
+  imagen_url: string; // imagen principal
+  galeria_imagenes: string[]; // todas las imágenes
   precio_por_noche: number | null;
 }
 
@@ -56,19 +46,36 @@ export interface HotelListApiRespuesta {
     ciudad: string;
     pais: string;
     precio_por_noche: number | null;
-    imagenUrl: string[]; 
+    imagenUrl: string[];
     descripcion: string | null;
   }>;
 }
 
 // ==========================================================
-// 2. SERVICIO
+// 2. SERVICIO PRINCIPAL
 // ==========================================================
 @Injectable({
   providedIn: 'root'
 })
 export class HotelService {
   private http = inject(HttpClient);
+  private auth = inject(AuthService); // 👈 Servicio de autenticación
+  private readonly API_URL = environment.apiUrl;
+
+  /**
+   * ✅ Obtiene headers dinámicamente (usa el token actual del usuario)
+   */
+  private getHeaders(): HttpHeaders {
+    const token = this.auth.getToken();
+    return new HttpHeaders({
+      'Accept': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}) // solo si hay token
+    });
+  }
+
+  // ==========================================================
+  // 3. MÉTODOS
+  // ==========================================================
 
   /**
    * Obtener lista de hoteles (solo datos generales)
@@ -77,7 +84,10 @@ export class HotelService {
     const httpParams = new HttpParams({ fromObject: params || {} });
 
     return this.http
-      .get<HotelListApiRespuesta>(`${API_URL}/hoteles`, { headers: API_HEADERS, params: httpParams })
+      .get<HotelListApiRespuesta>(`${this.API_URL}/hoteles`, {
+        headers: this.getHeaders(),
+        params: httpParams
+      })
       .pipe(
         map(res =>
           res.data.map(apiHotel => ({
@@ -87,7 +97,7 @@ export class HotelService {
             pais: apiHotel.pais,
             direccion: apiHotel.direccion,
             estrellas: apiHotel.estrellas,
-            imagen_url: apiHotel.imagenUrl?.[0] || 'no hay foto',
+            imagen_url: apiHotel.imagenUrl?.[0] || 'assets/images/placeholder-hotel.jpg',
             galeria_imagenes: apiHotel.imagenUrl ?? [],
             precio_por_noche: apiHotel.precio_por_noche ?? null,
             descripcion: apiHotel.descripcion ?? null,
@@ -101,7 +111,9 @@ export class HotelService {
    */
   getHotelDetalles(id: number): Observable<HotelDetalles> {
     return this.http
-      .get<any>(`${API_URL}/hoteles/${id}`, { headers: API_HEADERS })
+      .get<any>(`${this.API_URL}/hoteles/${id}`, {
+        headers: this.getHeaders()
+      })
       .pipe(
         map(res => {
           const h = res.hotel ?? res.data ?? res;
@@ -110,16 +122,16 @@ export class HotelService {
           }
 
           const hotel: HotelData = {
-            id: h.servicio_id,
+            id: h.servicio_id ?? h.id,
             nombre: h.nombre,
             ciudad: h.ciudad,
             pais: h.pais,
             direccion: h.direccion,
             estrellas: h.estrellas,
-            imagen_url: '',            // Lo completaremos en getHotelCompleto
-            galeria_imagenes: [],      // Lo completaremos en getHotelCompleto
-            precio_por_noche: null,    // Lo completaremos en getHotelCompleto
-            descripcion: null          // Lo completaremos en getHotelCompleto
+            imagen_url: '',
+            galeria_imagenes: [],
+            precio_por_noche: null,
+            descripcion: null
           };
 
           const habitaciones: Habitacion[] = (h.habitaciones ?? res.habitaciones ?? []).map((r: any) => ({
@@ -138,7 +150,7 @@ export class HotelService {
   }
 
   /**
-   * Combina getHoteles + getHotelDetalles
+   * Combina la información general y los detalles del hotel
    */
   getHotelCompleto(id: number): Observable<HotelDetalles> {
     return forkJoin({
@@ -150,7 +162,8 @@ export class HotelService {
 
         if (hotelLista) {
           detalle.hotel = {
-            ...hotelLista, // Sobrescribe con los datos de la lista (imagen, descripcion, precio)
+            ...hotelLista,
+            ...detalle.hotel // fusiona ambos sin perder campos
           };
         }
 

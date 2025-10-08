@@ -1,18 +1,32 @@
-// src/app/interceptors/auth.interceptor.ts
-import { Injectable } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { AuthService } from '../services/auth.service';
+import { catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
 
-@Injectable()
-export class AuthInterceptor implements HttpInterceptor {
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const token = localStorage.getItem('sanctum_token');
-    if (token) {
-      const cloned = req.clone({
-        setHeaders: { Authorization: `Bearer ${token}` }
-      });
-      return next.handle(cloned);
-    }
-    return next.handle(req);
-  }
-}
+export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
+  const authService = inject(AuthService);
+  const token = authService.getToken();
+
+  // 🔹 Clonamos la petición para agregar el token si existe
+  const authReq = token
+    ? req.clone({
+        setHeaders: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json'
+        }
+      })
+    : req;
+
+  return next(authReq).pipe(
+    catchError((error) => {
+      // 🔸 Si el token es inválido o expiró
+      if (error.status === 401) {
+        console.warn('⚠️ Token inválido o expirado. Limpiando sesión local...');
+        authService['cleanSession'](); // llamamos el método sincrónico sin suscribirnos
+      }
+
+      return throwError(() => error);
+    })
+  );
+};

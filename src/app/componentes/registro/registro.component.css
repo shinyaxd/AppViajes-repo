@@ -1,0 +1,177 @@
+/* ====== CONTENEDOR PRINCIPAL ====== */
+.registro-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #f8f9fa;
+  padding: 2rem;
+}
+
+/* ====== IMAGEN ====== */
+.registro-imagen {
+  flex: 0.8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.registro-imagen img {
+  width: 80%; /* más pequeña */
+  height: auto;
+  border-radius: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  object-fit: cover;
+}
+
+/* ====== FORMULARIO ====== */
+.registro-formulario {
+  flex: 1;
+  background: white;
+  border-radius: 1rem;
+  padding: 3rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.registro-formulario h2 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.registro-formulario p {
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+/* ====== CAMPOS DE NOMBRE Y APELLIDO ====== */
+.nombre-apellido {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem; /* separación horizontal */
+  margin-bottom: 1rem;
+}
+
+.nombre,
+.apellido {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.nombre label,
+.apellido label {
+  font-weight: 500;
+  margin-bottom: 0.3rem;
+}
+
+.nombre input,
+.apellido input {
+  /* Corregido: 94% causa desalineación. Usar box-sizing o padding fijo es mejor. */
+  width: 100%; /* El width 100% es manejado por el contenedor flex */
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  box-sizing: border-box; /* Asegura que padding no aumente el ancho */
+}
+
+/* ====== INPUTS GENERALES ====== */
+input,
+select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+  box-sizing: border-box; /* Añadido para consistencia */
+}
+
+/* ====== CONTRASEÑAS ====== */
+.password-container {
+  position: relative;
+}
+
+.password-field {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  opacity: 0.6;
+}
+
+.toggle-password:hover {
+  opacity: 1;
+}
+
+/* ====== BOTÓN DE ENVÍO ====== */
+button[type='submit'] {
+  background-color: #8ed1b2;
+  color: rgb(0, 0, 0);
+  border: none;
+  padding: 0.9rem;
+  border-radius: 0.5rem;
+  font-size: 1em;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 0.5rem;
+  transition: background-color 0.2s ease;
+}
+
+button[type='submit']:hover {
+  background-color: #83c4a6;
+}
+
+/* ====== MENSAJES ====== */
+.mensaje-exito {
+  color: #58816e; /* verde */
+  font-weight: 600;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.mensaje-error {
+  color: #e3342f; /* rojo */
+  font-weight: 600;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+/* ====== ENLACE LOGIN (Corrección de Clic / Z-Index) ====== */
+.login-link {
+  text-align: center;
+  margin-top: 1.5rem;
+  /* Fuerza que sea un contexto de apilamiento */
+  position: relative; 
+  z-index: 100;
+}
+
+.login-link a {
+  color: #58816e;
+  text-decoration: none;
+  font-weight: 600;
+  
+  /* Se convierte en un bloque interactivo para aumentar el área de clic */
+  display: inline-block; 
+  padding: 5px 10px; /* Aumenta el área de clic real */
+  /* Lo elevamos aún más por si un elemento invisible lo está cubriendo */
+  position: relative; 
+  z-index: 101; 
+  cursor: pointer; /* Fuerza el cursor de puntero */
+}
+
+.login-link a:hover {
+  color: #83c4a6;
+  text-decoration: underline;
+}
