@@ -6,6 +6,9 @@ import { TourComponent } from "./componentes/paginas/tour/tour.component";
 import { ResultadosHOTELESComponent } from "./componentes/resultados-hoteles/resultados-hoteles.component";
 import { DetallesHotelComponent } from "./componentes/detalles-hotel/detalles-hotel.component";
 import { PagosHotelesComponent } from "./componentes/pagos-hoteles/pagos-hoteles.component";
+import { ResultadosTOURSComponent } from "./componentes/resultados-tours/resultados-tours.component";
+import { DetallesTourComponent } from "./componentes/detalles-tour/detalles-tour.component";
+import { PagosToursComponent } from "./componentes/pagos-tours/pagos-tours.component";
 
 
 export const routes: Routes = [
@@ -26,6 +29,10 @@ export const routes: Routes = [
   
   // 6. Página de tours
   { path: 'tour', component: TourComponent },
+  // Resultados y detalle de tours
+  { path: 'resultadosTours', component: ResultadosTOURSComponent },
+  { path: 'detallesTour/:servicio_id', component: DetallesTourComponent }, 
+  { path: 'pagos-tours', component: PagosToursComponent },
 
   // 7. Wildcard para rutas no encontradas
   { path: '**', redirectTo: 'hoteles' }                

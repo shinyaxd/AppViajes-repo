@@ -1,1 +1,13 @@
-<p>resultados-tours works!</p>
+<div *ngIf="tours?.length; else empty">
+	<div *ngFor="let t of tours" class="tour-card">
+		<h3>{{ t.nombre }}</h3>
+		<p>{{ t.ciudad }}, {{ t.pais }}</p>
+		<p *ngIf="t.tour">{{ t.tour.categoria }} - {{ t.tour.duracion_min }} min - ${{ t.tour.precio_persona }}</p>
+		<p>{{ t.descripcion }}</p>
+		<img *ngIf="t.imagen_url" [src]="t.imagen_url" [alt]="t.nombre" style="max-width: 200px;">
+		<button (click)="verDetalle(t)">Ver detalle</button>
+	</div>
+</div>
+<ng-template #empty>
+	<p>No se encontraron tours.</p>
+</ng-template>

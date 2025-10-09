@@ -1,0 +1,7 @@
+<div *ngIf="tour; else loading">
+  <h2>{{ tour.nombre || tour.title || 'Detalle de Tour' }}</h2>
+  <p>{{ tour.descripcion }}</p>
+</div>
+<ng-template #loading>
+  <p>Cargando...</p>
+</ng-template>
