@@ -1,1 +1,103 @@
-<p>proveedor works!</p>
+<!-- 
+  Dashboard del Proveedor - Mis Hoteles
+  Este template asume que:
+  1. Solo es accesible para usuarios con rol 'proveedor' y autenticados (filtrado por login/guard).
+  2. El header (con 'Añadir Hotel' y 'Cerrar Sesión') está en el layout principal.
+  Utiliza clases CSS puras que son definidas en el archivo supplier-dashboard.css.
+-->
+
+<div class="dashboard-container">
+
+  <!-- Título principal -->
+  <h1 class="dashboard-title">
+    Mis publicaciones
+  </h1>
+
+  <!-- Contenedor de carga (Spinner) -->
+  <div *ngIf="isLoading()" class="loading-state">
+    <div class="spinner"></div>
+    <p class="loading-text">Cargando hoteles...</p>
+  </div>
+
+  <!-- Contenido principal -->
+  <ng-container *ngIf="!isLoading()">
+
+    <!-- 1. Estado vacío (El proveedor no tiene hoteles) -->
+    <div *ngIf="publications().length === 0"
+         class="empty-state">
+      <i class="fa-solid fa-hotel empty-icon"></i>
+      <h2 class="empty-title">¡Aún no tienes publicaciones!</h2>
+      <p class="empty-text">Puedes añadir tu primera publicación usando el enlace "Añadir Hotel" o "Añadir Tour" en la cabecera.</p>
+      <!-- Se mantiene el enlace de navegación, pero sin el estilo de botón grande, ya que la acción principal está en el header. -->
+    </div>
+
+    <!-- 2. Listado de Hoteles (Hay publicaciones) -->
+    <div *ngIf="publications().length > 0" class="publications-grid">
+
+      <div *ngFor="let pub of publications()" [class]="getPublicationCardClass()">
+        
+        <!-- Contenido principal de la tarjeta -->
+        <div class="card-content-wrapper">
+          
+          <!-- Imagen del Hotel -->
+          <div class="card-image-container">
+            <img [src]="pub.imagen_url || 'https://placehold.co/600x400/0891b2/ffffff?text=Hotel+Preview'" 
+                 alt="Imagen de {{ pub.nombre }}" 
+                 class="card-image"
+                 onerror="this.onerror=null;this.src='https://placehold.co/600x400/0891b2/ffffff?text=Hotel+Preview'">
+          </div>
+
+          <!-- Detalles del Hotel -->
+          <div class="card-details">
+            <!-- Nombre y Estrellas -->
+            <h3 class="card-title-main">
+              {{ pub.nombre }}
+              <div class="card-stars-wrapper">
+                <i *ngFor="let i of (pub.estrellas | starArray)" class="fa-solid fa-star card-star"></i>
+              </div>
+            </h3>
+            
+            <!-- Ubicación -->
+            <p class="card-location">
+              <i class="fa-solid fa-map-marker-alt card-location-icon"></i> {{ pub.ciudad }}, {{ pub.pais }}
+            </p>
+
+            <!-- Métricas clave -->
+            <div class="card-metrics">
+              <div class="metric-item">
+                <i class="fa-solid fa-tag metric-icon-price"></i>
+                Precio Base: 
+                <span class="metric-value metric-value-price">${{ pub.precio_por_noche | number:'1.2-2' }}</span> / noche
+              </div>
+              <div class="metric-item">
+                <i class="fa-solid fa-users metric-icon-reserva"></i>
+                Reservas (Pendientes): 
+                <span class="metric-value metric-value-reserva">{{ pub.reservations }}</span>
+              </div>
+              <div class="metric-item">
+                <i class="fa-solid fa-chart-line metric-icon-star"></i>
+                Estrellas: 
+                <span class="metric-value">{{ pub.estrellas }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Botones de Acción (Derecha) -->
+          <div class="card-acciones">
+            <button (click)="editPublication(pub.id, 'hotel')" 
+                    class="btn btn-secondary">
+              <i class="fa-solid fa-pen-to-square btn-icon-sm"></i> Editar
+            </button>
+            <button (click)="deletePublication(pub.id, pub.nombre)" 
+                    class="btn btn-danger">
+              <i class="fa-solid fa-trash-can btn-icon-sm"></i> Eliminar
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </ng-container>
+</div>

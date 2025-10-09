@@ -1,0 +1,151 @@
+<div class="formulario-container">
+  <h2>🛎️ Publicar nuevo hotel</h2>
+
+  <!-- ⚠️ Mensajes de éxito o error -->
+  <div *ngIf="mensajeExito" class="alert alert-success">
+    {{ mensajeExito }}
+  </div>
+
+  <div *ngIf="mensajeError" class="alert alert-danger">
+    {{ mensajeError }}
+  </div>
+
+  <!-- ========================= -->
+  <!-- FORMULARIO PRINCIPAL -->
+  <!-- ========================= -->
+  <form [formGroup]="hotelForm" (ngSubmit)="onSubmit()" class="hotel-form">
+
+    <!-- ✅ Agrupamos los campos del hotel -->
+    <div formGroupName="hotel" class="form-section">
+      <h3>🏨 Datos del Hotel</h3>
+
+      <label>
+        Nombre:
+        <input type="text" formControlName="nombre" placeholder="Nombre del hotel" required />
+      </label>
+
+      <label>
+        Descripción:
+        <textarea formControlName="descripcion" placeholder="Describe tu hotel" required></textarea>
+      </label>
+
+      <label>
+        Dirección:
+        <input type="text" formControlName="direccion" placeholder="Dirección completa" required />
+      </label>
+
+      <div class="inline-group">
+        <label>
+          Ciudad:
+          <input type="text" formControlName="ciudad" placeholder="Ciudad" required />
+        </label>
+
+        <label>
+          País:
+          <input type="text" formControlName="pais" placeholder="País" required />
+        </label>
+      </div>
+
+      <label>
+        Estrellas:
+        <input type="number" formControlName="estrellas" min="1" max="5" required />
+      </label>
+
+      <label>
+        Imagen principal (URL):
+        <input type="text" formControlName="imagen_url" placeholder="https://ejemplo.com/hotel.jpg" />
+      </label>
+
+      <!-- 👇 Galería de imágenes -->
+      <div class="galeria">
+        <h4>Galería de imágenes</h4>
+
+        <!-- ✅ Sin 'as FormArray' (ya se maneja en el TS) -->
+        <div *ngFor="let imgCtrl of galeriaImagenes?.controls; let i = index">
+          <input [formControl]="imgCtrl" placeholder="https://imagen.jpg" />
+          <button type="button" (click)="eliminarImagen(i)">🗑️</button>
+        </div>
+
+        <input #nuevaImagen placeholder="URL de nueva imagen" />
+        <button
+          type="button"
+          (click)="agregarImagen(nuevaImagen.value); nuevaImagen.value=''"
+        >
+          ➕ Agregar imagen
+        </button>
+      </div>
+    </div>
+
+    <!-- ========================= -->
+    <!-- HABITACIONES DINÁMICAS -->
+    <!-- ========================= -->
+    <div formArrayName="habitaciones" class="form-section">
+      <h3>🛏️ Habitaciones</h3>
+
+      <!-- ✅ Usa el getter 'habitaciones' -->
+      <div
+        *ngFor="let habitacion of habitaciones?.controls; let i = index"
+        [formGroupName]="i"
+        class="habitacion-card"
+      >
+        <h4>Habitación {{ i + 1 }}</h4>
+
+        <label>
+          Nombre:
+          <input type="text" formControlName="nombre" placeholder="Ej. Suite Deluxe" />
+        </label>
+
+        <label>
+          Descripción:
+          <textarea
+            formControlName="descripcion"
+            placeholder="Detalles de la habitación"
+          ></textarea>
+        </label>
+
+        <div class="inline-group">
+          <label>
+            Capacidad adultos:
+            <input type="number" formControlName="capacidad_adultos" min="1" />
+          </label>
+
+          <label>
+            Capacidad niños:
+            <input type="number" formControlName="capacidad_ninos" min="0" />
+          </label>
+        </div>
+
+        <div class="inline-group">
+          <label>
+            Precio por noche (USD):
+            <input type="number" formControlName="precio_por_noche" min="0" />
+          </label>
+
+          <label>
+            Cantidad disponible:
+            <input type="number" formControlName="cantidad" min="1" />
+          </label>
+        </div>
+
+        <button type="button" class="btn-remove" (click)="eliminarHabitacion(i)">
+          ❌ Eliminar
+        </button>
+      </div>
+
+      <button type="button" class="btn-add" (click)="agregarHabitacion()">
+        ➕ Agregar habitación
+      </button>
+    </div>
+
+    <!-- ========================= -->
+    <!-- BOTÓN DE ENVÍO -->
+    <!-- ========================= -->
+    <button
+      type="submit"
+      class="btn-submit"
+      [disabled]="hotelForm.invalid || enviando"
+    >
+      {{ enviando ? 'Enviando...' : 'Publicar hotel' }}
+    </button>
+  </form>
+</div>

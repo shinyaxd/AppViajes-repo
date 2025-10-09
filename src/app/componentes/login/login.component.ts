@@ -2,12 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService, LoginCredentials } from '../paginas/hoteles/services/auth.service';
+import { AuthService, LoginCredentials } from '../paginas/hoteles/services/auth.service'; // Ruta correcta
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  // Aseguramos la importación de RouterLink para el enlace a registro en el HTML
   imports: [CommonModule, ReactiveFormsModule, RouterLink], 
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
@@ -26,7 +25,6 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Inicializa el formulario con solo email y password, ambos requeridos
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
@@ -43,41 +41,52 @@ export class LoginComponent implements OnInit {
 
     if (this.loginForm.invalid) {
       this.error = '❌ Por favor, ingresa tu correo y contraseña.';
+      this.loginForm.markAllAsTouched();
       return;
     }
 
     this.isSubmitting = true;
-
-    // Obtenemos los datos del formulario (LoginCredentials)
     const data: LoginCredentials = this.loginForm.getRawValue() as LoginCredentials;
 
-    // Llama al método login del AuthService
     this.authService.login(data).subscribe({
       next: (res) => {
         this.message = res.message || '✅ Sesión iniciada exitosamente.';
-        this.error = '';
         this.isSubmitting = false;
+
+        console.log('Login exitoso. Usuario:', res.user.email, 'Rol:', res.user.rol);
+
+        // ==========================================================
+        // ✅ LÓGICA DE REDIRECCIÓN SEGÚN EL ROL
+        // ==========================================================
+        const userRole = res.user.rol;
+
+        // 🧠 Guardamos el rol explícitamente (por si el AuthService no lo hizo aún)
+        if (userRole) {
+          localStorage.setItem('user_role', userRole);
+        }
+
+        let redirectPath = '/';
+        if (userRole === 'proveedor') {
+          redirectPath = '/proveedor';
+        } else if (userRole === 'viajero') {
+          redirectPath = '/hoteles';
+        }
+
+        // Redirigimos después de un pequeño delay
+        setTimeout(() => {
+          this.router.navigate([redirectPath]);
+        }, 400);
+
         this.loginForm.reset();
-
-        console.log('Login exitoso. Token almacenado.', res);
-
-        // Redirige al usuario a la página principal (hoteles)
-        setTimeout(() => this.router.navigate(['/hoteles']), 1000);
       },
       error: (err) => {
         console.error('Error de login:', err);
         this.isSubmitting = false;
-        // El error viene del throwError que configuramos en AuthService
         this.error = err.message || '❌ Error desconocido al iniciar sesión.'; 
       }
     });
   }
 
-  /**
-   * Verifica si un campo debe mostrar el indicador de error.
-   * @param campo Nombre del control de formulario.
-   * @returns true si el campo es inválido y ha sido tocado/modificado.
-   */
   campoInvalido(campo: string): boolean {
     const control = this.loginForm.get(campo);
     return !!(control && control.invalid && (control.dirty || control.touched));

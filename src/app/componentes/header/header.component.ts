@@ -1,7 +1,7 @@
-import { Component, OnInit, inject, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { Subscription } from 'rxjs';
+import { Subscription, map, Observable } from 'rxjs'; 
 import { AuthService, User } from '../paginas/hoteles/services/auth.service';
 
 // Asegúrate de que la ruta al AuthService sea correcta en tu proyecto
@@ -13,48 +13,54 @@ import { AuthService, User } from '../paginas/hoteles/services/auth.service';
   styleUrls: ['./header.component.css']
 })
 export class HeaderComponent implements OnInit, OnDestroy {
-  // Inyección de dependencias
+  // ======================================================
+  // 🧱 Inyección de dependencias
+  // ======================================================
   private authService = inject(AuthService);
   private router = inject(Router);
 
+  // ======================================================
+  // 🧩 Propiedades de Estado (Observables)
+  // Se usan directamente con el 'async' pipe en el HTML.
+  // ======================================================
+  
   // Observable que mantiene el estado de autenticación (true/false)
   isAuthenticated$ = this.authService.isAuthenticated$;
   
-  // Usamos el observable directamente para que el HTML se actualice automáticamente.
+  // Observable del objeto de usuario completo
   currentUser$ = this.authService.currentUser$;
+
+  // Observable derivado: Emite TRUE si el usuario logueado tiene el rol 'proveedor'.
+  isProveedor$: Observable<boolean> = this.currentUser$.pipe(
+    map(user => user?.rol === 'proveedor') 
+  );
   
-  // Variable para guardar el usuario al que nos suscribimos.
+  // Variable para guardar el usuario al que nos suscribimos (necesario si no usas async pipe)
   currentUser: User | null = null;
   
   private subscriptions = new Subscription();
 
+  // ======================================================
+  // 🚀 Inicialización
+  // ======================================================
   ngOnInit(): void {
-    // Suscripción CLAVE: Usamos subscribe para que 'currentUser' tenga el valor sin el pipe | async
-    // y lo usamos solo para lógica si es necesario, aunque el HTML usará el pipe | async.
+    // Única suscripción necesaria: Obtener el objeto de usuario.
+    // Usar 'async' pipe en el HTML es preferible, pero esta suscripción es aceptable 
+    // si el componente necesita el objeto de forma imperativa.
     const userSub = this.currentUser$.subscribe(user => {
       this.currentUser = user;
     });
 
-    // Lógica para cargar el perfil solo si hay token pero el usuario no ha sido cargado (ej. al recargar la página).
-    const authSub = this.isAuthenticated$.subscribe(isAuthenticated => {
-      // Intentamos cargar el perfil solo si estamos autenticados y el usuario AÚN no está en la memoria (null)
-      if (isAuthenticated && !this.currentUser) {
-        this.authService.getMe().subscribe({
-          next: () => {
-            console.log('✅ Perfil cargado automáticamente.');
-            // El tap dentro de getMe ya actualiza el currentUserSubject.
-          },
-          error: (err) => {
-            console.warn('⚠️ Fallo al cargar /auth/me. Forzando logout.', err);
-            // Si el token es inválido, el getMe ya llama a cleanSession/logout.
-          }
-        });
-      }
-    });
-
+    // ⚠️ Se elimina la lógica de 'getMe()' aquí. 
+    // El AuthService (en su constructor) ya es responsable de cargar el perfil 
+    // si detecta un token al iniciar la aplicación.
+    
     this.subscriptions.add(userSub);
-    this.subscriptions.add(authSub);
   }
+
+  // ======================================================
+  // 📤 Métodos
+  // ======================================================
 
   /**
    * Cierra la sesión del usuario.
@@ -62,10 +68,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
   logout(): void {
     this.authService.logout().subscribe({
       next: () => {
+        // Navegar a la página de inicio/hoteles al cerrar sesión
         this.router.navigate(['/hoteles']);
       },
       error: () => {
-        // En caso de error de red, la sesión local ya se limpió
+        // En caso de error de red durante el logout, la sesión local ya se limpió,
+        // así que igualmente redirigimos al usuario.
         this.router.navigate(['/hoteles']);
       }
     });

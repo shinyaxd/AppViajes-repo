@@ -13,7 +13,8 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
     ? req.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`,
-          Accept: 'application/json'
+          // El 'Accept': 'application/json' está perfecto para tu backend Laravel
+          Accept: 'application/json' 
         }
       })
     : req;
@@ -23,9 +24,11 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
       // 🔸 Si el token es inválido o expiró
       if (error.status === 401) {
         console.warn('⚠️ Token inválido o expirado. Limpiando sesión local...');
-        authService['cleanSession'](); // llamamos el método sincrónico sin suscribirnos
+        // ✅ Acceso directo al método, asumiendo que es público
+        authService.cleanSession(); 
       }
 
+      // Re-lanza el error para que sea manejado por el componente que hizo la llamada
       return throwError(() => error);
     })
   );
