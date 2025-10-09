@@ -1,0 +1,107 @@
+<div class="editar-tour-container">
+  <div class="editar-header">
+    <h2>Editar Tour</h2>
+    <button class="btn-volver" (click)="cancelar()">← Volver</button>
+  </div>
+
+  <!-- Cargando -->
+  <div *ngIf="cargando" class="cargando">
+    <p>Cargando datos del tour...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="error-mensaje">
+    <p>{{ error }}</p>
+  </div>
+
+  <!-- Formulario -->
+  <form *ngIf="tour && !cargando" (ngSubmit)="guardarCambios()" class="formulario-editar">
+    
+    <!-- Nombre -->
+    <div class="form-group">
+      <label for="nombre">Nombre del Tour *</label>
+      <input 
+        type="text" 
+        id="nombre" 
+        [(ngModel)]="tour.nombre" 
+        name="nombre" 
+        required
+        class="form-control">
+    </div>
+
+    <!-- Ciudad -->
+    <div class="form-group">
+      <label for="ciudad">Ciudad *</label>
+      <input 
+        type="text" 
+        id="ciudad" 
+        [(ngModel)]="tour.ciudad" 
+        name="ciudad" 
+        required
+        class="form-control">
+    </div>
+
+    <!-- País -->
+    <div class="form-group">
+      <label for="pais">País</label>
+      <input 
+        type="text" 
+        id="pais" 
+        [(ngModel)]="tour.pais" 
+        name="pais"
+        class="form-control">
+    </div>
+
+    <!-- Descripción -->
+    <div class="form-group">
+      <label for="descripcion">Descripción</label>
+      <textarea 
+        id="descripcion" 
+        [(ngModel)]="tour.descripcion" 
+        name="descripcion"
+        rows="5"
+        class="form-control"></textarea>
+    </div>
+
+    <!-- URL de imagen -->
+    <div class="form-group">
+      <label for="imagen">URL de Imagen</label>
+      <input 
+        type="text" 
+        id="imagen" 
+        [(ngModel)]="tour.imagen_url" 
+        name="imagen"
+        class="form-control">
+      <small *ngIf="tour.imagen_url" class="preview-link">
+        <a [href]="tour.imagen_url" target="_blank">Ver imagen actual</a>
+      </small>
+    </div>
+
+    <!-- Información del tour (solo lectura) -->
+    <div *ngIf="tour.tour" class="info-tour">
+      <h3>Datos del Tour (Solo lectura)</h3>
+      <p><strong>Categoría:</strong> {{ tour.tour.categoria }}</p>
+      <p><strong>Duración:</strong> {{ tour.tour.duracion_min }} minutos</p>
+      <p><strong>Precio:</strong> ${{ tour.tour.precio_persona }}</p>
+      <p><strong>Capacidad:</strong> {{ tour.tour.capacidad_por_salida }} personas</p>
+    </div>
+
+    <!-- Botones -->
+    <div class="form-actions">
+      <button 
+        type="button" 
+        class="btn-cancelar" 
+        (click)="cancelar()"
+        [disabled]="guardando">
+        Cancelar
+      </button>
+      <button 
+        type="submit" 
+        class="btn-guardar"
+        [disabled]="guardando">
+        {{ guardando ? 'Guardando...' : 'Guardar Cambios' }}
+      </button>
+    </div>
+
+  </form>
+</div>

@@ -86,4 +86,19 @@ export class TourService {
   crearPago(data: any): Observable<any> {
     return this.http.post<any>(`${API_URL}/pagos/tours`, data, { headers: API_HEADERS });
   }
+
+  // Método para actualizar un tour existente
+  actualizarTour(id: number, datos: Partial<TourData>): Observable<TourData> {
+    return this.http.put<TourData>(`${API_URL}/tours/${id}`, datos, { headers: API_HEADERS });
+  }
+
+  // Método para eliminar un tour (eliminación lógica - cambia activo a false)
+  eliminarTour(id: number): Observable<void> {
+    return this.http.delete<void>(`${API_URL}/tours/${id}`, { headers: API_HEADERS });
+  }
+
+  // Método para desactivar un tour (alternativa más explícita)
+  desactivarTour(id: number): Observable<TourData> {
+    return this.actualizarTour(id, { activo: false });
+  }
 }

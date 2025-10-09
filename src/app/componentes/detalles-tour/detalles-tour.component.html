@@ -1,7 +1,44 @@
-<div *ngIf="tour; else loading">
-  <h2>{{ tour.nombre || tour.title || 'Detalle de Tour' }}</h2>
-  <p>{{ tour.descripcion }}</p>
+<div class="detalles-container">
+  <div *ngIf="tour; else loading" class="tour-detalles">
+    
+    <!-- Botones de acción -->
+    <div class="acciones-admin">
+      <button 
+        class="btn-editar" 
+        (click)="editarTour()"
+        [disabled]="eliminando">
+        ✏️ Editar
+      </button>
+      <button 
+        class="btn-eliminar" 
+        (click)="eliminarTour()"
+        [disabled]="eliminando">
+        {{ eliminando ? '🗑️ Eliminando...' : '🗑️ Eliminar' }}
+      </button>
+    </div>
+
+    <!-- Detalles del tour -->
+    <h2>{{ tour.nombre || tour.title || 'Detalle de Tour' }}</h2>
+    <p class="descripcion">{{ tour.descripcion }}</p>
+    
+    <!-- Información adicional si existe -->
+    <div *ngIf="tour.ciudad" class="info-item">
+      <strong>📍 Ubicación:</strong> {{ tour.ciudad }}<span *ngIf="tour.pais">, {{ tour.pais }}</span>
+    </div>
+    
+    <div *ngIf="tour.tour" class="tour-info">
+      <h3>Información del Tour</h3>
+      <p><strong>Categoría:</strong> {{ tour.tour.categoria }}</p>
+      <p><strong>Duración:</strong> {{ tour.tour.duracion_min }} minutos</p>
+      <p><strong>Precio:</strong> ${{ tour.tour.precio_persona }} por persona</p>
+      <p><strong>Capacidad:</strong> {{ tour.tour.capacidad_por_salida }} personas por salida</p>
+    </div>
+
+  </div>
+
+  <ng-template #loading>
+    <div class="loading">
+      <p>Cargando detalles del tour...</p>
+    </div>
+  </ng-template>
 </div>
-<ng-template #loading>
-  <p>Cargando...</p>
-</ng-template>

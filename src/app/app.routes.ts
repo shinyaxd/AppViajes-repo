@@ -32,6 +32,7 @@ export const routes: Routes = [
   // Resultados y detalle de tours
   { path: 'resultadosTours', component: ResultadosTOURSComponent },
   { path: 'detallesTour/:servicio_id', component: DetallesTourComponent }, 
+  { path: 'editarTour/:id', loadComponent: () => import('./componentes/paginas/tour/editar-tour/editar-tour.component').then(m => m.EditarTourComponent) },
   { path: 'pagos-tours', component: PagosToursComponent },
 
   // 7. Wildcard para rutas no encontradas
