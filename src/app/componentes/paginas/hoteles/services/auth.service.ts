@@ -1,31 +1,60 @@
-// src/app/services/auth.service.ts
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
 import { tap, catchError, map } from 'rxjs/operators';
+import { environment } from '../../../../../environments/environment';
 
-// --- INTERFACES ---
+// ==========================================================
+// INTERFACES
+// ==========================================================
 export interface LoginCredentials {
   email: string;
   password: string;
-  device_name?: string; // opcional
+  device_name?: string;
+}
+
+export interface RegisterData {
+  email: string;
+  password: string;
+  rol: 'viajero' | 'proveedor';
+  nombre?: string;
+  apellido?: string;
+  empresa_nombre?: string; // 🔹 coincide con backend
+  telefono?: string;       // 🔹 coincide con backend
+  ruc?: string;            // 🔹 coincide con backend
+}
+
+export interface User {
+  id: number;
+  nombre?: string;
+  apellido?: string;
+  email: string;
+  rol?: string;
+  empresa_nombre?: string;
+  telefono?: string;
+  ruc?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface AuthResponse {
   message: string;
   token: string;
-  user: {
-    id: number;
-    nombre: string;
-    apellido?: string;
-    email: string;
-    rol?: string;
-    created_at?: string;
+  user: User;
+}
+
+export interface RegisterResponse {
+  message: string;
+  data: {
+    user: User;
+    token?: string;
   };
 }
-// --------------------
 
+// ==========================================================
+// SERVICIO DE AUTENTICACIÓN
+// ==========================================================
 @Injectable({
   providedIn: 'root'
 })
@@ -33,14 +62,84 @@ export class AuthService {
   private platformId = inject(PLATFORM_ID);
   private http = inject(HttpClient);
 
-  private BASE_ENDPOINT = 'http://localhost:8000/api';
+  private readonly BASE_ENDPOINT = environment.apiUrl;
+  private readonly TOKEN_KEY = 'sanctum_token';
+  private readonly ROLE_KEY = 'user_role';
 
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
+  
+  private currentUserSubject = new BehaviorSubject<User | null>(null);
+  public currentUser$ = this.currentUserSubject.asObservable();
 
-  /**
-   * LOGIN → /api/auth/login
-   */
+  constructor() {
+    if (isPlatformBrowser(this.platformId)) {
+      this.initializeAuth();
+    }
+  }
+
+  // ==========================================================
+  // INICIALIZACIÓN DE SESIÓN
+  // ==========================================================
+  private initializeAuth(): void {
+    if (this.hasToken()) {
+      this.getMe().subscribe({
+        error: () => {
+          console.warn('⚠️ Token inválido o expirado. Sesión cerrada.');
+        }
+      });
+    }
+  }
+
+  // ==========================================================
+  // REGISTRO
+  // ==========================================================
+  register(data: RegisterData): Observable<RegisterResponse> {
+    const url = `${this.BASE_ENDPOINT}/auth/register`;
+
+    const basePayload = {
+      email: data.email,
+      password: data.password,
+      rol: data.rol,
+      device_name: 'WebApp'
+    };
+
+    let payload: any;
+
+    if (data.rol === 'viajero') {
+      payload = {
+        ...basePayload,
+        nombre: data.nombre,
+        apellido: data.apellido
+      };
+    } else if (data.rol === 'proveedor') {
+      payload = {
+        ...basePayload,
+        empresa_nombre: data.empresa_nombre,
+        telefono: data.telefono,
+        ruc: data.ruc
+      };
+    } else {
+      payload = basePayload;
+    }
+
+    return this.http.post<RegisterResponse>(url, payload).pipe(
+      tap(response => {
+        console.log('✅ Registro exitoso:', response.data.user);
+
+        if (response.data?.token && isPlatformBrowser(this.platformId)) {
+          localStorage.setItem(this.TOKEN_KEY, response.data.token);
+          this.isAuthenticatedSubject.next(true);
+          this.setCurrentUser(response.data.user);
+        }
+      }),
+      catchError((error: HttpErrorResponse) => this.handleError(error, 'registro'))
+    );
+  }
+
+  // ==========================================================
+  // LOGIN
+  // ==========================================================
   login(credentials: LoginCredentials): Observable<AuthResponse> {
     const url = `${this.BASE_ENDPOINT}/auth/login`;
     const payload = { ...credentials, device_name: 'WebApp' };
@@ -48,59 +147,32 @@ export class AuthService {
     return this.http.post<AuthResponse>(url, payload).pipe(
       tap(response => {
         if (isPlatformBrowser(this.platformId)) {
-          localStorage.setItem('sanctum_token', response.token);
+          localStorage.setItem(this.TOKEN_KEY, response.token);
+          if (response.user?.rol) {
+            localStorage.setItem(this.ROLE_KEY, response.user.rol);
+          }
           this.isAuthenticatedSubject.next(true);
+          this.setCurrentUser(response.user);
         }
       }),
-      catchError((error: HttpErrorResponse) => {
-        console.error('Error de inicio de sesión:', error);
-        return throwError(() => error);
-      })
+      catchError((error: HttpErrorResponse) => this.handleError(error, 'inicio de sesión'))
     );
   }
 
-  /**
-   * LOGOUT → /api/auth/logout
-   */
-  logout(): Observable<any> {
-    const token = this.getToken();
-    const url = `${this.BASE_ENDPOINT}/auth/logout`;
-
-    const headers = token
-      ? new HttpHeaders({
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`
-        })
-      : undefined;
-
-    return this.http.post(url, {}, { headers }).pipe(
-      tap(() => this.cleanSession()),
-      catchError(error => {
-        console.warn('Error en logout, limpiando sesión local:', error);
-        this.cleanSession();
-        return of(null);
-      })
-    );
-  }
-
-  /**
-   * GET USUARIO AUTENTICADO → /api/auth/me
-   */
-  getMe(): Observable<any> {
-    const token = this.getToken();
+  // ==========================================================
+  // PERFIL
+  // ==========================================================
+  getMe(): Observable<User> {
     const url = `${this.BASE_ENDPOINT}/auth/me`;
-
-    const headers = token
-      ? new HttpHeaders({
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`
-        })
-      : undefined;
-
-    return this.http.get<{ data: any }>(url, { headers }).pipe(
-      map(res => res.data), // 🟢 extrae el usuario dentro de data
+    return this.http.get<{ data: User }>(url).pipe(
+      map(res => res.data),
+      tap(user => {
+        this.setCurrentUser(user);
+        if (isPlatformBrowser(this.platformId) && user?.rol) {
+          localStorage.setItem(this.ROLE_KEY, user.rol);
+        }
+      }),
       catchError(error => {
-        console.error('Error al obtener /auth/me:', error);
         if (error.status === 401) {
           this.cleanSession();
         }
@@ -110,24 +182,92 @@ export class AuthService {
   }
 
   // ==========================================================
+  // LOGOUT
+  // ==========================================================
+  logout(): Observable<any> {
+    const url = `${this.BASE_ENDPOINT}/auth/logout`;
+    return this.http.post(url, {}).pipe(
+      tap(() => this.cleanSession()),
+      catchError(error => {
+        console.warn('⚠️ Error cerrando sesión, limpiando local.', error);
+        this.cleanSession();
+        return of(null);
+      })
+    );
+  }
+
+  // ==========================================================
   // UTILIDADES
   // ==========================================================
+  public isLoggedIn(): boolean {
+    return this.hasToken();
+  }
 
-  private cleanSession(): void {
+  public getRole(): string | null {
+    const userRole = this.currentUserSubject.value?.rol;
+    if (userRole) return userRole;
+
     if (isPlatformBrowser(this.platformId)) {
-      localStorage.removeItem('sanctum_token');
+      return localStorage.getItem(this.ROLE_KEY);
+    }
+    return null;
+  }
+
+  public isProveedor$(): Observable<boolean> {
+    return this.currentUser$.pipe(map(user => user?.rol === 'proveedor'));
+  }
+
+  public isViajero$(): Observable<boolean> {
+    return this.currentUser$.pipe(map(user => user?.rol === 'viajero'));
+  }
+
+  public setCurrentUser(user: User | null): void {
+    this.currentUserSubject.next(user);
+  }
+
+  public cleanSession(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem(this.TOKEN_KEY);
+      localStorage.removeItem(this.ROLE_KEY);
     }
     this.isAuthenticatedSubject.next(false);
+    this.currentUserSubject.next(null);
   }
 
   getToken(): string | null {
     if (isPlatformBrowser(this.platformId)) {
-      return localStorage.getItem('sanctum_token');
+      return localStorage.getItem(this.TOKEN_KEY);
     }
     return null;
   }
 
   private hasToken(): boolean {
-    return !!this.getToken();
+    if (!isPlatformBrowser(this.platformId)) return false;
+    return !!localStorage.getItem(this.TOKEN_KEY);
+  }
+
+  private handleError(error: HttpErrorResponse, context: string) {
+    console.error(`❌ Error durante ${context}:`, error);
+    let message = 'Ocurrió un error inesperado.';
+
+    if (error.status === 0) {
+      message = 'No se puede conectar con el servidor.';
+    } else if (error.status === 401) {
+      message = error.error?.message || 'Credenciales incorrectas.';
+    } else if (error.status === 422) {
+      const errors = error.error?.errors;
+      if (errors) {
+        const firstErrorKey = Object.keys(errors)[0];
+        if (firstErrorKey && errors[firstErrorKey].length > 0) {
+          message = errors[firstErrorKey][0];
+        }
+      } else {
+        message = error.error?.message || 'Error de validación.';
+      }
+    } else if (error.error?.message) {
+      message = error.error.message;
+    }
+
+    return throwError(() => new Error(message));
   }
 }

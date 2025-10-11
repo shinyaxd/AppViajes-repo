@@ -1,0 +1,176 @@
+
+
+/* El contenedor que aloja el formulario y la imagen */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #f8f9fa;
+  padding: 2rem;
+  border-radius: 20px;
+}
+
+/* ====== IMAGEN (Lado Derecho) ====== */
+.login-imagen {
+    /* Mantiene la proporción de la imagen de tu registro original (flex: 0.8) */
+    flex: 0.8; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0; 
+    background-color: transparent; 
+    position: relative; 
+}
+
+.login-imagen img {
+    /* Estilos idénticos a los de registro-imagen img */
+    width: 80%; 
+    height: auto;
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    object-fit: cover;
+}
+
+/* Estilos de los puntos del carrusel (Ocultos para coincidir con el registro) */
+.carousel-dots {
+    display: none;
+}
+
+
+/* ====== FORMULARIO (Lado Izquierdo) ====== */
+.login-formulario {
+    /* Mantiene la proporción del formulario de tu registro original (flex: 1) */
+    flex: 1; 
+    background: white;
+    padding: 3rem; /* Idéntico al registro */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); /* Idéntico al registro */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-radius: 1rem;
+}
+
+.login-formulario h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.login-formulario .subtitle {
+    color: #666;
+    margin-bottom: 2rem;
+    font-size: 1rem; 
+}
+
+/* Etiquetas y Grupos de Formulario */
+label {
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+    display: block;
+}
+
+.form-group {
+    margin-bottom: 1rem; 
+}
+
+/* INPUTS GENERALES */
+input:not(.form-check-input), select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    box-sizing: border-box; 
+    margin-bottom: 0; 
+}
+
+/* ====== CONTRASEÑA y Botón de Toggle ====== */
+.password-field {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    opacity: 0.6;
+    color: initial; 
+}
+
+.toggle-password:hover {
+    opacity: 1;
+}
+
+/* Recordarme Checkbox (Estilo Checkbox) */
+.form-check {
+    display: flex;
+    align-items: center;
+    margin-top: 1rem; 
+    margin-bottom: 1.5rem; 
+    font-size: 0.9rem;
+}
+
+.form-check-input {
+    margin-right: 8px;
+    accent-color: #58816e; 
+}
+
+/* ====== BOTÓN DE ENVÍO ====== */
+button[type='submit'] {
+  background-color: #8ed1b2;
+  color: rgb(0, 0, 0);
+  border: none;
+  padding: 0.9rem;
+  border-radius: 0.5rem;
+  font-size: 1em;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 0.5rem;
+  transition: background-color 0.2s ease;
+}
+
+button[type='submit']:hover {
+  background-color: #83c4a6;
+}
+
+/* ====== MENSAJES ====== */
+.mensaje-exito {
+    color: #58816e; 
+    font-weight: 600;
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.mensaje-error {
+    color: #e3342f; 
+    font-weight: 600; 
+    margin-top: 0.3rem; 
+    font-size: 0.85rem;
+    text-align: left; 
+    display: block;
+}
+
+/* ====== ENLACE A REGISTRO ====== */
+.registro-link {
+  text-align: center;
+  margin-top: 1.5rem; 
+}
+
+.registro-link a {
+  color: #58816e;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.registro-link a:hover {
+  color: #83c4a6;
+  text-decoration: underline;
+}

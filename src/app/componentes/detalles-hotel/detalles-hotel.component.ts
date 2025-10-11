@@ -251,11 +251,15 @@ export class DetallesHotelComponent implements OnInit {
       queryParams[`reserva_${i}_cant`] = cant;
       queryParams[`reserva_${i}_precio_unitario`] = precio;
       queryParams[`reserva_${i}_precio_total`] = subtotal.toFixed(2);
-      queryParams[`reserva_${i}_id`] = hab.id;
+      
+      // ✅ CORRECCIÓN: Usar 'reserva_${i}_habitacion_id' para que el componente de pagos lo reconozca.
+      queryParams[`reserva_${i}_habitacion_id`] = hab.id; 
     });
 
     queryParams['precioTotalGeneral'] = total.toFixed(2);
 
+
+    console.log('✅ VALIDACIÓN SUPERADA. Iniciando navegación a pagos.', queryParams); 
     this.router.navigate(['/pagos-hoteles'], { queryParams });
   }
 }

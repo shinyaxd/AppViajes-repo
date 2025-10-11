@@ -1,29 +1,79 @@
-<!-- ENCABEZADO -->
 <header class="encabezado">
   <div class="contenido-header">
     <div class="tourhotel">
-      <a 
-        routerLink="/tour" 
-        routerLinkActive="activo" 
-        [routerLinkActiveOptions]="{ exact: true }" 
-        class="somb">
-        <i class="fa-solid fa-location-dot"></i> Encontrar Tour
-      </a>
+      
+      <!-- Lógica para Proveedores (Rol: 'proveedor') -->
+      <!-- isProveedor$ se resuelve a true/false -->
+      <ng-container *ngIf="isProveedor$ | async; else clienteLinks">
+        
+        <!-- Enlaza a la nueva ruta dedicada para Tours -->
+        <a 
+          routerLink="/crear-tour"
+          routerLinkActive="activo" 
+          class="somb">
+          <i class="fa-solid fa-square-plus"></i> Crear Tour
+        </a>
 
-      <a 
-        routerLink="/hoteles" 
-        routerLinkActive="activo" 
-        [routerLinkActiveOptions]="{ exact: true }" 
-        class="somb">
-        <i class="fa-solid fa-bed"></i> Encontrar Hotel
-      </a>
+        <!-- Enlaza a la nueva ruta dedicada para Hoteles -->
+        <a 
+          routerLink="/crear-hotel"
+          routerLinkActive="activo" 
+          class="somb">
+          <i class="fa-solid fa-building-circle-check"></i> Crear Hotel
+        </a>
+
+      </ng-container>
+
+      <!-- Lógica para Viajeros (Rol: 'viajero' o no logueado) -->
+      <ng-template #clienteLinks>
+        <a 
+          routerLink="/tour" 
+          routerLinkActive="activo" 
+          [routerLinkActiveOptions]="{ exact: true }" 
+          class="somb">
+          <i class="fa-solid fa-location-dot"></i> Encontrar Tour
+        </a>
+
+        <a 
+          routerLink="/hoteles" 
+          routerLinkActive="activo" 
+          [routerLinkActiveOptions]="{ exact: true }" 
+          class="somb">
+          <i class="fa-solid fa-bed"></i> Encontrar Hotel
+        </a>
+      </ng-template>
+
     </div>
 
-    <!-- Inicio y registro -->
     <div class="sesreg">
-      <a href="alojamiento.html" target="_blank" class="btn">Registra tu alojamiento</a>
-      <a href="sesion.html" target="_blank" class="btn">Iniciar sesión</a>
-      <a href="registro.html" target="_blank" class="btn">Registrarse</a>
+      
+      <!-- Lógica: Usuario Autenticado -->
+      <ng-container *ngIf="isAuthenticated$ | async; else authButtons">
+        
+        <div class="dropdown-usuario">
+          <button class="bienvenida dropdown-toggle">
+            <!-- 🔑 MEJORA CLAVE: Uso del async pipe para acceder al nombre -->
+            Hola, {{ (currentUser$ | async)?.nombre || 'Usuario' }}
+            <i class="fa-solid fa-caret-down fa-xs"></i>
+          </button>
+          
+          <div class="dropdown-menu">
+            <button (click)="logout()" class="dropdown-item">
+              <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+            </button>
+          </div>
+        </div>
+        
+      </ng-container>
+
+      <!-- Lógica: Usuario No Autenticado -->
+      <ng-template #authButtons>
+        <!-- 💡 Sugerencia: El primer enlace puede ser para redirigir a proveedores -->
+        <a routerLink="/login" class="btn">Registra tu alojamiento, proveedor</a> 
+        <a routerLink="/login" class="btn">Iniciar sesión</a>
+        <a routerLink="/registro" class="btn">Registrarse</a>
+      </ng-template>
+
     </div>
   </div>
 </header>

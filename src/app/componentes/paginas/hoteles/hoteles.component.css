@@ -124,14 +124,18 @@
 
 .populares-cards {
   display: flex;
-  gap: 20px;
-  overflow-x: auto;
-  padding-bottom: 10px;
+  gap: 10px;
+  justify-content: flex-start;
+  margin-bottom: 30px; 
+  max-width: 900px;
+  margin-left: 350px;
+  margin-top: 70px;
+  margin-right: 2%;
 }
 
 .hotel-card {
   position: relative;
-  width: 600px;
+  width: 900px;
   height: 400px;
   border-radius: 10px;
   overflow: hidden;
@@ -152,18 +156,12 @@
   height: 100%;
   background-image: linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0));
   color: white;
-  
   display: flex;
   flex-direction: column;
   justify-content: flex-end; /* Empuja el contenido hacia el fondo */
   
   padding: 20px;
 }
-
-.card-content {
-  flex-grow: 1; /* Ocupa el espacio restante en la parte superior */
-}
-
 
 .price-name-group {
     display: flex; 

@@ -4,18 +4,23 @@
     align-items: center;
     background-color: #f7f9fc;
     min-height: 100vh;
-    padding: 30px 0px; 
+    padding: 30px 20px; /* Padding ajustado para asegurar espacio en bordes */
     width: 100%; 
 }
 
 /* Contenedor principal de la tarjeta */
 .pago-card {
+    max-width: 1200px; /* Establecer un ancho máximo */
     width: 100%; 
     background-color: #ffffff;
     padding: 30px;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); 
 }
+
+/* ---------------------------------------------------------- */
+/* LAYOUT FLEX */
+/* ---------------------------------------------------------- */
 
 /* Contenedor (Hotel/Fechas vs Habitaciones/Precio) */
 .secciones-flex-container {
@@ -31,9 +36,11 @@
     border-radius: 8px;
 }
 
-/* Títulos y Encabezados */
+/* ---------------------------------------------------------- */
+/* TIPOGRAFÍA Y ENCABEZADOS */
+/* ---------------------------------------------------------- */
 .header h1 {
-    font-size: 24px;
+    font-size: 28px; /* Ligeramente más grande */
     font-weight: 700;
     color: #1a1a1a;
     margin-bottom: 5px;
@@ -54,7 +61,7 @@
 }
 .seccion-reserva h2 i, .seccion-precio h3 i {
     margin-right: 10px;
-    color: #000000; 
+    color: #000000; /* Color representativo */
 }
 
 /* Información del Hotel y Ubicación */
@@ -69,13 +76,14 @@
 /* Sección de Fechas */
 .fechas-reserva {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between; /* Ajustado a space-between */
     align-items: center;
-    padding: 15px 30px;
+    padding: 15px 0px; /* Padding más discreto */
     margin-bottom: 15px;
 }
 .fecha-item {
     text-align: center;
+    flex: 1; /* Para distribuir equitativamente el espacio */
 }
 .fecha-item label {
     display: block;
@@ -91,6 +99,7 @@
 }
 .separador-fechas {
     color: #adb5bd;
+    margin: 0 15px;
 }
 
 /* Separador Interno */
@@ -98,6 +107,13 @@
     height: 1px;
     background-color: #e9ecef;
     margin: 20px 0;
+}
+
+/* Sección de Huéspedes */
+.huespedes-resumen p {
+    margin-bottom: 5px;
+    font-size: 15px;
+    color: #333;
 }
 
 /* Sección de Habitaciones */
@@ -127,7 +143,17 @@
     font-size: 14px;
 }
 
-/* Desglose de Precios */
+/* ---------------------------------------------------------- */
+/* DESGLOSE DE PRECIOS Y TOTAL */
+/* ---------------------------------------------------------- */
+
+/* ✅ Corrección: Estilos para la lista (ul) que envuelve los desglose-item */
+.desglose-lista {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
 .desglose-item {
     display: flex;
     justify-content: space-between;
@@ -139,7 +165,10 @@
     font-weight: 600;
 }
 .desglose-item.tax {
-    color: #83c4a6; 
+    color: #83c4a6;
+}
+.desglose-item.tax span:last-child {
+    font-weight: 600;
 }
 
 .total-final {
@@ -150,29 +179,67 @@
     border-top: 2px solid #e9ecef;
 }
 .total-final h4 {
-    font-size: 20px;
+    font-size: 22px; /* Ligeramente más grande */
     font-weight: 700;
 }
 .precio-total {
-    color: #000000; 
+    color: #0b222d; 
 }
 
-/* Botón de Pagar */
-.boton-pagar {
+/* ---------------------------------------------------------- */
+/* BOTÓN DE PAGAR */
+/* ---------------------------------------------------------- */
+.boton-pagar, .boton-inicio {
     width: 100%;
     padding: 15px;
-    background-color: #8ed1b2; 
-    color: rgb(0, 0, 0);
+    background-color: #8ed1b2; /* Color primario fuerte */
+    color: #000000;
     font-size: 18px;
+    font-weight: 500;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     margin-top: 30px;
     transition: background-color 0.3s, transform 0.1s;
+    text-align: center;
+    text-decoration: none; /* Por si lo usas con routerLink */
+    display: block; /* Para que ocupe todo el ancho si es un <a> */
 }
-.boton-pagar:hover {
+.boton-pagar:hover, .boton-inicio:hover {
     background-color: #83c4a6;
 }
-.boton-pagar:active {
+.boton-pagar:active, .boton-inicio:active {
     transform: translateY(1px);
 }
+
+/* ---------------------------------------------------------- */
+/* ✅ NUEVOS ESTILOS: MENSAJE DE ÉXITO */
+/* ---------------------------------------------------------- */
+.success-message {
+    text-align: center;
+    padding: 60px 20px;
+    border: 3px solid #008c48;
+    border-radius: 12px;
+    background-color: #e6ffec; /* Fondo verde muy claro */
+    margin-top: 30px;
+}
+.success-message h2 {
+    color: #008c48;
+    font-size: 30px;
+    margin-bottom: 10px;
+}
+.success-message p {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 25px;
+}
+.boton-inicio {
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #8ed1b2; /* Color de éxito */
+}
+.boton-inicio:hover {
+    background-color: #83c4a6;
+}
+
