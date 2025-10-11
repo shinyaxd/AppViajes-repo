@@ -43,8 +43,10 @@
     </p>
     <button class="see-all-button">See All</button>
   </div>
+</div>
 
-  <div class="populares-cards">
+
+<div class="populares-cards">
     <div *ngFor="let hotel of hotelesPopulares" class="hotel-card">
       <img
         *ngIf="hotel.galeria_imagenes?.length; else noImage"
@@ -71,4 +73,3 @@
       </button>
     </div>
   </div>
-</div>

@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService, LoginCredentials } from '../paginas/hoteles/services/auth.service'; // Ruta correcta
+// Asumiendo que has actualizado LoginCredentials en auth.service.ts para ser opcional
+import { AuthService, LoginCredentials } from '../paginas/hoteles/services/auth.service'; 
 
 @Component({
   selector: 'app-login',
@@ -27,7 +28,9 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.required]
+      password: ['', Validators.required],
+      // ✅ CORRECCIÓN: Se añade el control 'rememberMe' que faltaba en el FormGroup
+      rememberMe: [false] 
     });
   }
 
@@ -46,7 +49,16 @@ export class LoginComponent implements OnInit {
     }
 
     this.isSubmitting = true;
-    const data: LoginCredentials = this.loginForm.getRawValue() as LoginCredentials;
+    
+    // Al obtener los valores, Angular incluirá 'rememberMe', aunque tu API probablemente lo ignore.
+    const formValue = this.loginForm.getRawValue();
+    
+    // Creamos los credenciales solo con email y password, tal como espera tu servicio.
+    // Si la API espera 'rememberMe', tendrías que incluirlo en LoginCredentials.
+    const data: LoginCredentials = {
+        email: formValue.email,
+        password: formValue.password
+    };
 
     this.authService.login(data).subscribe({
       next: (res) => {
@@ -77,7 +89,8 @@ export class LoginComponent implements OnInit {
           this.router.navigate([redirectPath]);
         }, 400);
 
-        this.loginForm.reset();
+        // Usamos el valor de rememberMe del formulario para el reset
+        this.loginForm.reset({ rememberMe: formValue.rememberMe }); 
       },
       error: (err) => {
         console.error('Error de login:', err);

@@ -6,7 +6,13 @@
             <p>Revisa los detalles y el precio final antes de proceder al pago.</p>
         </div>
 
-        <div class="secciones-flex-container">
+        <div *ngIf="reservaExitosa" class="success-message">
+            <h2>¡Reserva Exitosa! 🎉</h2>
+            <p>El proceso de pago y reserva se ha completado. Recibirás los detalles en tu correo.</p>
+            <button class="boton-inicio" [routerLink]="['/hoteles']">Volver a Hoteles</button>
+        </div>
+
+        <div *ngIf="!reservaExitosa" class="secciones-flex-container">
             
             <div class="seccion-reserva detalle-columna">
                 <h2><i class="fas fa-building"></i> {{ nombreHotel }}</h2>
@@ -34,7 +40,7 @@
                     <p>Niños totales: <strong>{{ ninosReservados }}</strong></p>
                     <p>Habitaciones solicitadas: <strong>{{ habitacionesSolicitadas }}</strong></p>
                 </div>
-                </div>
+            </div>
             
             <div class="seccion-precio detalle-columna">
                 <h3><i class="fas fa-bed"></i> Habitaciones Reservadas</h3>
@@ -52,24 +58,31 @@
 
                 <h3><i class="fas fa-receipt"></i> Total y Desglose</h3>
                 
-                <div class="desglose-item">
-                    <span>Tarifa Básica ({{ totalNoches }} noches)</span>
-                    <span>{{ tarifaBasica | currency:'PEN':'symbol':'1.2-2' }}</span>
-                </div>
-                
-                <div class="desglose-item tax">
-                    <span>Impuesto (IGV {{ impuesto * 100 }}%)</span>
-                    <span>{{ montoImpuesto | currency:'PEN':'symbol':'1.2-2' }}</span>
-                </div>
+                <ul class="desglose-lista">
+                    <li class="desglose-item">
+                        <span>Tarifa Básica ({{ totalNoches }} noches)</span>
+                        <span>{{ tarifaBasica | currency:'PEN':'symbol':'1.2-2' }}</span>
+                    </li>
+                    
+                    <li class="desglose-item tax">
+                        <span>Impuesto (IGV {{ impuesto * 100 }}%)</span>
+                        <span>{{ montoImpuesto | currency:'PEN':'symbol':'1.2-2' }}</span>
+                    </li>
+                </ul>
 
                 <div class="total-final">
                     <h4>Total a Pagar</h4>
-                    <h4 class="precio-total">{{ totalPagar | currency:'PEN':'symbol':'1.2-2' }}</h4>
+                    <h4 class="precio-total"><strong>{{ totalPagar | currency:'PEN':'symbol':'1.2-2' }}</strong></h4>
                 </div>
             </div>
             
         </div>
         
-        <button class="boton-pagar">Confirmar y Pagar Ahora</button>
+        <button 
+            *ngIf="!reservaExitosa" 
+            class="boton-pagar" 
+            (click)="procesarPago()">
+            Confirmar y Pagar Ahora
+        </button>
     </div>
 </div>

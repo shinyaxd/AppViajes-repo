@@ -67,16 +67,57 @@
 
 .nombre input,
 .apellido input {
-  /* Corregido: 94% causa desalineación. Usar box-sizing o padding fijo es mejor. */
-  width: 100%; /* El width 100% es manejado por el contenedor flex */
+  width: 100%; 
   padding: 0.75rem;
   border: 1px solid #ccc;
   border-radius: 0.5rem;
   font-size: 1rem;
-  box-sizing: border-box; /* Asegura que padding no aumente el ancho */
+  box-sizing: border-box; 
 }
 
-/* ====== INPUTS GENERALES ====== */
+/* ======================================= */
+/* ====== NUEVOS ESTILOS DE CONTACTO (Email y Celular) ====== */
+/* ======================================= */
+
+/* Contenedor general para los campos de contacto */
+.campos-contacto {
+    margin-bottom: 1rem; /* Espacio para separar del siguiente grupo de campos (contraseñas) */
+}
+
+/* Estilos aplicados SOLAMENTE cuando el rol es 'proveedor' (clase dinámica) */
+.campos-contacto-doble {
+    display: flex; 
+    gap: 1rem; /* Usa el mismo espaciado que nombre/apellido */
+    justify-content: space-between;
+}
+
+/* Asegura que los campos individuales ocupen la mitad del espacio en modo doble */
+.campos-contacto-doble .email-campo,
+.campos-contacto-doble .celular-campo {
+    flex: 1; /* Ambos ocupan el mismo ancho */
+    min-width: 0; 
+    /* No es necesario un margin-bottom aquí si lo pones en el contenedor padre */
+}
+
+/* Estilos de los campos individuales (cuando es Viajero, solo aplica al email-campo) */
+.email-campo,
+.celular-campo {
+    display: flex;
+    flex-direction: column;
+}
+
+.email-campo label,
+.celular-campo label {
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+}
+
+/* ======================================= */
+/* ====== FIN NUEVOS ESTILOS DE CONTACTO ====== */
+/* ======================================= */
+
+
+/* ====== INPUTS GENERALES (Aplica a todos, incluyendo los nuevos) ====== */
 input,
 select {
   width: 100%;
@@ -85,8 +126,13 @@ select {
   border-radius: 0.5rem;
   margin-bottom: 1rem;
   font-size: 1rem;
-  box-sizing: border-box; /* Añadido para consistencia */
+  box-sizing: border-box;
 }
+
+/* Nota: Los campos dentro de 'nombre-apellido' o 'campos-contacto-doble' 
+        podrían necesitar un ajuste en su margin-bottom para el input 
+        si los quieres más pegados. Por ahora, el estilo general es suficiente. */
+
 
 /* ====== CONTRASEÑAS ====== */
 .password-container {
@@ -135,24 +181,23 @@ button[type='submit']:hover {
 
 /* ====== MENSAJES ====== */
 .mensaje-exito {
-  color: #58816e; /* verde */
+  color: #58816e;
   font-weight: 600;
   margin-top: 1rem;
   text-align: center;
 }
 
 .mensaje-error {
-  color: #e3342f; /* rojo */
+  color: #e3342f;
   font-weight: 600;
   margin-top: 1rem;
   text-align: center;
 }
 
-/* ====== ENLACE LOGIN (Corrección de Clic / Z-Index) ====== */
+/* ====== ENLACE LOGIN ====== */
 .login-link {
   text-align: center;
   margin-top: 1.5rem;
-  /* Fuerza que sea un contexto de apilamiento */
   position: relative; 
   z-index: 100;
 }
@@ -161,14 +206,11 @@ button[type='submit']:hover {
   color: #58816e;
   text-decoration: none;
   font-weight: 600;
-  
-  /* Se convierte en un bloque interactivo para aumentar el área de clic */
   display: inline-block; 
-  padding: 5px 10px; /* Aumenta el área de clic real */
-  /* Lo elevamos aún más por si un elemento invisible lo está cubriendo */
+  padding: 5px 10px; 
   position: relative; 
   z-index: 101; 
-  cursor: pointer; /* Fuerza el cursor de puntero */
+  cursor: pointer; 
 }
 
 .login-link a:hover {

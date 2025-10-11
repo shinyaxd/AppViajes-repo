@@ -1,139 +1,95 @@
 <div class="registro-container">
-  <!-- Imagen lateral -->
   <div class="registro-imagen">
     <img src="/public/img/imagenVIaje.jpg" alt="Viaje" />
   </div>
 
-  <!-- Formulario -->
   <div class="registro-formulario">
     <h2>Regístrate</h2>
-    <p>Configura tu cuenta para comenzar tu experiencia de viaje.</p>
+    <p>Configura tu cuenta para comenzar tu experiencia.</p>
 
-    <!-- ✅ Mensajes de estado -->
     <div *ngIf="message" class="mensaje-exito">{{ message }}</div>
     <div *ngIf="error" class="mensaje-error">{{ error }}</div>
 
     <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
-      <!-- Nombre y Apellido -->
-      <div class="nombre-apellido">
-        <div class="nombre">
-          <label for="nombre">Nombre</label>
-          <input
-            id="nombre"
-            type="text"
-            formControlName="nombre"
-            placeholder="Tu nombre"
-            [class.invalido]="campoInvalido('nombre')"
-          />
-        </div>
-
-        <div class="apellido">
-          <label for="apellido">Apellido</label>
-          <input
-            id="apellido"
-            type="text"
-            formControlName="apellido"
-            placeholder="Tu apellido"
-            [class.invalido]="campoInvalido('apellido')"
-          />
-        </div>
-      </div>
-
-      <!-- Email -->
-      <div class="email">
-        <label for="email">Correo electrónico</label>
-        <input
-          id="email"
-          type="email"
-          formControlName="email"
-          placeholder="Tu correo"
-          [class.invalido]="campoInvalido('email')"
-        />
-      </div>
-
-      <!-- Contraseña -->
-      <div class="password-container">
-        <label for="password">Contraseña</label>
-        <div class="password-field">
-          <input
-            id="password"
-            [type]="showPassword ? 'text' : 'password'"
-            formControlName="password"
-            placeholder="Tu contraseña (Mayor a 6 dígitos)"
-            [class.invalido]="campoInvalido('password')"
-          />
-          <button
-            type="button"
-            class="toggle-password"
-            (click)="togglePassword()"
-            aria-label="Mostrar u ocultar contraseña"
-          >
-            <!-- CAMBIO: Íconos de Font Awesome -->
-            <i [class]="showPassword ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'"></i>
-          </button>
-        </div>
-        
-        <!-- AVISO DE VALIDACIÓN DE MINLENGTH -->
-        <small 
-          *ngIf="registerForm.get('password')?.hasError('minlength') && (registerForm.get('password')?.dirty || registerForm.get('password')?.touched)" 
-          class="mensaje-error"
-        >
-          La contraseña debe tener al menos 6 caracteres.
-        </small>
-        <!-- /AVISO DE VALIDACIÓN -->
-      </div>
-
-      <!-- Confirmar contraseña -->
-      <div class="password-container">
-        <label for="confirmPassword">Confirmar contraseña</label>
-        <div class="password-field">
-          <input
-            id="confirmPassword"
-            [type]="showConfirmPassword ? 'text' : 'password'"
-            formControlName="confirmPassword"
-            placeholder="Ingresa nuevamente tu contraseña"
-            [class.invalido]="
-              campoInvalido('confirmPassword') ||
-              registerForm.hasError('passwordMismatch')
-            "
-          />
-          <button
-            type="button"
-            class="toggle-password"
-            (click)="toggleConfirmPassword()"
-            aria-label="Mostrar u ocultar confirmación de contraseña"
-          >
-            <!-- CAMBIO: Íconos de Font Awesome -->
-            <i [class]="showConfirmPassword ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'"></i>
-          </button>
-        </div>
-
-        <!-- 🔴 Mensaje específico para contraseñas no coincidentes -->
-        <small *ngIf="registerForm.hasError('passwordMismatch')" class="mensaje-error">
-          Las contraseñas no coinciden.
-        </small>
-      </div>
-
-      <!-- Selector de Rol -->
+      
       <div class="rol">
         <label for="rol">Tipo de cuenta</label>
         <select id="rol" formControlName="rol">
-          <option value="viajero">Viajero</option>
-          <option value="proveedor">Proveedor</option>
+          <option value="viajero">Viajero (Busco experiencias)</option>
+          <option value="proveedor">Proveedor (Ofrezco servicios)</option>
         </select>
       </div>
+      
+      <ng-container *ngIf="registerForm.get('rol')?.value === 'viajero'">
+        <div class="nombre-apellido">
+          <div class="nombre">
+            <label for="nombre">Nombre</label>
+            <input id="nombre" type="text" formControlName="nombre" placeholder="Tu nombre" [class.invalido]="campoInvalido('nombre')" />
+            <small *ngIf="campoInvalido('nombre')" class="mensaje-error">El nombre es requerido.</small>
+          </div>
 
-      <!-- Botón -->
-      <!-- Es importante mantener la deshabilitación basada en la invalidez del formulario -->
-      <button type="submit" [disabled]="registerForm.invalid || isSubmitting">
-        {{ isSubmitting ? 'Creando cuenta...' : 'Crear cuenta' }}
-      </button>
+          <div class="apellido">
+            <label for="apellido">Apellido</label>
+            <input id="apellido" type="text" formControlName="apellido" placeholder="Tu apellido" [class.invalido]="campoInvalido('apellido')" />
+            <small *ngIf="campoInvalido('apellido')" class="mensaje-error">El apellido es requerido.</small>
+          </div>
+        </div>
+      </ng-container>
 
-      <!-- Enlace a login -->
-      <p class="login-link">
-        ¿Ya tienes una cuenta?
-        <a routerLink="/login">Inicia Sesion</a>
-      </p>
+      <ng-container *ngIf="registerForm.get('rol')?.value === 'proveedor'">
+        <div class="form-group">
+          <label for="empresa_nombre">Nombre de la Empresa</label>
+          <input id="empresa_nombre" type="text" formControlName="empresa_nombre" placeholder="Nombre legal de la empresa" [class.invalido]="campoInvalido('empresa_nombre')" />
+          <small *ngIf="campoInvalido('empresa_nombre')" class="mensaje-error">El nombre de la empresa es requerido.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="ruc">RUC</label>
+          <input id="ruc" type="text" formControlName="ruc" placeholder="Número RUC (11 dígitos)" [class.invalido]="campoInvalido('ruc')" />
+          <small *ngIf="campoInvalido('ruc')" class="mensaje-error">RUC es requerido y debe tener 11 dígitos numéricos.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="telefono">Celular</label>
+          <input id="telefono" type="text" formControlName="telefono" placeholder="Número de celular (9 dígitos)" [class.invalido]="campoInvalido('telefono')" />
+          <small *ngIf="campoInvalido('telefono')" class="mensaje-error">Celular requerido y debe tener 9 dígitos numéricos.</small>
+        </div>
+      </ng-container>
+
+      <!-- Campos comunes -->
+      <div class="email-campo">
+        <label for="email">Correo electrónico</label>
+        <input id="email" type="email" formControlName="email" placeholder="Tu correo" [class.invalido]="campoInvalido('email')" />
+        <small *ngIf="campoInvalido('email') && registerForm.get('email')?.hasError('required')" class="mensaje-error">El correo es requerido.</small>
+        <small *ngIf="campoInvalido('email') && registerForm.get('email')?.hasError('email')" class="mensaje-error">Debe ser un formato de correo electrónico válido.</small>
+      </div>
+
+      <!-- Contraseñas -->
+      <div class="password-container">
+        <label for="password">Contraseña</label>
+        <div class="password-field">
+          <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password" placeholder="Tu contraseña (Mínimo 6 caracteres)" [class.invalido]="campoInvalido('password')" />
+          <button type="button" class="toggle-password" (click)="togglePassword()" aria-label="Mostrar u ocultar contraseña">
+            <i [class]="showPassword ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'"></i>
+          </button>
+        </div>
+        <small *ngIf="registerForm.get('password')?.hasError('minlength') && (registerForm.get('password')?.dirty || registerForm.get('password')?.touched)" class="mensaje-error">La contraseña debe tener al menos 6 caracteres.</small>
+      </div>
+
+      <div class="password-container">
+        <label for="confirmPassword">Confirmar contraseña</label>
+        <div class="password-field">
+          <input id="confirmPassword" [type]="showConfirmPassword ? 'text' : 'password'" formControlName="confirmPassword" placeholder="Ingresa nuevamente tu contraseña" [class.invalido]="campoInvalido('confirmPassword') || (registerForm.hasError('passwordMismatch') && registerForm.get('confirmPassword')?.touched)" />
+          <button type="button" class="toggle-password" (click)="toggleConfirmPassword()" aria-label="Mostrar u ocultar confirmación de contraseña">
+            <i [class]="showConfirmPassword ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'"></i>
+          </button>
+        </div>
+        <small *ngIf="registerForm.hasError('passwordMismatch') && registerForm.get('confirmPassword')?.touched" class="mensaje-error">Las contraseñas no coinciden.</small>
+      </div>
+
+      <button type="submit" [disabled]="registerForm.invalid || isSubmitting">{{ isSubmitting ? 'Creando cuenta...' : 'Crear cuenta' }}</button>
+
+      <p class="login-link">¿Ya tienes una cuenta? <a routerLink="/login">Inicia Sesion</a></p>
     </form>
   </div>
 </div>

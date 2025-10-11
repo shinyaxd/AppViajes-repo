@@ -42,10 +42,13 @@ export class HotelesComponent implements OnInit {
   cargarHotelesDesdeApi() {
     this.hotelService.getHoteles().subscribe({
       next: (hoteles: HotelData[]) => {
-        this.hotelesRecientes = hoteles.slice(0, 4);
-        this.hotelesPopulares = hoteles.filter(
-          hotel => (hotel.estrellas ?? 0) >= this.UMBRAL_POPULARIDAD
-        );
+        // Hoteles recientes (ya limitado a 4)
+        this.hotelesRecientes = hoteles.slice(0, 4); 
+
+        // Hoteles populares: filtrar Y luego limitar a los primeros 4
+        this.hotelesPopulares = hoteles
+          .filter(hotel => (hotel.estrellas ?? 0) >= this.UMBRAL_POPULARIDAD)
+          .slice(0, 4); // <-- ¡Esta es la línea clave que debes agregar!
       },
       error: (error) => {
         console.error('Error al cargar hoteles desde la API:', error);
