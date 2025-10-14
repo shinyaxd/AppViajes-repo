@@ -7,9 +7,8 @@ import { PagosHotelesComponent } from './componentes/pagos-hoteles/pagos-hoteles
 import { RegistroComponent } from './componentes/registro/registro.component';
 import { LoginComponent } from './componentes/login/login.component';
 import { ProveedorComponent } from './componentes/proveedor/proveedor.component';
-import { HotelFormComponent } from './componentes/formulario/formulario.component'; // ✅ Manteniendo el nombre de importación de tu archivo
-// 1. ⚠️ Necesitas importar el componente TourFormComponent
-// import { TourFormComponent } from './componentes/tour-formulario/tour-formulario.component'; 
+import { HotelFormComponent } from './componentes/formulario/formulario.component'; 
+import { TourFormComponent } from './componentes/formulario-tour/formulario-tour.component'; 
 
 import { authGuard } from './auth.guard';
 // 2. ⚠️ Necesitas importar los guards de roles (asumo que se llamarán así)
@@ -44,13 +43,12 @@ export const routes: Routes = [
     // canActivate: [authGuard, proveedorGuard]
     canActivate: [authGuard]
   },
-  // ⚠️ Necesitas una ruta para el formulario de Tour una vez lo crees
-  // { 
-  //   path: 'crear-tour', 
-  //   component: TourFormComponent, 
-  //   // canActivate: [authGuard, proveedorGuard] 
-  //   canActivate: [authGuard]
-  // },
+  { 
+    path: 'crear-tour', 
+    component: TourFormComponent, 
+    // canActivate: [authGuard, proveedorGuard] 
+    canActivate: [authGuard]
+  },
 
   // 🚫 Ruta no encontrada
   { path: '**', redirectTo: 'hoteles' },

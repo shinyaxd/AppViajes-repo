@@ -1,0 +1,128 @@
+<div class="formulario-container">
+  <h2>🛎️ Publicar nuevo tour</h2>
+
+  <!-- ⚠️ Mensajes de éxito o error -->
+  <div *ngIf="mensajeExito" class="alert alert-success">
+    {{ mensajeExito }}
+  </div>
+
+  <div *ngIf="mensajeError" class="alert alert-danger">
+    {{ mensajeError }}
+  </div>
+
+  <!-- ========================= -->
+  <!-- FORMULARIO PRINCIPAL -->
+  <!-- ========================= -->
+  <form [formGroup]="tourForm" (ngSubmit)="onSubmit()" class="tour-form">
+
+    <!-- ✅ Agrupamos los campos del tour -->
+    <div formGroupName="tour" class="form-section">
+      <h3>🏨 Datos del Tour</h3>
+
+      <label>
+        Nombre:
+        <input type="text" formControlName="nombre" placeholder="Nombre del tour" required />
+      </label>
+
+      <label>
+        Descripción:
+        <textarea formControlName="descripcion" placeholder="Describe tu tour" required></textarea>
+      </label>
+
+      <label>
+        Dirección:
+        <input type="text" formControlName="direccion" placeholder="Dirección completa" required />
+      </label>
+
+      <div class="inline-group">
+        <label>Cosas para llevar: </label>
+        
+        <div formArrayName="cosasParaLlevar">
+          <div *ngFor="let item of cosasParaLlevar.controls; let i = index" class="item-row">
+            <input
+              [formControlName]="i"
+              type="text"
+              placeholder="Ej: Cámara, protector solar..."
+            />
+            <button type="button" (click)="quitarCosa(i)">❌</button>
+          </div>
+        </div>
+
+        <button type="button" (click)="agregarCosa()">Agregar ➕</button>
+      </div>
+
+      <label>
+        Precio:
+        <input type="number" formControlName="precio" min="0" required />
+      </label>
+
+      <label>
+        Ubicación:
+        <input type="text" formControlName="ubicacion" required />
+      </label>
+
+      <label>
+        Categoría:
+        <select formControlName="categoria" required>
+          <option value="" disabled selected>Selecciona una categoría</option>
+          <option value="Aventura">Aventura</option>
+          <option value="Gastronomía">Gastronomía</option>
+          <option value="Cultura">Cultura</option>
+          <option value="Relajación">Relajación</option>
+        </select>
+      </label>
+
+      <label>
+        Duración:
+        <input type="number" formControlName="duracion" required />
+      </label>
+
+      <div class="inline-group">
+        <label>
+          Fecha:
+          <input type="date" formControlName="fecha" placeholder="Fecha" required />
+        </label>
+
+        <label>
+          Cupos disponibles
+          <input type="number" formControlName="cupos" placeholder="Cupos disponibles" required />
+        </label>
+      </div>
+
+      <label>
+        Imagen principal (URL):
+        <input type="text" formControlName="imagen_url" placeholder="https://denomades.imgix.net/destinos/cusco/336/plaza-city-tour-cusco.jpg" />
+      </label>
+
+      <!-- 👇 Galería de imágenes -->
+      <div class="galeria">
+        <h4>Galería de imágenes</h4>
+
+        <!-- ✅ Sin 'as FormArray' (ya se maneja en el TS) -->
+        <div *ngFor="let imgCtrl of galeriaImagenes?.controls; let i = index">
+          <input [formControl]="imgCtrl" placeholder="https://imagen.jpg" />
+          <button type="button" (click)="eliminarImagen(i)">🗑️</button>
+        </div>
+
+        <input #nuevaImagen placeholder="URL de nueva imagen" />
+        <button
+          type="button"
+          (click)="agregarImagen(nuevaImagen.value); nuevaImagen.value=''"
+        >
+          ➕ Agregar imagen
+        </button>
+      </div>
+    </div>
+
+    <!-- ========================= -->
+    <!-- BOTÓN DE ENVÍO -->
+    <!-- ========================= -->
+    <button
+      type="submit"
+      class="btn-submit"
+      [disabled]="tourForm.invalid || enviando"
+    >
+      {{ enviando ? 'Enviando...' : 'Publicar tour' }}
+    </button>
+  </form>
+</div>
