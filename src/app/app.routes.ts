@@ -1,18 +1,17 @@
 import { Routes } from '@angular/router';
-import { HotelesComponent } from './componentes/paginas/hoteles/hoteles.component';
-import { TourComponent } from './componentes/paginas/tour/tour.component';
-import { ResultadosHOTELESComponent } from './componentes/resultados-hoteles/resultados-hoteles.component';
-import { DetallesHotelComponent } from './componentes/detalles-hotel/detalles-hotel.component';
-import { PagosHotelesComponent } from './componentes/pagos-hoteles/pagos-hoteles.component';
-import { RegistroComponent } from './componentes/registro/registro.component';
-import { LoginComponent } from './componentes/login/login.component';
-import { ProveedorComponent } from './componentes/proveedor/proveedor.component';
-import { HotelFormComponent } from './componentes/formulario/formulario.component'; 
-import { TourFormComponent } from './componentes/formulario-tour/formulario-tour.component'; 
+import { HotelesComponent } from './features/hoteles/components/hoteles-list/hoteles.component';
+import { TourComponent } from './features/tours/components/tours-list/tour.component';
+import { ResultadosHOTELESComponent } from './features/hoteles/components/resultados/resultados-hoteles.component';
+import { DetallesHotelComponent } from './features/hoteles/components/hotel-detalle/detalles-hotel.component';
+import { PagosHotelesComponent } from './features/hoteles/components/pagos/pagos-hoteles.component';
+import { RegistroComponent } from './features/auth/components/registro/registro.component';
+import { LoginComponent } from './features/auth/components/login/login.component';
+import { ProveedorComponent } from './features/proveedor/components/dashboard/proveedor.component';
+import { HotelFormComponent } from './features/proveedor/components/hotel-form/formulario.component'; 
+import { TourFormComponent } from './features/proveedor/components/tour-form/formulario-tour.component'; 
 
-import { authGuard } from './auth.guard';
-// 2. ⚠️ Necesitas importar los guards de roles (asumo que se llamarán así)
-// import { proveedorGuard } from './guards/proveedor.guard'; 
+import { authGuard } from './core/guards/auth.guard';
+import { viajeroGuard } from './core/guards/viajero.guard'; 
 
 export const routes: Routes = [
   // 🏠 Redirección raíz
