@@ -131,8 +131,8 @@
   <button 
     class="search-button" 
     (click)="mostrarLugares()" 
-    [disabled]="(tipoBusqueda === 'hoteles' && (!destino || !checkInDate || !checkOutDate)) || 
-                (tipoBusqueda === 'tours' && (!destino || !checkInDate || personas.total < 1))"> 
+    [disabled]="(tipoBusqueda === 'hoteles' && (!checkInDate || !checkOutDate)) || 
+                (tipoBusqueda === 'tours' && !checkInDate)"> 
     <i class="fa-solid" [ngClass]="{'fa-hotel': tipoBusqueda === 'hoteles', 'fa-compass': tipoBusqueda === 'tours'}"></i>
     Mostrar {{ tipoBusqueda === 'hoteles' ? 'hoteles' : 'tours' }}
   </button>

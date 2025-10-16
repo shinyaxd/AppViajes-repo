@@ -1,10 +1,4 @@
 /* cantidad cuartos y huespedes*/
-.input-group {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
-
 .guests-selector {
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -31,8 +25,8 @@
 .guest-options-menu {
   position: absolute;
   top: 100%; 
-  left: 0;
-  z-index: 10;
+  right: 0; /* Cambiado de left: 0 a right: 0 para que se alinee a la derecha */
+  z-index: 100; /* Aumentado para estar por encima del botón */
   width: 250px; 
   background-color: #fff;
   border: 1px solid #ccc;
@@ -129,6 +123,7 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+  position: relative; /* Agregado para que el menú desplegable se posicione correctamente */
 }
 
 .input-group label {
@@ -156,7 +151,7 @@
   position: absolute;
   bottom: 30px;
   right: 30px;
-  z-index: -1;
+  z-index: 10; /* Cambiado de -1 a 10 para que esté por encima */
   display: flex;
   align-items: center;
   gap: 8px;
@@ -168,6 +163,12 @@
 
 .search-button:hover {
   background-color: #83c4a6;
+}
+
+.search-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
 

@@ -62,4 +62,12 @@ export class HotelesComponent implements OnInit {
       }
     });
   }
+
+  /**
+   * Navega a la lista completa de hoteles sin filtros
+   * Se activa desde el botón "See All"
+   */
+  verTodosLosHoteles(): void {
+    this.router.navigate(['/hoteles/resultados']);
+  }
 }

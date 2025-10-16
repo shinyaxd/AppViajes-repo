@@ -1,0 +1,73 @@
+<div class="resultados-container">
+  <!-- Contador de resultados -->
+  <div class="resultados-info">
+    <p>Mostrando {{ items.length }} de {{ totalItems }} {{ tipo === 'hoteles' ? 'lugares' : 'tours' }}</p>
+  </div>
+
+  <!-- Lista de resultados -->
+  <div class="resultados-lista">
+    <div *ngFor="let item of items" class="resultado-card">
+      <!-- Imagen del servicio -->
+      <div class="resultado-imagen">
+        <img
+          [src]="item.imagen_url"
+          [alt]="'Imagen de ' + item.nombre"
+          (error)="onImageError($event)"
+        />
+      </div>
+
+      <!-- Información del servicio -->
+      <div class="resultado-info">
+        <h3 class="resultado-nombre">{{ item.nombre }}</h3>
+        
+        <p class="resultado-ubicacion">
+          <i class="fa-solid fa-location-dot"></i>
+          {{ item.ubicacion }}
+        </p>
+
+        <!-- Estrellas (solo hoteles) -->
+        <div *ngIf="tipo === 'hoteles' && item.estrellas" class="resultado-estrellas">
+          <span class="estrellas-icon">{{ '⭐'.repeat(item.estrellas) }}</span>
+          <span class="estrellas-texto">{{ item.estrellas }} estrellas</span>
+        </div>
+
+        <!-- Rating y reseñas -->
+        <div class="resultado-rating">
+          <span class="rating-badge">{{ item.rating }}</span>
+          <span class="rating-texto">{{ item.ratingTexto }}</span>
+          <span class="rating-resenias">{{ item.resenias }} reseñas</span>
+        </div>
+
+        <!-- Duración (solo tours) -->
+        <div *ngIf="tipo === 'tours' && item.duracionHoras" class="resultado-duracion">
+          <i class="fa-regular fa-clock"></i>
+          <span>{{ item.duracionHoras }} Horas</span>
+        </div>
+      </div>
+
+      <!-- Precio y botón -->
+      <div class="resultado-acciones">
+        <div class="precio-container">
+          <p class="precio-label">Desde</p>
+          <p class="precio-valor">${{ item.precio | number:'1.0-0' }}</p>
+          <p class="precio-unidad">/{{ item.precioUnidad }}</p>
+          <p class="precio-impuestos">excl. tax</p>
+        </div>
+        
+        <button 
+          class="btn-ver-detalles"
+          [routerLink]="getDetalleRoute(item)"
+          (click)="onVerDetalleClick(item)">
+          Ver detalles
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botón "Ver más resultados" -->
+  <div *ngIf="mostrarMas" class="ver-mas-container">
+    <button class="btn-ver-mas" (click)="onVerMasClick()">
+      Ver más resultados
+    </button>
+  </div>
+</div>

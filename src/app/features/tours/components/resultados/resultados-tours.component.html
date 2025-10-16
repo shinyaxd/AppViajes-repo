@@ -1,1 +1,17 @@
-<p>resultados-tours works!</p>
+<!-- Buscador superior -->
+<app-buscador-dinamico [tipoBusqueda]="'tours'"></app-buscador-dinamico>
+
+<!-- Lista de resultados usando componente genérico -->
+<ng-container *ngIf="tours$ | async as tours">
+  <app-resultados-lista
+    [tipo]="'tours'"
+    [items]="resultadosItems"
+    [totalItems]="totalTours"
+    [mostrarMas]="false">
+  </app-resultados-lista>
+
+  <!-- Mensaje si no hay resultados -->
+  <div *ngIf="tours.length === 0" class="no-results-message">
+    <p>No se encontraron tours para su búsqueda.</p>
+  </div>
+</ng-container>

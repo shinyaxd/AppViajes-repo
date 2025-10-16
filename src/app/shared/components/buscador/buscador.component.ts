@@ -161,9 +161,15 @@ export class BuscadorComponent implements OnInit {
    * Pasa los filtros como Query Parameters.
    */
   mostrarLugares() {
-    console.log('Navegando a la página de resultados...');
+    console.log('Navegando a la página de resultados...', {
+      tipo: this.tipoBusqueda,
+      destino: this.destino,
+      checkIn: this.checkInDate,
+      checkOut: this.checkOutDate
+    });
+    
     if (this.tipoBusqueda === 'hoteles') {
-      this.router.navigate(['/resultadosHoteles'], {
+      this.router.navigate(['/hoteles/resultados'], {
         queryParams: {
           ciudad: this.destino, 
           checkIn: this.checkInDate,
@@ -174,7 +180,7 @@ export class BuscadorComponent implements OnInit {
         }
       });
     } else if (this.tipoBusqueda === 'tours') {
-      this.router.navigate(['/resultadosTours'], {
+      this.router.navigate(['/tour/resultados'], {
         queryParams: {
           destino: this.destino,
           categoria: this.categoriaTour,

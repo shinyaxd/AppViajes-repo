@@ -2,6 +2,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../core/services/auth.service';
 
@@ -12,6 +13,15 @@ import { TourData } from '../../../shared/models';
 
 // Re-exportamos la interfaz para mantener backward compatibility
 export type { TourData };
+
+// Interfaz para la respuesta paginada de la API
+interface TourApiResponse {
+  current_page: number;
+  data: any[];
+  total: number;
+  per_page: number;
+  last_page: number;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -36,10 +46,12 @@ export class TourService {
   /**
    * Obtener todos los tours
    */
-  getTours(): Observable<TourData[]> {
-    return this.http.get<TourData[]>(`${this.API_URL}/tours`, {
+  getTours(): Observable<any[]> {
+    return this.http.get<TourApiResponse>(`${this.API_URL}/tours`, {
       headers: this.getHeaders()
-    });
+    }).pipe(
+      map((response: TourApiResponse) => response.data)
+    );
   }
 
   /**
@@ -81,10 +93,12 @@ export class TourService {
   /**
    * Buscar tours por categoría
    */
-  getToursByCategoria(categoria: string): Observable<TourData[]> {
-    return this.http.get<TourData[]>(`${this.API_URL}/tours`, {
+  getToursByCategoria(categoria: string): Observable<any[]> {
+    return this.http.get<TourApiResponse>(`${this.API_URL}/tours`, {
       headers: this.getHeaders(),
       params: { categoria }
-    });
+    }).pipe(
+      map((response: TourApiResponse) => response.data)
+    );
   }
 }
