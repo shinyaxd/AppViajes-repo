@@ -1,0 +1,32 @@
+<div class="card-list-container">
+  <h2>{{ title }}</h2>
+
+  <div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+
+  <div class="lista-items">
+    <div *ngFor="let item of items" 
+         class="item-card"
+         [routerLink]="[routePrefix, item.id]"
+         [queryParams]="{
+           checkIn: '',
+           checkOut: '',
+           adultos: 1,
+           ninos: 0,
+           habitaciones: 1
+         }">
+      <img
+        *ngIf="getImageUrl(item); else noImage"
+        [src]="getImageUrl(item)"
+        [alt]="'Imagen de ' + item.nombre"
+        />
+        <ng-template #noImage>
+          <div class="no-image-placeholder">No hay imagen disponible</div>
+        </ng-template>
+
+      <div class="item-info">
+        <p class="nombre-item">{{ item.nombre }}</p>
+        <p class="ubicacion-item">{{ item.ciudad }}, {{ item.pais }}</p>
+      </div>
+    </div>
+  </div>
+</div>

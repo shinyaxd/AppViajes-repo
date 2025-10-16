@@ -1,0 +1,131 @@
+.card-list-container {
+  margin-bottom: 30px; 
+  max-width: 1200px;
+  margin-left: auto;
+  margin-top: 70px;
+  margin-right: auto;
+  padding: 0 20px;
+}
+
+.card-list-container h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: #333;
+}
+
+.error {
+  padding: 15px;
+  background-color: #fee;
+  color: #c33;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Layout horizontal como el original */
+.lista-items {
+  display: flex;
+  gap: 50px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.item-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  min-width: 250px;
+  background: white;
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  color: inherit;
+}
+
+.item-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.item-card img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.no-image-placeholder {
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f0f0f0;
+  color: #999;
+  font-size: 0.8rem;
+  border-radius: 10px;
+  flex-shrink: 0;
+  text-align: center;
+  padding: 5px;
+}
+
+.item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.nombre-item {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+.ubicacion-item {
+  font-size: 0.9rem;
+  color: #777;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .lista-items {
+    gap: 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .lista-items {
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+  }
+
+  .item-card {
+    min-width: 100%;
+    max-width: 400px;
+  }
+
+  .card-list-container h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-list-container {
+    margin: 30px auto;
+    padding: 0 15px;
+  }
+
+  .item-card {
+    flex-direction: column;
+    text-align: center;
+  }
+}

@@ -1,0 +1,67 @@
+<div class="card-grid-section">
+  <div class="grid-header">
+    <div class="header-content">
+      <h2>{{ title }}</h2>
+      <p *ngIf="description">{{ description }}</p>
+    </div>
+    <button *ngIf="showButton" class="see-all-button" (click)="onButtonClick()">
+      See All
+    </button>
+  </div>
+
+  <div class="cards-grid" [ngClass]="'grid-cols-' + columns">
+    <!-- Modo Hoteles: con routerLink y precio -->
+    <ng-container *ngIf="mode === 'hoteles'">
+      <div *ngFor="let item of items" 
+           class="grid-card"
+           [routerLink]="[routePrefix, item.id]"
+           [queryParams]="{
+             checkIn: '',
+             checkOut: '',
+             adultos: 1,
+             ninos: 0,
+             habitaciones: 1
+           }">
+        <img
+          *ngIf="getImageUrl(item); else noImage"
+          [src]="getImageUrl(item)"
+          [alt]="'Imagen de ' + item.nombre"
+          />
+          <ng-template #noImage>
+            <div class="no-image-placeholder">No hay imagen disponible</div>
+          </ng-template>
+
+        <div class="card-overlay">
+          <div class="price-name-group">
+            <h3 class="card-title">{{ item.nombre }}</h3>
+            <p class="card-price">
+              {{ getPrice(item) | currency:'PEN':'symbol':'1.2-2' }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Modo Tours: clickeable sin routerLink -->
+    <ng-container *ngIf="mode === 'tours'">
+      <div *ngFor="let item of items" 
+           class="grid-card tour-card"
+           [ngClass]="item.categoria?.toLowerCase()"
+           (click)="onCardClick(item)">
+        <img
+          *ngIf="getImageUrl(item); else noImage"
+          [src]="getImageUrl(item)"
+          [alt]="'Imagen de ' + item.nombre"
+          />
+          <ng-template #noImage>
+            <div class="no-image-placeholder">No hay imagen disponible</div>
+          </ng-template>
+
+        <div class="tour-info">
+          <h2>{{ item.nombre }}</h2>
+          <p *ngIf="item.descripcion">{{ item.descripcion }}</p>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>

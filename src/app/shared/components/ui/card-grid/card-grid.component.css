@@ -1,0 +1,321 @@
+.card-grid-section {
+  margin-bottom: 30px; 
+  max-width: 1200px;
+  margin-left: auto;
+  margin-top: 70px;
+  margin-right: auto;
+  padding: 0 20px;
+}
+
+/* Header */
+.grid-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 30px;
+}
+
+.header-content {
+  flex: 1;
+}
+
+.grid-header h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.grid-header p {
+  font-size: 1rem;
+  color: #555;
+  margin: 0;
+  line-height: 1.5;
+  max-width: 600px;
+}
+
+/* Botón See All con estilo original (borde gris, sin fondo) */
+.see-all-button {
+  border: 1px solid #ccc;
+  background: none;
+  border-radius: 5px;
+  padding: 8px 15px;
+  font-size: 1em;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-left: 20px;
+  color: #333;
+  transition: all 0.3s ease;
+}
+
+.see-all-button:hover {
+  background-color: #f5f5f5;
+  border-color: #999;
+}
+
+/* Grid */
+.cards-grid {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.grid-cols-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-cols-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-cols-4 {
+  display: flex;
+  gap: 20px;
+}
+
+/* Card Base */
+.grid-card {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  color: inherit;
+}
+
+.grid-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.grid-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.no-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f0f0f0;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+/* Overlay para Hoteles */
+.card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0));
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 20px;
+}
+
+.price-name-group {
+  display: flex; 
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 100%;
+  margin-bottom: 90px;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 1.5em;
+  font-weight: 600;
+}
+
+.card-price {
+  padding: 0 40px;
+  font-weight: bold;
+  font-size: 1.2em;
+  margin: 0;
+  color: #fff;
+}
+
+/* Tour Cards */
+.tour-card {
+  height: 350px;
+}
+
+.tour-info {
+  position: absolute;
+  bottom: 20px;
+  left: 30px;
+  color: white;
+  z-index: 2;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.tour-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 50%);
+}
+
+.tour-info h2 {
+  font-size: 2em;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+}
+
+.tour-info p {
+  font-size: 0.9em;
+  margin: 0;
+  max-width: 90%;
+  opacity: 0.95;
+}
+
+/* Tour Category Backgrounds (fallback si no hay imagen) */
+.tour-card.aventura {
+  background-image: url('/img/aventura.png');
+  background-size: cover;
+  background-position: center;
+}
+
+.tour-card.gastronomía {
+  background-image: url('/img/gastronomia.png');
+  background-size: cover;
+  background-position: center;
+}
+
+.tour-card.cultura {
+  background-image: url('/img/cultura.png');
+  background-size: cover;
+  background-position: center;
+}
+
+.tour-card.relajación {
+  background-image: url('/img/relajacion.png');
+  background-size: cover;
+  background-position: center;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .cards-grid,
+  .grid-cols-4 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .grid-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .see-all-button {
+    margin-left: 0;
+    margin-top: 15px;
+  }
+
+  .grid-card {
+    height: 350px;
+  }
+
+  .tour-card {
+    height: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .cards-grid,
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .grid-card {
+    width: 100%;
+    max-width: 500px;
+    height: 300px;
+  }
+
+  .tour-card {
+    height: 250px;
+  }
+
+  .grid-header h2 {
+    font-size: 1.6rem;
+  }
+
+  .grid-header p {
+    font-size: 0.9rem;
+  }
+
+  .card-title {
+    font-size: 1.2em;
+  }
+
+  .card-price {
+    font-size: 1em;
+    padding: 0 20px;
+  }
+
+  .tour-info h2 {
+    font-size: 1.5em;
+  }
+
+  .tour-info p {
+    font-size: 0.8em;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-grid-section {
+    margin: 40px auto;
+    padding: 0 15px;
+  }
+
+  .grid-header h2 {
+    font-size: 1.4rem;
+  }
+
+  .grid-card {
+    height: 250px;
+  }
+
+  .tour-card {
+    height: 200px;
+  }
+
+  .price-name-group {
+    margin-bottom: 50px;
+  }
+
+  .tour-info {
+    bottom: 15px;
+    left: 20px;
+  }
+
+  .tour-info h2 {
+    font-size: 1.2em;
+  }
+
+  .tour-info p {
+    font-size: 0.75em;
+  }
+}

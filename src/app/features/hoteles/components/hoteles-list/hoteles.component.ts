@@ -5,6 +5,9 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { BuscadorComponent } from '../../../../shared/components/buscador/buscador.component';
+import { BannerComponent } from '../../../../shared/components/ui/banner/banner.component';
+import { CardListComponent } from '../../../../shared/components/ui/card-list/card-list.component';
+import { CardGridComponent } from '../../../../shared/components/ui/card-grid/card-grid.component';
 import { HotelService, HotelData } from '../../services/hoteles.service';
 
 @Component({
@@ -17,7 +20,10 @@ import { HotelService, HotelData } from '../../services/hoteles.service';
     FormsModule,
     HttpClientModule,
     RouterModule,
-    BuscadorComponent
+    BuscadorComponent,
+    BannerComponent,
+    CardListComponent,
+    CardGridComponent
   ]
 })
 export class HotelesComponent implements OnInit {

@@ -1,44 +1,23 @@
-<div class="banner">
-  <div class="banner-text">
-    <p>Descubre tours que te inspiran</p>
-    <h1>Tu aventura comienza aquí</h1>
-  </div>
+﻿<!-- Banner con imagen de fondo original -->
+<app-banner 
+  [title]="'Tu aventura comienza aquí'"
+  [subtitle]="'Descubre tours que te inspiran'"
+  [backgroundImage]="'/public/img/tour.png'"
+  [overlayGradient]="'linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0))'">
+</app-banner>
+
+<!-- Buscador -->
+<div class="search-bar-container">
+    <app-buscador-dinamico [tipoBusqueda]="'tours'"></app-buscador-dinamico>
 </div>
 
-<app-buscador-dinamico [tipoBusqueda]="'tours'"></app-buscador-dinamico>
-
-<div class="ToursCategoria-section"> 
-  <div class="TourCategoria-header">
-    <h2>Tours por Categoria</h2>
-    <p>¿Listo para explorar? De la planificación a la aventura, nuestros tours son el primer paso.</p>
-  </div>
-
-  <div class="tours-grid">
-    <div class="tour-card aventura">
-        <div class="tour-info">
-            <h2>Aventura</h2>
-            <p>Explora los Andes y vive una experiencia inigualable.</p>
-        </div>
-    </div>
-
-    <div class="tour-card gastronomia">
-        <div class="tour-info">
-            <h2>Gastronomía</h2>
-            <p>Descubre los secretos de la comida peruana.</p>
-        </div>
-    </div>
-
-    <div class="tour-card cultura">
-        <div class="tour-info">
-            <h2>Cultura</h2>
-            <p>Explora el centro histórico y sus secretos.</p>
-        </div>
-    </div>
-
-    <div class="tour-card relajacion">
-        <div class="tour-info">
-            <h2>Relajación</h2>
-            <p>Desconexión total en el paraíso.</p>
-        </div>
-    </div>
-</div>
+<!-- Tours por Categoría -->
+<app-card-grid
+  [title]="'Tours por Categoria'"
+  [description]="'¿Listo para explorar? De la planificación a la aventura, nuestros tours son el primer paso.'"
+  [items]="toursCategorias"
+  [showButton]="false"
+  [mode]="'tours'"
+  [columns]="4"
+  (cardClick)="navegarPorCategoria($event)">
+</app-card-grid>

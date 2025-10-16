@@ -85,8 +85,16 @@
 
       <div class="input-group">
         <label for="categoria-tour">Categoría</label>
-        <input 
-          type="text" id="categoria-tour" placeholder="Aventura" [(ngModel)]="categoriaTour"> 
+        <select 
+          id="categoria-tour" 
+          class="categoria-select"
+          [(ngModel)]="categoriaTour">
+          <option value="">Selecciona una categoría</option>
+          <option value="Aventura">Aventura</option>
+          <option value="Gastronomía">Gastronomía</option>
+          <option value="Cultura">Cultura</option>
+          <option value="Relajación">Relajación</option>
+        </select>
       </div>
 
       <div class="input-group">
@@ -118,7 +126,9 @@
         </div>
       </div>
     </ng-container>
-    <button 
+  </div>
+  
+  <button 
     class="search-button" 
     (click)="mostrarLugares()" 
     [disabled]="(tipoBusqueda === 'hoteles' && (!destino || !checkInDate || !checkOutDate)) || 
@@ -126,5 +136,4 @@
     <i class="fa-solid" [ngClass]="{'fa-hotel': tipoBusqueda === 'hoteles', 'fa-compass': tipoBusqueda === 'tours'}"></i>
     Mostrar {{ tipoBusqueda === 'hoteles' ? 'hoteles' : 'tours' }}
   </button>
-  </div>
 </div>
