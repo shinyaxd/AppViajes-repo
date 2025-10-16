@@ -2,8 +2,9 @@ import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
-import { tap, catchError, map } from 'rxjs/operators';
+import { tap, catchError, map, finalize } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { LoadingService } from './loading.service';
 
 // ==========================================================
 // MODELOS IMPORTADOS DESDE SHARED
@@ -34,6 +35,7 @@ export type {
 export class AuthService {
   private platformId = inject(PLATFORM_ID);
   private http = inject(HttpClient);
+  private loadingService = inject(LoadingService);
 
   private readonly BASE_ENDPOINT = environment.apiUrl;
   private readonly TOKEN_KEY = 'sanctum_token';
@@ -96,6 +98,8 @@ export class AuthService {
       payload = basePayload;
     }
 
+    this.loadingService.show('Registrando usuario...');
+
     return this.http.post<RegisterResponse>(url, payload).pipe(
       tap(response => {
         console.log('✅ Registro exitoso:', response.data.user);
@@ -106,7 +110,8 @@ export class AuthService {
           this.setCurrentUser(response.data.user);
         }
       }),
-      catchError((error: HttpErrorResponse) => this.handleError(error, 'registro'))
+      catchError((error: HttpErrorResponse) => this.handleError(error, 'registro')),
+      finalize(() => this.loadingService.hide())
     );
   }
 
@@ -116,6 +121,8 @@ export class AuthService {
   login(credentials: LoginCredentials): Observable<AuthResponse> {
     const url = `${this.BASE_ENDPOINT}/auth/login`;
     const payload = { ...credentials, device_name: 'WebApp' };
+
+    this.loadingService.show('Iniciando sesión...');
 
     return this.http.post<AuthResponse>(url, payload).pipe(
       tap(response => {
@@ -128,7 +135,8 @@ export class AuthService {
           this.setCurrentUser(response.user);
         }
       }),
-      catchError((error: HttpErrorResponse) => this.handleError(error, 'inicio de sesión'))
+      catchError((error: HttpErrorResponse) => this.handleError(error, 'inicio de sesión')),
+      finalize(() => this.loadingService.hide())
     );
   }
 
@@ -159,13 +167,17 @@ export class AuthService {
   // ==========================================================
   logout(): Observable<any> {
     const url = `${this.BASE_ENDPOINT}/auth/logout`;
+    
+    this.loadingService.show('Cerrando sesión...');
+    
     return this.http.post(url, {}).pipe(
       tap(() => this.cleanSession()),
       catchError(error => {
         console.warn('⚠️ Error cerrando sesión, limpiando local.', error);
         this.cleanSession();
         return of(null);
-      })
+      }),
+      finalize(() => this.loadingService.hide())
     );
   }
 

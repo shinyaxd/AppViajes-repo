@@ -1,54 +1,92 @@
-import { Routes } from '@angular/router';
-import { HotelesComponent } from './features/hoteles/components/hoteles-list/hoteles.component';
-import { TourComponent } from './features/tours/components/tours-list/tour.component';
-import { ResultadosHOTELESComponent } from './features/hoteles/components/resultados/resultados-hoteles.component';
-import { DetallesHotelComponent } from './features/hoteles/components/hotel-detalle/detalles-hotel.component';
-import { PagosHotelesComponent } from './features/hoteles/components/pagos/pagos-hoteles.component';
-import { RegistroComponent } from './features/auth/components/registro/registro.component';
-import { LoginComponent } from './features/auth/components/login/login.component';
-import { ProveedorComponent } from './features/proveedor/components/dashboard/proveedor.component';
-import { HotelFormComponent } from './features/proveedor/components/hotel-form/formulario.component'; 
-import { TourFormComponent } from './features/proveedor/components/tour-form/formulario-tour.component'; 
+// ==========================================================
+// RUTAS PRINCIPALES DE LA APLICACIÓN
+// ==========================================================
+// Configuración de rutas con Lazy Loading para optimizar
+// el tiempo de carga inicial de la aplicación.
+// Cada feature se carga bajo demanda (on-demand) cuando el usuario navega.
 
-import { authGuard } from './core/guards/auth.guard';
-import { viajeroGuard } from './core/guards/viajero.guard'; 
+import { Routes } from '@angular/router';
 
 export const routes: Routes = [
   // 🏠 Redirección raíz
-  { path: '', redirectTo: 'hoteles', pathMatch: 'full' },
-
-  // 🌍 Vistas públicas
-  { path: 'hoteles', component: HotelesComponent },
-  { path: 'resultadosHoteles', component: ResultadosHOTELESComponent },
-  { path: 'detallesHotel/:servicio_id', component: DetallesHotelComponent },
-  { path: 'pagos-hoteles', component: PagosHotelesComponent },
-  { path: 'registro', component: RegistroComponent },
-  { path: 'login', component: LoginComponent },
-  { path: 'tour', component: TourComponent },
-
-  // 🧳 Sección de proveedor (Rutas protegidas)
   { 
-    path: 'proveedor', 
-    component: ProveedorComponent, 
-    // Usaremos un guard más específico para proteger las rutas de proveedor
-    canActivate: [authGuard] 
+    path: '', 
+    redirectTo: 'hoteles', 
+    pathMatch: 'full' 
   },
-  
-  // 3. ✅ Rutas específicas para formularios (según lo definimos en el Header)
+
+  // 🔐 Módulo de Autenticación (Login y Registro)
+  // Se carga solo cuando el usuario accede a /auth/*
+  {
+    path: 'auth',
+    loadChildren: () => 
+      import('./features/auth/auth.routes').then(m => m.AUTH_ROUTES)
+  },
+
+  // 🏨 Módulo de Hoteles
+  // Incluye: lista, búsqueda, detalles y pagos
+  {
+    path: 'hoteles',
+    loadChildren: () => 
+      import('./features/hoteles/hoteles.routes').then(m => m.HOTELES_ROUTES)
+  },
+
+  // 🌴 Módulo de Tours
+  // Incluye: lista y resultados de búsqueda
+  {
+    path: 'tour',
+    loadChildren: () => 
+      import('./features/tours/tours.routes').then(m => m.TOURS_ROUTES)
+  },
+
+  // 🧳 Módulo de Proveedor (Rutas protegidas)
+  // Incluye: dashboard, crear hotel, crear tour
+  {
+    path: 'proveedor',
+    loadChildren: () => 
+      import('./features/proveedor/proveedor.routes').then(m => m.PROVEEDOR_ROUTES)
+  },
+
+  // 🔄 Rutas legacy para mantener compatibilidad con URLs antiguas
+  { 
+    path: 'resultadosHoteles', 
+    redirectTo: 'hoteles/resultados', 
+    pathMatch: 'full' 
+  },
+  { 
+    path: 'detallesHotel/:servicio_id', 
+    redirectTo: 'hoteles/detalle/:servicio_id', 
+    pathMatch: 'full' 
+  },
+  { 
+    path: 'pagos-hoteles', 
+    redirectTo: 'hoteles/pagos', 
+    pathMatch: 'full' 
+  },
+  { 
+    path: 'registro', 
+    redirectTo: 'auth/registro', 
+    pathMatch: 'full' 
+  },
+  { 
+    path: 'login', 
+    redirectTo: 'auth/login', 
+    pathMatch: 'full' 
+  },
   { 
     path: 'crear-hotel', 
-    component: HotelFormComponent, 
-    // Idealmente, se usaría un guard de rol aquí para solo permitir proveedores
-    // canActivate: [authGuard, proveedorGuard]
-    canActivate: [authGuard]
+    redirectTo: 'proveedor/crear-hotel', 
+    pathMatch: 'full' 
   },
   { 
     path: 'crear-tour', 
-    component: TourFormComponent, 
-    // canActivate: [authGuard, proveedorGuard] 
-    canActivate: [authGuard]
+    redirectTo: 'proveedor/crear-tour', 
+    pathMatch: 'full' 
   },
 
   // 🚫 Ruta no encontrada
-  { path: '**', redirectTo: 'hoteles' },
+  { 
+    path: '**', 
+    redirectTo: 'hoteles' 
+  }
 ];
