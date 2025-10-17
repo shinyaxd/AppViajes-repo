@@ -137,6 +137,11 @@ export class PagosHotelesComponent implements OnInit {
     }
   }
 
+  // Método para volver atrás
+  volverAtras(): void {
+    this.router.navigate(['/hoteles']);
+  }
+
 // ------------------------------------------------------------------
 // LÓGICA DE PROCESAMIENTO DE PAGO
 // ------------------------------------------------------------------

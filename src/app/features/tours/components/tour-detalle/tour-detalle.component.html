@@ -1,0 +1,102 @@
+<div class="tour-detalle-container">
+  
+  <!-- ESTADO: Cargando -->
+  <div *ngIf="loading" class="loading-message">
+    <p>Cargando detalles del tour...</p>
+  </div>
+
+  <!-- ESTADO: Error -->
+  <div *ngIf="error && !loading" class="error-message">
+    <p>❌ No se pudo cargar el tour. Por favor, intenta nuevamente.</p>
+    <button class="back-button" (click)="volverAResultados()">← Volver a resultados</button>
+  </div>
+
+  <!-- ESTADO: Tour cargado -->
+  <div *ngIf="tour && !loading && !error">
+    <!-- 🔙 Botón para volver -->
+    <button class="back-button" (click)="volverAResultados()"> ← Volver a resultados </button>
+
+    <!-- ======================= -->
+    <!-- COMPONENTE GENÉRICO: HEADER + GALERÍA + DESCRIPCIÓN -->
+    <!-- ======================= -->
+    <app-servicio-detalle-header
+      *ngIf="servicioData"
+      [tipo]="'tour'"
+      [servicio]="servicioData"
+      [breadcrumb]="breadcrumbItems"
+      (onReservar)="reservarTour()"
+    ></app-servicio-detalle-header>
+
+    <!-- ======================= -->
+    <!-- QUÉ INCLUYE Y QUÉ NECESITAS LLEVAR -->
+    <!-- ======================= -->
+    <div class="tour-includes-section">
+      <div class="includes-grid">
+        
+        <!-- Columna: Qué incluye -->
+        <div class="includes-card">
+          <h2 class="section-title">Qué incluye:</h2>
+          <div class="includes-list" *ngIf="tour.actividades && tour.actividades.length > 0">
+            <div *ngFor="let actividad of tour.actividades" class="include-item">
+              <i class="fas fa-check-circle"></i>
+              <span>{{ actividad.descripcion || actividad.nombre }}</span>
+            </div>
+          </div>
+          <div class="includes-list" *ngIf="!tour.actividades || tour.actividades.length === 0">
+            <div class="include-item">
+              <i class="fas fa-bus"></i>
+              <span>Transporte desde y hacia Lima</span>
+            </div>
+            <div class="include-item">
+              <i class="fas fa-life-ring"></i>
+              <span>Clase de seguridad para rafting y tirolesa.</span>
+            </div>
+            <div class="include-item">
+              <i class="fas fa-hard-hat"></i>
+              <span>Equipo completo de seguridad.</span>
+            </div>
+            <div class="include-item">
+              <i class="fas fa-user-tie"></i>
+              <span>Guía certificado y experimentado.</span>
+            </div>
+            <div class="include-item">
+              <i class="fas fa-utensils"></i>
+              <span>Almuerzo.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Columna: Qué necesitas llevar -->
+        <div class="needs-card">
+          <h2 class="section-title">Qué necesitas llevar:</h2>
+          <div class="needs-list" *ngIf="tour.tour?.cosas_para_llevar && tour.tour.cosas_para_llevar.length > 0">
+            <div *ngFor="let item of tour.tour.cosas_para_llevar" class="need-item">
+              <i [class]="getIconForItem(item)"></i>
+              <span>{{ item }}</span>
+            </div>
+          </div>
+          <div class="needs-list" *ngIf="!tour.tour?.cosas_para_llevar || tour.tour.cosas_para_llevar.length === 0">
+            <div class="need-item">
+              <i class="fas fa-tshirt"></i>
+              <span>Ropa cómoda y zapatillas.</span>
+            </div>
+            <div class="need-item">
+              <i class="fas fa-water"></i>
+              <span>Ropa de baño y toalla</span>
+            </div>
+            <div class="need-item">
+              <i class="fas fa-sun"></i>
+              <span>Protector solar.</span>
+            </div>
+            <div class="need-item">
+              <i class="fas fa-camera"></i>
+              <span>Cámara a prueba de agua.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -18,5 +18,11 @@ export const TOURS_ROUTES: Routes = [
     loadComponent: () => 
       import('./components/resultados/resultados-tours.component').then(m => m.ResultadosTOURSComponent),
     title: 'Resultados de Búsqueda - Tours'
+  },
+  {
+    path: 'detalle/:id',
+    loadComponent: () => 
+      import('./components/tour-detalle/tour-detalle.component').then(m => m.TourDetalleComponent),
+    title: 'Detalle del Tour - AppViajes'
   }
 ];

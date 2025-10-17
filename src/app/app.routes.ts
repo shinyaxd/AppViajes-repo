@@ -58,6 +58,11 @@ export const routes: Routes = [
     redirectTo: 'hoteles/detalle/:servicio_id', 
     pathMatch: 'full' 
   },
+  {
+    path: 'detallesHotel/:id',
+    redirectTo: 'hoteles/detalle/:id',
+    pathMatch: 'full'
+  },
   { 
     path: 'pagos-hoteles', 
     redirectTo: 'hoteles/pagos', 

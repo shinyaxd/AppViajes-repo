@@ -1,245 +1,493 @@
-:host {
-    display: flex;
-    justify-content: center; 
-    align-items: center;
-    background-color: #f7f9fc;
-    min-height: 100vh;
-    padding: 30px 20px; /* Padding ajustado para asegurar espacio en bordes */
-    width: 100%; 
+/* =============================================
+   PAGOS HOTELES - DISEÑO MODERNO
+   ============================================= */
+
+/* Contenedor principal */
+.pagos-container {
+  max-width: 1200px;
+  margin: 80px auto 40px;
+  padding: 0 24px;
+  font-family: 'Poppins', Arial, sans-serif;
 }
 
-/* Contenedor principal de la tarjeta */
-.pago-card {
-    max-width: 1200px; /* Establecer un ancho máximo */
-    width: 100%; 
-    background-color: #ffffff;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); 
+/* Botón volver */
+.back-button {
+  background: transparent;
+  border: none;
+  color: #83c4a6;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
 }
 
-/* ---------------------------------------------------------- */
-/* LAYOUT FLEX */
-/* ---------------------------------------------------------- */
-
-/* Contenedor (Hotel/Fechas vs Habitaciones/Precio) */
-.secciones-flex-container {
-    display: flex;
-    gap: 30px; 
-    margin-top: 20px;
+.back-button:hover {
+  color: #6fb094;
+  transform: translateX(-4px);
 }
 
-.detalle-columna {
-    flex: 1; 
-    padding: 20px;
-    border: 1px solid #e9ecef; 
-    border-radius: 8px;
+.back-button i {
+  font-size: 0.9rem;
 }
 
-/* ---------------------------------------------------------- */
-/* TIPOGRAFÍA Y ENCABEZADOS */
-/* ---------------------------------------------------------- */
-.header h1 {
-    font-size: 28px; /* Ligeramente más grande */
-    font-weight: 700;
-    color: #1a1a1a;
-    margin-bottom: 5px;
-}
-.header p {
-    font-size: 16px;
-    color: #6c757d;
-    margin-bottom: 25px;
+/* Header de la página */
+.page-header {
+  margin-bottom: 32px;
 }
 
-.seccion-reserva h2, .seccion-precio h3 {
-    color: #0b222d;
-    font-weight: 600;
-    font-size: 20px;
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-}
-.seccion-reserva h2 i, .seccion-precio h3 i {
-    margin-right: 10px;
-    color: #000000; /* Color representativo */
+.page-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
 }
 
-/* Información del Hotel y Ubicación */
-.ubicacion {
-    color: #888;
-    font-size: 14px;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #e9ecef;
-    padding-bottom: 15px;
+.page-header .subtitle {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
 }
 
-/* Sección de Fechas */
-.fechas-reserva {
-    display: flex;
-    justify-content: space-between; /* Ajustado a space-between */
-    align-items: center;
-    padding: 15px 0px; /* Padding más discreto */
-    margin-bottom: 15px;
-}
-.fecha-item {
-    text-align: center;
-    flex: 1; /* Para distribuir equitativamente el espacio */
-}
-.fecha-item label {
-    display: block;
-    font-size: 12px;
-    color: #6c757d;
-    font-weight: 500;
-    margin-bottom: 4px;
-}
-.fecha-valor {
-    font-size: 17px;
-    font-weight: 700;
-    color: #1a1a1a;
-}
-.separador-fechas {
-    color: #adb5bd;
-    margin: 0 15px;
+/* Mensaje de éxito */
+.success-card {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border: 2px solid #4caf50;
+  border-radius: 16px;
+  padding: 48px 32px;
+  text-align: center;
+  animation: slideIn 0.5s ease-out;
 }
 
-/* Separador Interno */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.success-icon {
+  margin-bottom: 24px;
+}
+
+.success-icon i {
+  font-size: 4rem;
+  color: #4caf50;
+  animation: checkmark 0.6s ease-in-out;
+}
+
+@keyframes checkmark {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+@keyframes checkmark {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.success-card h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #2e7d32;
+  margin: 0 0 12px 0;
+}
+
+.success-card p {
+  font-size: 1rem;
+  color: #555;
+  margin: 0 0 32px 0;
+  line-height: 1.6;
+}
+
+.btn-primary {
+  background-color: #8ed1b2;
+  color: #000;
+  border: none;
+  padding: 14px 32px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-primary:hover {
+  background-color: #79bf9f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(142, 209, 178, 0.4);
+}
+
+/* Layout de dos columnas */
+.checkout-grid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 32px;
+  align-items: start;
+}
+
+/* Columna principal */
+.main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Cards de información */
+.info-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+}
+
+.info-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+  background: #f8f9fa;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-header i {
+  color: #83c4a6;
+  font-size: 1.25rem;
+}
+
+.card-header h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.card-body {
+  padding: 20px;
+}
+
+/* Información del hotel */
+.hotel-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+}
+
+.hotel-location {
+  font-size: 1rem;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.hotel-location i {
+  color: #83c4a6;
+}
+
+/* Fechas */
+.dates-grid {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.date-box {
+  flex: 1;
+  text-align: center;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.date-box label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.date-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.date-separator {
+  color: #bbb;
+  font-size: 1.25rem;
+}
+
+.nights-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: #666;
+  margin: 0;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.nights-info i {
+  color: #83c4a6;
+}
+
+/* Huéspedes */
+.guests-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.guest-item {
+  text-align: center;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.guest-label {
+  display: block;
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.guest-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+/* Habitaciones */
+.room-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.room-item:last-child {
+  border-bottom: none;
+}
+
+.room-info h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
+}
+
+.room-quantity {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+}
+
+.room-price {
+  text-align: right;
+}
+
+.price-per-night {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #83c4a6;
+}
+
+/* Sidebar: Resumen de precios */
+.sidebar {
+  position: sticky;
+  top: 100px;
+}
+
+.price-summary-card {
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.price-summary-card h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 20px 0;
+}
+
+.price-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.price-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.price-item span:last-child {
+  font-weight: 600;
+}
+
+.price-item.tax {
+  color: #666;
+}
+
 .divider {
-    height: 1px;
-    background-color: #e9ecef;
-    margin: 20px 0;
+  height: 1px;
+  background: #e0e0e0;
+  margin: 16px 0;
 }
 
-/* Sección de Huéspedes */
-.huespedes-resumen p {
-    margin-bottom: 5px;
-    font-size: 15px;
-    color: #333;
+.total-price {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
 }
 
-/* Sección de Habitaciones */
-.cantidad {
-    font-size: 14px;
-    color: #555;
-    margin-bottom: 15px;
+.total-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a1a1a;
 }
 
-.detalle-reserva-multiple {
-    padding: 10px 0;
-    border-bottom: 1px dashed #e9ecef; 
-}
-.detalle-reserva-multiple:last-of-type {
-    border-bottom: none;
-}
-.tipo-cuarto {
-    display: flex;
-    justify-content: space-between;
-    font-size: 15px;
-    color: #1a1a1a;
-    font-weight: 600;
-}
-.precio-unitario {
-    color: #555;
-    font-weight: 400;
-    font-size: 14px;
+.total-amount {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #83c4a6;
 }
 
-/* ---------------------------------------------------------- */
-/* DESGLOSE DE PRECIOS Y TOTAL */
-/* ---------------------------------------------------------- */
-
-/* ✅ Corrección: Estilos para la lista (ul) que envuelve los desglose-item */
-.desglose-lista {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+.btn-pay {
+  width: 100%;
+  background-color: #8ed1b2;
+  color: #000;
+  border: none;
+  padding: 16px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  margin-top: 20px;
 }
 
-.desglose-item {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    font-size: 15px;
-    color: #333;
-}
-.desglose-item span:last-child {
-    font-weight: 600;
-}
-.desglose-item.tax {
-    color: #83c4a6;
-}
-.desglose-item.tax span:last-child {
-    font-weight: 600;
+.btn-pay:hover {
+  background-color: #79bf9f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(142, 209, 178, 0.4);
 }
 
-.total-final {
-    display: flex;
-    justify-content: space-between;
-    padding-top: 15px;
-    margin-top: 15px;
-    border-top: 2px solid #e9ecef;
-}
-.total-final h4 {
-    font-size: 22px; /* Ligeramente más grande */
-    font-weight: 700;
-}
-.precio-total {
-    color: #0b222d; 
+.btn-pay:active {
+  transform: translateY(0);
 }
 
-/* ---------------------------------------------------------- */
-/* BOTÓN DE PAGAR */
-/* ---------------------------------------------------------- */
-.boton-pagar, .boton-inicio {
-    width: 100%;
-    padding: 15px;
-    background-color: #8ed1b2; /* Color primario fuerte */
-    color: #000000;
-    font-size: 18px;
-    font-weight: 500;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-top: 30px;
-    transition: background-color 0.3s, transform 0.1s;
-    text-align: center;
-    text-decoration: none; /* Por si lo usas con routerLink */
-    display: block; /* Para que ocupe todo el ancho si es un <a> */
-}
-.boton-pagar:hover, .boton-inicio:hover {
-    background-color: #83c4a6;
-}
-.boton-pagar:active, .boton-inicio:active {
-    transform: translateY(1px);
+.btn-pay i {
+  font-size: 1rem;
 }
 
-/* ---------------------------------------------------------- */
-/* ✅ NUEVOS ESTILOS: MENSAJE DE ÉXITO */
-/* ---------------------------------------------------------- */
-.success-message {
-    text-align: center;
-    padding: 60px 20px;
-    border: 3px solid #008c48;
-    border-radius: 12px;
-    background-color: #e6ffec; /* Fondo verde muy claro */
-    margin-top: 30px;
-}
-.success-message h2 {
-    color: #008c48;
-    font-size: 30px;
-    margin-bottom: 10px;
-}
-.success-message p {
-    font-size: 18px;
-    color: #333;
-    margin-bottom: 25px;
-}
-.boton-inicio {
-    max-width: 300px;
-    margin-left: auto;
-    margin-right: auto;
-    background-color: #8ed1b2; /* Color de éxito */
-}
-.boton-inicio:hover {
-    background-color: #83c4a6;
+.payment-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 16px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
 }
 
+.payment-note i {
+  color: #83c4a6;
+  margin-top: 2px;
+}
+
+/* Responsive Design */
+@media (max-width: 968px) {
+  .checkout-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+    order: 2;
+  }
+
+  .main-content {
+    order: 1;
+  }
+
+  .guests-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .pagos-container {
+    margin-top: 60px;
+    padding: 0 16px;
+  }
+
+  .page-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .dates-grid {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .date-separator {
+    transform: rotate(90deg);
+  }
+
+  .guests-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .total-amount {
+    font-size: 1.5rem;
+  }
+
+  .price-summary-card {
+    padding: 20px;
+  }
+}

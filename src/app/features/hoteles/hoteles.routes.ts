@@ -22,7 +22,7 @@ export const HOTELES_ROUTES: Routes = [
     title: 'Resultados de Búsqueda - Hoteles'
   },
   {
-    path: 'detalle/:servicio_id',
+    path: 'detalle/:id',
     loadComponent: () => 
       import('./components/hotel-detalle/detalles-hotel.component').then(m => m.DetallesHotelComponent),
     title: 'Detalles del Hotel - AppViajes'

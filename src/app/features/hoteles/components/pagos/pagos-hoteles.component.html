@@ -1,88 +1,154 @@
-<div class="main-wrapper">
-    <div class="pago-card">
-        
-        <div class="header">
-            <h1>Confirmación de Reserva</h1>
-            <p>Revisa los detalles y el precio final antes de proceder al pago.</p>
-        </div>
+<div class="pagos-container">
+  <!-- Botón volver -->
+  <button class="back-button" (click)="volverAtras()">
+    <i class="fas fa-arrow-left"></i> Volver
+  </button>
 
-        <div *ngIf="reservaExitosa" class="success-message">
-            <h2>¡Reserva Exitosa! 🎉</h2>
-            <p>El proceso de pago y reserva se ha completado. Recibirás los detalles en tu correo.</p>
-            <button class="boton-inicio" [routerLink]="['/hoteles']">Volver a Hoteles</button>
-        </div>
+  <!-- Header principal -->
+  <div class="page-header">
+    <h1>Confirma y paga</h1>
+    <p class="subtitle">Revisa los detalles de tu reserva antes de continuar</p>
+  </div>
 
-        <div *ngIf="!reservaExitosa" class="secciones-flex-container">
-            
-            <div class="seccion-reserva detalle-columna">
-                <h2><i class="fas fa-building"></i> {{ nombreHotel }}</h2>
-                <p class="ubicacion">{{ ubicacion }}</p>
-                
-                <div class="fechas-reserva">
-                    <div class="fecha-item">
-                        <label>CHECK IN</label>
-                        <p class="fecha-valor">{{ checkIn | date:'EEE, MMM d, y' }}</p>
-                    </div>
-                    <div class="separador-fechas">
-                        <i class="fas fa-arrow-right"></i>
-                    </div>
-                    <div class="fecha-item">
-                        <label>CHECK OUT</label>
-                        <p class="fecha-valor">{{ checkOut | date:'EEE, MMM d, y' }}</p>
-                    </div>
-                </div>
-
-                <div class="divider"></div> 
-
-                <h3><i class="fas fa-user-friends"></i> Huéspedes y Filtros</h3>
-                <div class="huespedes-resumen">
-                    <p>Adultos totales: <strong>{{ adultosReservados }}</strong></p>
-                    <p>Niños totales: <strong>{{ ninosReservados }}</strong></p>
-                    <p>Habitaciones solicitadas: <strong>{{ habitacionesSolicitadas }}</strong></p>
-                </div>
-            </div>
-            
-            <div class="seccion-precio detalle-columna">
-                <h3><i class="fas fa-bed"></i> Habitaciones Reservadas</h3>
-                
-                <p class="cantidad">Total de cuartos: <strong>{{ cantidadTotalCuartos }}</strong></p>
-                
-                <div *ngFor="let reserva of reservas" class="detalle-reserva-multiple">
-                    <p class="tipo-cuarto">
-                        <strong>{{ reserva.cantidad }}x {{ reserva.tipo }}</strong>
-                        <span class="precio-unitario">{{ reserva.precioNoche | currency:'PEN':'symbol':'1.2-2' }} / noche</span>
-                    </p>
-                </div>
-
-                <div class="divider"></div>
-
-                <h3><i class="fas fa-receipt"></i> Total y Desglose</h3>
-                
-                <ul class="desglose-lista">
-                    <li class="desglose-item">
-                        <span>Tarifa Básica ({{ totalNoches }} noches)</span>
-                        <span>{{ tarifaBasica | currency:'PEN':'symbol':'1.2-2' }}</span>
-                    </li>
-                    
-                    <li class="desglose-item tax">
-                        <span>Impuesto (IGV {{ impuesto * 100 }}%)</span>
-                        <span>{{ montoImpuesto | currency:'PEN':'symbol':'1.2-2' }}</span>
-                    </li>
-                </ul>
-
-                <div class="total-final">
-                    <h4>Total a Pagar</h4>
-                    <h4 class="precio-total"><strong>{{ totalPagar | currency:'PEN':'symbol':'1.2-2' }}</strong></h4>
-                </div>
-            </div>
-            
-        </div>
-        
-        <button 
-            *ngIf="!reservaExitosa" 
-            class="boton-pagar" 
-            (click)="procesarPago()">
-            Confirmar y Pagar Ahora
-        </button>
+  <!-- Mensaje de éxito -->
+  <div *ngIf="reservaExitosa" class="success-card">
+    <div class="success-icon">
+      <i class="fas fa-check-circle"></i>
     </div>
+    <h2>¡Reserva confirmada!</h2>
+    <p>Tu reserva se ha procesado exitosamente. Recibirás un correo de confirmación con todos los detalles.</p>
+    <button class="btn-primary" [routerLink]="['/hoteles']">
+      Buscar más hoteles
+    </button>
+  </div>
+
+  <!-- Contenido principal: Layout de dos columnas -->
+  <div *ngIf="!reservaExitosa" class="checkout-grid">
+    
+    <!-- Columna izquierda: Información del hotel y fechas -->
+    <div class="main-content">
+      
+      <!-- Información del hotel -->
+      <div class="info-card">
+        <div class="card-header">
+          <i class="fas fa-hotel"></i>
+          <h2>Información del hotel</h2>
+        </div>
+        <div class="card-body">
+          <h3 class="hotel-name">{{ nombreHotel }}</h3>
+          <p class="hotel-location">
+            <i class="fas fa-map-marker-alt"></i>
+            {{ ubicacion }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Fechas de estadía -->
+      <div class="info-card">
+        <div class="card-header">
+          <i class="fas fa-calendar-alt"></i>
+          <h2>Fechas de estadía</h2>
+        </div>
+        <div class="card-body">
+          <div class="dates-grid">
+            <div class="date-box">
+              <label>Check-in</label>
+              <p class="date-value">{{ checkIn | date:'EEE, d MMM y':'':'es' }}</p>
+            </div>
+            <div class="date-separator">
+              <i class="fas fa-arrow-right"></i>
+            </div>
+            <div class="date-box">
+              <label>Check-out</label>
+              <p class="date-value">{{ checkOut | date:'EEE, d MMM y':'':'es' }}</p>
+            </div>
+          </div>
+          <p class="nights-info">
+            <i class="fas fa-moon"></i>
+            {{ totalNoches }} {{ totalNoches === 1 ? 'noche' : 'noches' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Información de huéspedes -->
+      <div class="info-card">
+        <div class="card-header">
+          <i class="fas fa-users"></i>
+          <h2>Huéspedes</h2>
+        </div>
+        <div class="card-body">
+          <div class="guests-grid">
+            <div class="guest-item">
+              <span class="guest-label">Adultos</span>
+              <span class="guest-value">{{ adultosReservados }}</span>
+            </div>
+            <div class="guest-item">
+              <span class="guest-label">Niños</span>
+              <span class="guest-value">{{ ninosReservados }}</span>
+            </div>
+            <div class="guest-item">
+              <span class="guest-label">Habitaciones</span>
+              <span class="guest-value">{{ cantidadTotalCuartos }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Habitaciones seleccionadas -->
+      <div class="info-card">
+        <div class="card-header">
+          <i class="fas fa-bed"></i>
+          <h2>Habitaciones seleccionadas</h2>
+        </div>
+        <div class="card-body">
+          <div *ngFor="let reserva of reservas" class="room-item">
+            <div class="room-info">
+              <h4>{{ reserva.tipo }}</h4>
+              <p class="room-quantity">Cantidad: {{ reserva.cantidad }}</p>
+            </div>
+            <div class="room-price">
+              <span class="price-per-night">{{ reserva.precioNoche | currency:'PEN':'symbol':'1.0-0' }}/noche</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Columna derecha: Resumen de precios -->
+    <div class="sidebar">
+      <div class="price-summary-card">
+        <h2>Resumen de precios</h2>
+        
+        <div class="price-breakdown">
+          <div class="price-item">
+            <span>Subtotal ({{ totalNoches }} {{ totalNoches === 1 ? 'noche' : 'noches' }})</span>
+            <span>{{ tarifaBasica | currency:'PEN':'symbol':'1.0-0' }}</span>
+          </div>
+          <div class="price-item tax">
+            <span>Impuestos ({{ impuesto * 100 }}%)</span>
+            <span>{{ montoImpuesto | currency:'PEN':'symbol':'1.0-0' }}</span>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="total-price">
+          <span class="total-label">Total a pagar</span>
+          <span class="total-amount">{{ totalPagar | currency:'PEN':'symbol':'1.0-0' }}</span>
+        </div>
+
+        <button class="btn-pay" (click)="procesarPago()">
+          <i class="fas fa-lock"></i>
+          Confirmar y pagar
+        </button>
+
+        <p class="payment-note">
+          <i class="fas fa-info-circle"></i>
+          No se realizará ningún cargo hasta confirmar la reserva
+        </p>
+      </div>
+    </div>
+
+  </div>
 </div>

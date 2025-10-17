@@ -1,0 +1,267 @@
+/* ======================= */
+/* CONTENEDOR GENERAL */
+/* ======================= */
+.tour-detalle-container {
+  font-family: Arial, sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  color: #000000;
+}
+
+/* ======================= */
+/* BOTÓN VOLVER */
+/* ======================= */
+.back-button {
+  background-color: transparent;
+  border: none;
+  color: #83c4a6;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-bottom: 20px;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+.back-button:hover {
+  color: #5fae8c;
+}
+
+/* ======================= */
+/* MENSAJES DE ESTADO */
+/* ======================= */
+.loading-message,
+.error-message {
+  text-align: center;
+  padding: 40px 20px;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.error-message {
+  color: #ef4444;
+}
+
+.error-message p {
+  margin-bottom: 20px;
+}
+
+/* ======================= */
+/* QUÉ INCLUYE Y QUÉ NECESITAS LLEVAR */
+/* ======================= */
+.tour-includes-section {
+  margin: 40px 0;
+}
+
+.includes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+.includes-card,
+.needs-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s ease;
+}
+
+.includes-card:hover,
+.needs-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+  padding: 24px 24px 20px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.includes-list,
+.needs-list {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.include-item,
+.need-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  font-size: 1rem;
+  color: #333;
+  line-height: 1.6;
+}
+
+.include-item i {
+  color: #83c4a6;
+  font-size: 1.25rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.need-item i {
+  color: #666;
+  font-size: 1.25rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.include-item span,
+.need-item span {
+  flex: 1;
+  font-size: 1rem;
+  color: #333;
+}
+
+/* ======================= */
+/* INFORMACIÓN ADICIONAL DEL TOUR */
+/* ======================= */
+.tour-extra-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+.info-card {
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.info-card.full-width {
+  grid-column: 1 / -1;
+}
+
+.info-card h3 {
+  font-size: 1.3rem;
+  margin-bottom: 12px;
+  color: #83c4a6;
+  font-weight: 600;
+}
+
+.info-card p {
+  font-size: 1.1rem;
+  color: #333;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.info-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.info-card ul li {
+  font-size: 1.05rem;
+  color: #444;
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+}
+
+.info-card ul li:last-child {
+  border-bottom: none;
+}
+
+.info-card ul li::before {
+  content: "✓";
+  color: #83c4a6;
+  font-weight: bold;
+  margin-right: 10px;
+  font-size: 1.2rem;
+}
+
+/* ======================= */
+/* RESPONSIVE */
+/* ======================= */
+@media (max-width: 968px) {
+  .includes-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .tour-detalle-container {
+    padding: 16px;
+  }
+
+  .tour-includes-section {
+    margin: 24px 0;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+    padding: 20px 20px 16px;
+  }
+
+  .includes-list,
+  .needs-list {
+    padding: 20px;
+    gap: 14px;
+  }
+
+  .include-item,
+  .need-item {
+    font-size: 0.95rem;
+    gap: 12px;
+  }
+
+  .include-item i,
+  .need-item i {
+    font-size: 1.1rem;
+  }
+
+  .tour-extra-info {
+    grid-template-columns: 1fr;
+  }
+
+  .info-card {
+    padding: 20px;
+  }
+
+  .info-card h3 {
+    font-size: 1.2rem;
+  }
+
+  .info-card p,
+  .info-card ul li {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .section-title {
+    font-size: 1.15rem;
+  }
+
+  .includes-list,
+  .needs-list {
+    padding: 16px;
+  }
+
+  .include-item,
+  .need-item {
+    font-size: 0.9rem;
+  }
+}

@@ -1,0 +1,102 @@
+<!-- ======================= -->
+<!-- BREADCRUMB -->
+<!-- ======================= -->
+<div class="breadcrumb" *ngIf="breadcrumb && breadcrumb.length > 0">
+  <span *ngFor="let item of breadcrumb; let last = last">
+    {{ item }}
+    <span *ngIf="!last" class="breadcrumb-separator"> > </span>
+  </span>
+</div>
+
+<!-- ======================= -->
+<!-- ENCABEZADO DEL SERVICIO -->
+<!-- ======================= -->
+<div class="header-section">
+  <div class="servicio-info-header">
+    <div class="main-info">
+      <h1>{{ servicio.nombre }}</h1>
+      
+      <!-- Rating y Reseñas (prioritario) -->
+      <div class="rating-section" *ngIf="servicio.rating || servicio.resenas">
+        <span class="rating-box">{{ servicio.rating || 0 }}</span>
+        <span class="rating-label" *ngIf="servicio.calificacion_texto">
+          {{ servicio.calificacion_texto }}
+        </span>
+        <span class="reviews-count" *ngIf="servicio.resenas">
+          {{ servicio.resenas }} reseñas
+        </span>
+      </div>
+
+      <!-- Ubicación -->
+      <p class="location-text"> 
+        <i class="fa-solid fa-location-dot"></i> 
+        {{ servicio.pais }}, {{ servicio.ciudad }}
+      </p>
+
+      <!-- Dirección (solo hoteles) -->
+      <p class="location-direct" *ngIf="tipo === 'hotel' && servicio.direccion">
+        {{ servicio.direccion }}
+      </p>
+
+      <!-- Estrellas (solo hoteles) -->
+      <div class="stars-info" *ngIf="tipo === 'hotel' && servicio.estrellas">
+        <p class="stars-text">{{ servicio.estrellas }} / 5</p>
+        <span class="stars-icons">{{ repetirEstrellas(servicio.estrellas) }}</span>
+      </div>
+
+      <!-- Duración (solo tours) -->
+      <div class="duration-info" *ngIf="tipo === 'tour' && servicio.duracion">
+        <i class="fa-solid fa-clock"></i>
+        <span>{{ servicio.duracion }}</span>
+      </div>
+    </div>
+
+    <!-- Precio y botón de reserva -->
+    <div class="price-and-reserve">
+      <p *ngIf="servicio.precio !== null" class="price-text">
+        {{ servicio.precio | currency:'PEN':'symbol':'1.2-2' }}
+        <span class="price-per-night" *ngIf="tipo === 'hotel'">/noche</span>
+      </p>
+      <p *ngIf="servicio.precio === null" class="price-text text-red-500">
+        Precio no disponible
+      </p>
+      <button class="reserve-button" (click)="reservar()">Reservar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= -->
+<!-- GALERÍA DE IMÁGENES - GRID 5 FOTOS -->
+<!-- ======================= -->
+<div class="image-gallery">
+  <!-- Imagen principal (grande, izquierda) -->
+  <div class="main-image">
+    <img [src]="imagenPrincipal" [alt]="servicio.nombre">
+  </div>
+  
+  <!-- Imágenes secundarias (4 pequeñas, derecha en 2x2) -->
+  <div class="secondary-images">
+    <div 
+      class="secondary-image" 
+      *ngFor="let imagen of imagenesSecundarias; let i = index"
+    >
+      <img [src]="imagen" [alt]="servicio.nombre + ' - Imagen ' + (i + 2)">
+    </div>
+  </div>
+</div>
+
+<!-- ======================= -->
+<!-- DESCRIPCIÓN / RESUMEN -->
+<!-- ======================= -->
+<div class="content-section">
+  <div class="summary">
+    <h2>{{ tituloSeccion }}</h2>
+    <p *ngIf="servicio.descripcion && servicio.descripcion.length > 0">
+      {{ servicio.descripcion }}
+    </p>
+    <p *ngIf="!servicio.descripcion || servicio.descripcion.length === 0" class="italic text-gray-500">
+      <ng-container *ngIf="tipo === 'hotel'">No hay un resumen detallado disponible para este hotel.</ng-container>
+      <ng-container *ngIf="tipo === 'tour'">No hay un resumen detallado disponible para este tour.</ng-container>
+    </p>
+  </div>
+</div>

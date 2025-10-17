@@ -57,7 +57,7 @@ export class ResultadosListaComponent {
   getDetalleRoute(item: ResultadoItem): string {
     return this.tipo === 'hoteles' 
       ? `/hoteles/detalle/${item.id}` 
-      : `/tours/detalle/${item.id}`;
+      : `/tour/detalle/${item.id}`; // ✅ Corregido: /tour/ (singular)
   }
 
   /**

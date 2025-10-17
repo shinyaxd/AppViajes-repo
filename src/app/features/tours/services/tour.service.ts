@@ -56,11 +56,14 @@ export class TourService {
 
   /**
    * Obtener un tour por ID
+   * La API retorna: { servicio: {..., tour: {...}, imagenes: [], actividades: [], salidas: [] } }
    */
-  getTourById(id: number): Observable<TourData> {
-    return this.http.get<TourData>(`${this.API_URL}/tours/${id}`, {
+  getTourById(id: number): Observable<any> {
+    return this.http.get<any>(`${this.API_URL}/tours/${id}`, {
       headers: this.getHeaders()
-    });
+    }).pipe(
+      map(response => response.servicio || response)
+    );
   }
 
   /**

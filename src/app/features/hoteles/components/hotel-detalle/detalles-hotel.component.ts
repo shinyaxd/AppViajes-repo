@@ -4,13 +4,14 @@ import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { HotelService, HotelData, Habitacion } from '../../services/hoteles.service';
+import { ServicioDetalleHeaderComponent, ServicioDetalleData } from '../../../../shared/components/servicio-detalle-header/servicio-detalle-header.component';
 
 @Component({
   selector: 'app-detalles-hotel',
   templateUrl: './detalles-hotel.component.html',
   styleUrls: ['./detalles-hotel.component.css'],
   standalone: true,
-  imports: [CommonModule, HttpClientModule, RouterModule, FormsModule]
+  imports: [CommonModule, HttpClientModule, RouterModule, FormsModule, ServicioDetalleHeaderComponent]
 })
 export class DetallesHotelComponent implements OnInit {
 
@@ -36,6 +37,43 @@ export class DetallesHotelComponent implements OnInit {
   ninos = 0;
   habitaciones = 1;
 
+  // 🔹 Datos para el componente genérico
+  get servicioData(): ServicioDetalleData | null {
+    if (!this.hotel) return null;
+    
+    // Construir galería de imágenes desde múltiples fuentes
+    let galeria: string[] = [];
+    
+    // Prioridad 1: galeria_imagenes
+    if (this.hotel.galeria_imagenes && this.hotel.galeria_imagenes.length > 0) {
+      galeria = [...this.hotel.galeria_imagenes];
+    }
+    // Prioridad 2: imagen_url única
+    else if (this.hotel.imagen_url) {
+      galeria = [this.hotel.imagen_url];
+    }
+    // Fallback: placeholder
+    else {
+      galeria = ['assets/images/placeholder-hotel.jpg'];
+    }
+
+    return {
+      nombre: this.hotel.nombre,
+      ciudad: this.hotel.ciudad,
+      pais: this.hotel.pais,
+      direccion: this.hotel.direccion,
+      estrellas: this.hotel.estrellas,
+      precio: this.precioHotelMostrado,
+      descripcion: this.hotel.descripcion || '',
+      galeria_imagenes: galeria
+    };
+  }
+
+  get breadcrumbItems(): string[] {
+    if (!this.hotel) return [];
+    return [this.hotel.ciudad, this.hotel.pais, this.hotel.nombre];
+  }
+
   ngOnInit(): void {
     // Leer parámetros del query string (si existen)
     this.route.queryParams.subscribe(qParams => {
@@ -48,12 +86,12 @@ export class DetallesHotelComponent implements OnInit {
 
     // Leer el ID del hotel
     this.route.paramMap.subscribe(params => {
-      const idParam = params.get('servicio_id');
+      const idParam = params.get('id'); // ✅ Cambiado de 'servicio_id' a 'id'
       this.hotelId = idParam;
       const hotelId = idParam ? parseInt(idParam, 10) : undefined;
 
       if (hotelId) this.getHotelDetails(hotelId);
-      else console.error("❌ No se encontró 'servicio_id' en los parámetros de la ruta.");
+      else console.error("❌ No se encontró 'id' en los parámetros de la ruta.");
     });
   }
 
@@ -156,8 +194,66 @@ export class DetallesHotelComponent implements OnInit {
   }
 
   // ==========================================================
-  // 🔹 Selección de habitaciones
+  // 🔹 Selección de habitaciones (nuevo método para botón individual)
   // ==========================================================
+  seleccionarHabitacion(habitacion: Habitacion): void {
+    // Si no hay fechas, abrir modal de fechas
+    if (!this.checkInDate || !this.checkOutDate) {
+      this.mostrarFormularioFechas = true;
+      // Marcar temporalmente esta habitación como seleccionada
+      this.resetearSelecciones();
+      habitacion.seleccionada = 1;
+      return;
+    }
+
+    const noches = this.calcularNoches();
+    if (noches <= 0) {
+      alert('Por favor selecciona fechas válidas antes de continuar.');
+      return;
+    }
+
+    // Resetear selecciones anteriores y seleccionar solo esta habitación
+    this.resetearSelecciones();
+    habitacion.seleccionada = 1;
+    
+    // Navegar directamente a pagos con esta habitación
+    this.procesarReservaSingle(habitacion);
+  }
+
+  private resetearSelecciones(): void {
+    this.habitacionesFiltradas.forEach(h => h.seleccionada = 0);
+  }
+
+  private procesarReservaSingle(habitacion: Habitacion): void {
+    if (!this.hotel) return;
+
+    const noches = this.calcularNoches();
+    const cant = 1; // Una habitación por defecto
+    const precio = habitacion.precio_por_noche;
+    const subtotal = precio * cant * noches;
+
+    const queryParams: Record<string, any> = {
+      hotelNombre: this.hotel.nombre,
+      ubicacion: `${this.hotel.pais}, ${this.hotel.ciudad}`,
+      checkIn: this.checkInDate,
+      checkOut: this.checkOutDate,
+      adultos: this.adultos,
+      ninos: this.ninos,
+      habitaciones: 1,
+      noches,
+      numTiposReservados: 1,
+      reserva_0_tipo: habitacion.nombre,
+      reserva_0_cant: cant,
+      reserva_0_precio_unitario: precio,
+      reserva_0_precio_total: subtotal.toFixed(2),
+      reserva_0_habitacion_id: habitacion.id,
+      precioTotalGeneral: subtotal.toFixed(2)
+    };
+
+    console.log('✅ Reserva individual procesada. Navegando a pagos.', queryParams);
+    this.router.navigate(['/pagos-hoteles'], { queryParams });
+  }
+
   actualizarSeleccion(habitacion: Habitacion, cambio: number): void {
     const limite = habitacion.cantidad ?? 0;
     habitacion.seleccionada = Math.max(
@@ -199,6 +295,16 @@ export class DetallesHotelComponent implements OnInit {
         habitaciones: this.habitaciones
       }
     });
+  }
+
+  // ==========================================================
+  // 📜 Scroll a sección habitaciones
+  // ==========================================================
+  scrollToHabitaciones(): void {
+    const element = document.getElementById('seccion-habitaciones');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 
   // ==========================================================
