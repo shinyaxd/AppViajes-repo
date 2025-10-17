@@ -24,3 +24,56 @@ export interface TourData {
  * Categorías disponibles para tours
  */
 export type TourCategoria = 'Aventura' | 'Gastronomía' | 'Cultura' | 'Relajación';
+
+/**
+ * Detalles completos de un tour (respuesta de la API)
+ */
+export interface TourDetalles {
+  id: number;
+  nombre: string;
+  descripcion: string;
+  ciudad: string;
+  pais: string;
+  imagen_url: string;
+  tour: {
+    id: number;
+    servicio_id: number;
+    categoria: TourCategoria;
+    duracion: number; // en minutos
+    precio: string | number;
+    cosas_para_llevar: string[];
+  } | null;
+  imagenes?: Array<{
+    id: number;
+    url?: string;
+    imagen_url?: string;
+  }>;
+  actividades?: Array<{
+    id: number;
+    nombre?: string;
+    descripcion: string;
+  }>;
+  salidas?: Array<{
+    id: number;
+    fecha_salida: string;
+    cupos_disponibles: number;
+  }>;
+}
+
+/**
+ * Respuesta de la API al listar tours
+ */
+export interface TourListApiResponse {
+  current_page: number;
+  data: TourData[];
+  total: number;
+  per_page: number;
+  last_page: number;
+}
+
+/**
+ * Respuesta de la API al obtener detalles de un tour
+ */
+export interface TourDetalleApiResponse {
+  servicio: TourDetalles;
+}

@@ -1,8 +1,9 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { TourService } from '../../services/tour.service';
+import { TourService, TourDetalles } from '../../services/tour.service';
 import { ServicioDetalleHeaderComponent, ServicioDetalleData } from '../../../../shared/components/servicio-detalle-header/servicio-detalle-header.component';
+import { ImageUtils } from '../../../../shared/utils/image.utils';
 
 @Component({
   selector: 'app-tour-detalle',
@@ -16,7 +17,7 @@ export class TourDetalleComponent implements OnInit {
   private router = inject(Router);
   private tourService = inject(TourService);
 
-  tour: any = null;
+  tour: TourDetalles | null = null;
   loading = true;
   error = false;
 
@@ -54,16 +55,20 @@ export class TourDetalleComponent implements OnInit {
   get servicioData(): ServicioDetalleData | null {
     if (!this.tour) return null;
 
-    const tourData = this.tour.tour || {};
-    const imagenes = this.tour.imagenes?.map((img: any) => img.url || img.imagen_url) || [];
+    // Obtener datos del tour con tipado correcto
+    const tourData = this.tour.tour;
     
-    // Si no hay imágenes, usar imagen_url del servicio
-    if (imagenes.length === 0 && this.tour.imagen_url) {
-      imagenes.push(this.tour.imagen_url);
-    }
+    // Usar ImageUtils para obtener y procesar imágenes
+    const imagenesFromApi = this.tour.imagenes?.map((img) => img.url || img.imagen_url).filter((url): url is string => !!url) || [];
+    const todasImagenes = ImageUtils.getAllImages(this.tour.imagen_url, imagenesFromApi);
+    
+    // Asegurar que siempre haya al menos una imagen
+    const imagenesFinal = todasImagenes.length > 0 
+      ? todasImagenes 
+      : [ImageUtils.getPlaceholder('tour')];
 
     // Convertir duración de minutos a formato legible
-    const duracionHoras = tourData.duracion 
+    const duracionHoras = tourData?.duracion 
       ? `${Math.floor(tourData.duracion / 60)} Horas` 
       : undefined;
 
@@ -71,10 +76,10 @@ export class TourDetalleComponent implements OnInit {
       nombre: this.tour.nombre || 'Tour sin nombre',
       ciudad: this.tour.ciudad || '',
       pais: this.tour.pais || '',
-      precio: parseFloat(tourData.precio) || null,
+      precio: tourData?.precio ? parseFloat(tourData.precio as any) : null,
       descripcion: this.tour.descripcion || '',
       duracion: duracionHoras,
-      galeria_imagenes: imagenes
+      galeria_imagenes: imagenesFinal
     };
   }
 

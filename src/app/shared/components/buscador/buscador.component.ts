@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 
 import { HotelService, Habitacion, HotelData, HotelDetalles } from '../../../features/hoteles/services/hoteles.service'; 
+import { DateUtils } from '../../utils/date.utils'; 
 
 // Define la estructura de los filtros para Hoteles
 interface FiltroHotel {
@@ -66,10 +67,9 @@ export class BuscadorComponent implements OnInit {
   showGuestMenuTour = false;
 
   constructor() {
-    this.minDate = new Date().toISOString().split('T')[0];
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    this.minCheckoutDate = tomorrow.toISOString().split('T')[0];
+    // Usar DateUtils para obtener fechas mínimas
+    this.minDate = DateUtils.getTodayISO();
+    this.minCheckoutDate = DateUtils.getTomorrowISO();
   }
 
   ngOnInit(): void {
@@ -123,9 +123,8 @@ export class BuscadorComponent implements OnInit {
 
   onCheckInChange(event: Event) {
     const checkInDate = (event.target as HTMLInputElement).value;
-    const nextDay = new Date(checkInDate);
-    nextDay.setDate(nextDay.getDate() + 1);
-    this.minCheckoutDate = nextDay.toISOString().split('T')[0];
+    // Usar DateUtils para calcular fecha mínima de checkout
+    this.minCheckoutDate = DateUtils.getMinCheckoutDate(checkInDate);
   }
 
   // Método de Hoteles

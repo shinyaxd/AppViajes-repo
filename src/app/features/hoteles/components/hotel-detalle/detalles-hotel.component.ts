@@ -5,6 +5,8 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { HotelService, HotelData, Habitacion } from '../../services/hoteles.service';
 import { ServicioDetalleHeaderComponent, ServicioDetalleData } from '../../../../shared/components/servicio-detalle-header/servicio-detalle-header.component';
+import { DateUtils } from '../../../../shared/utils/date.utils';
+import { ImageUtils } from '../../../../shared/utils/image.utils';
 
 @Component({
   selector: 'app-detalles-hotel',
@@ -26,7 +28,7 @@ export class DetallesHotelComponent implements OnInit {
   // 🟢 Control de formulario emergente de fechas
   mostrarFormularioFechas = false;
   mensajeDisponibilidad = '';
-  fechaMinimaHoy: string = new Date().toISOString().split('T')[0]; // fecha actual
+  fechaMinimaHoy: string = DateUtils.getTodayISO(); // Usar DateUtils
   fechaMinimaCheckOut: string = ''; // check-out depende del check-in
 
   // 🔹 Parámetros de búsqueda
@@ -41,21 +43,13 @@ export class DetallesHotelComponent implements OnInit {
   get servicioData(): ServicioDetalleData | null {
     if (!this.hotel) return null;
     
-    // Construir galería de imágenes desde múltiples fuentes
-    let galeria: string[] = [];
+    // Usar ImageUtils para obtener galería de imágenes
+    const galeria = ImageUtils.getAllImages(this.hotel.imagen_url, this.hotel.galeria_imagenes);
     
-    // Prioridad 1: galeria_imagenes
-    if (this.hotel.galeria_imagenes && this.hotel.galeria_imagenes.length > 0) {
-      galeria = [...this.hotel.galeria_imagenes];
-    }
-    // Prioridad 2: imagen_url única
-    else if (this.hotel.imagen_url) {
-      galeria = [this.hotel.imagen_url];
-    }
-    // Fallback: placeholder
-    else {
-      galeria = ['assets/images/placeholder-hotel.jpg'];
-    }
+    // Si no hay imágenes, agregar placeholder
+    const galeriaFinal = galeria.length > 0 
+      ? galeria 
+      : [ImageUtils.getPlaceholder('hotel')];
 
     return {
       nombre: this.hotel.nombre,
@@ -65,7 +59,7 @@ export class DetallesHotelComponent implements OnInit {
       estrellas: this.hotel.estrellas,
       precio: this.precioHotelMostrado,
       descripcion: this.hotel.descripcion || '',
-      galeria_imagenes: galeria
+      galeria_imagenes: galeriaFinal
     };
   }
 
@@ -164,9 +158,8 @@ export class DetallesHotelComponent implements OnInit {
   // ==========================================================
   onFechaCheckInChange(event: any): void {
     this.checkInDate = event.target.value;
-    const checkIn = new Date(this.checkInDate);
-    checkIn.setDate(checkIn.getDate() + 1);
-    this.fechaMinimaCheckOut = checkIn.toISOString().split('T')[0];
+    // Usar DateUtils para calcular la fecha mínima de checkout
+    this.fechaMinimaCheckOut = DateUtils.getMinCheckoutDate(this.checkInDate);
   }
 
   onFechaCheckOutChange(event: any): void {
@@ -273,11 +266,8 @@ export class DetallesHotelComponent implements OnInit {
   // 📅 Cálculo de noches
   // ==========================================================
   private calcularNoches(): number {
-    if (!this.checkInDate || !this.checkOutDate) return 0;
-    const dateIn = new Date(this.checkInDate);
-    const dateOut = new Date(this.checkOutDate);
-    const diffMs = dateOut.getTime() - dateIn.getTime();
-    return diffMs > 0 ? Math.ceil(diffMs / (1000 * 60 * 60 * 24)) : 0;
+    // Usar DateUtils para calcular noches
+    return DateUtils.calculateNights(this.checkInDate, this.checkOutDate);
   }
 
   // ==========================================================

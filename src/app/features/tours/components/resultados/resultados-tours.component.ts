@@ -7,6 +7,7 @@ import { ResultadosListaComponent, ResultadoItem } from '../../../../shared/comp
 import { tap, switchMap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { TourService, TourData } from '../../services/tour.service';
+import { ServicioTransformers } from '../../../../shared/utils/transformers';
 
 interface BusquedaTourParams {
   destino: string;
@@ -82,20 +83,10 @@ export class ResultadosTOURSComponent implements OnInit {
 
   /**
    * Transforma datos de tours a ResultadoItem[] para el componente genérico
+   * ACTUALIZADO: Usa ServicioTransformers centralizado
    */
   private transformarToursAResultados(tours: any[]): ResultadoItem[] {
-    return tours.map(tour => ({
-      id: tour.id,
-      nombre: tour.nombre,
-      imagen_url: tour.imagen_url || 'assets/images/placeholder-tour.jpg',
-      ubicacion: `${tour.ciudad}, ${tour.pais}`,
-      rating: 4.5, // Simulado
-      ratingTexto: tour.tour?.categoria === 'Aventura' ? 'Excelente' : 'Muy bueno',
-      resenias: Math.floor(Math.random() * 50) + 10, // Simulado
-      precio: parseFloat(tour.tour?.precio || '0'),
-      precioUnidad: 'persona',
-      duracionHoras: tour.tour?.duracion ? Math.round(tour.tour.duracion / 60) : 0 // Convertir minutos a horas
-    }));
+    return ServicioTransformers.toursToResultados(tours);
   }
 
   actualizarBusqueda(params: BusquedaTourParams): void {

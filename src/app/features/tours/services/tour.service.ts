@@ -9,12 +9,22 @@ import { AuthService } from '../../../core/services/auth.service';
 // ==========================================================
 // MODELOS IMPORTADOS DESDE SHARED
 // ==========================================================
-import { TourData } from '../../../shared/models';
+import { 
+  TourData, 
+  TourDetalles, 
+  TourListApiResponse,
+  TourDetalleApiResponse 
+} from '../../../shared/models';
 
-// Re-exportamos la interfaz para mantener backward compatibility
-export type { TourData };
+// Re-exportamos las interfaces para mantener backward compatibility
+export type { 
+  TourData, 
+  TourDetalles,
+  TourListApiResponse,
+  TourDetalleApiResponse
+};
 
-// Interfaz para la respuesta paginada de la API
+// Interfaz para la respuesta paginada de la API (deprecated - usar TourListApiResponse)
 interface TourApiResponse {
   current_page: number;
   data: any[];
@@ -46,11 +56,11 @@ export class TourService {
   /**
    * Obtener todos los tours
    */
-  getTours(): Observable<any[]> {
-    return this.http.get<TourApiResponse>(`${this.API_URL}/tours`, {
+  getTours(): Observable<TourData[]> {
+    return this.http.get<TourListApiResponse>(`${this.API_URL}/tours`, {
       headers: this.getHeaders()
     }).pipe(
-      map((response: TourApiResponse) => response.data)
+      map((response: TourListApiResponse) => response.data)
     );
   }
 
@@ -58,11 +68,11 @@ export class TourService {
    * Obtener un tour por ID
    * La API retorna: { servicio: {..., tour: {...}, imagenes: [], actividades: [], salidas: [] } }
    */
-  getTourById(id: number): Observable<any> {
-    return this.http.get<any>(`${this.API_URL}/tours/${id}`, {
+  getTourById(id: number): Observable<TourDetalles> {
+    return this.http.get<TourDetalleApiResponse>(`${this.API_URL}/tours/${id}`, {
       headers: this.getHeaders()
     }).pipe(
-      map(response => response.servicio || response)
+      map((response: TourDetalleApiResponse) => response.servicio)
     );
   }
 
@@ -96,12 +106,12 @@ export class TourService {
   /**
    * Buscar tours por categoría
    */
-  getToursByCategoria(categoria: string): Observable<any[]> {
-    return this.http.get<TourApiResponse>(`${this.API_URL}/tours`, {
+  getToursByCategoria(categoria: string): Observable<TourData[]> {
+    return this.http.get<TourListApiResponse>(`${this.API_URL}/tours`, {
       headers: this.getHeaders(),
       params: { categoria }
     }).pipe(
-      map((response: TourApiResponse) => response.data)
+      map((response: TourListApiResponse) => response.data)
     );
   }
 }

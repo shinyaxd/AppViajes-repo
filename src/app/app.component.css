@@ -1,0 +1,24 @@
+/* Layout Flexbox para sticky footer */
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* El main debe crecer para empujar el footer hacia abajo */
+main {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* El footer siempre se queda al final */
+app-footer {
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+/* El header mantiene su posición */
+app-header {
+  flex-shrink: 0;
+}

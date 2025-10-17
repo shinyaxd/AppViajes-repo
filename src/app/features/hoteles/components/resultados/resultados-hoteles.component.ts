@@ -7,6 +7,7 @@ import { ResultadosListaComponent, ResultadoItem } from '../../../../shared/comp
 import { tap, switchMap, map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { HotelService, HotelData } from '../../services/hoteles.service';
+import { ServicioTransformers } from '../../../../shared/utils/transformers';
 
 interface BusquedaHotelParams {
   ciudad: string;
@@ -88,22 +89,10 @@ export class ResultadosHOTELESComponent implements OnInit {
 
   /**
    * Transforma HotelData[] a ResultadoItem[] para el componente genérico
+   * ACTUALIZADO: Usa ServicioTransformers centralizado
    */
   private transformarHotelesAResultados(hoteles: HotelData[]): ResultadoItem[] {
-    return hoteles.map(hotel => ({
-      id: hotel.id,
-      nombre: hotel.nombre,
-      imagen_url: hotel.imagen_url || (hotel.galeria_imagenes && hotel.galeria_imagenes.length > 0 
-        ? hotel.galeria_imagenes[0] 
-        : 'assets/images/placeholder-hotel.jpg'),
-      ubicacion: `${hotel.ciudad}, ${hotel.pais}`,
-      rating: 4.4, // Simulado (tu API no tiene este campo aún)
-      ratingTexto: 'Muy bueno',
-      resenias: Math.floor(Math.random() * 100) + 10, // Simulado
-      precio: hotel.precio_por_noche || 0,
-      precioUnidad: 'noche',
-      estrellas: hotel.estrellas
-    }));
+    return ServicioTransformers.hotelesToResultados(hoteles);
   }
 
   actualizarBusqueda(params: BusquedaHotelParams): void {

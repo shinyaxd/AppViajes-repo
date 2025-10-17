@@ -1,4 +1,24 @@
 /* You can add global styles to this file, and also import other style files */
-body {
+
+/* Reset de márgenes para evitar conflictos con el sticky footer */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
   font-family: 'Poppins', sans-serif;
+}
+
+/* Flexbox layout para mantener el footer siempre al final */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* El contenedor principal (app-root) debe ocupar todo el espacio disponible */
+app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
 }
