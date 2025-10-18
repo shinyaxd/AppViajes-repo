@@ -1,0 +1,431 @@
+/* =============================================
+   PAGOS TOURS - DISEÑO MODERNO
+   ============================================= */
+
+/* Contenedor principal */
+.pagos-container {
+  max-width: 1200px;
+  margin: 80px auto 40px;
+  padding: 0 24px;
+  font-family: 'Poppins', Arial, sans-serif;
+}
+
+/* Botón volver */
+.back-button {
+  background: transparent;
+  border: none;
+  color: #83c4a6;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  color: #6fb094;
+  transform: translateX(-4px);
+}
+
+.back-button i {
+  font-size: 0.9rem;
+}
+
+/* Header de la página */
+.page-header {
+  margin-bottom: 32px;
+}
+
+.page-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+}
+
+.page-header .subtitle {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+}
+
+/* Mensaje de éxito */
+.success-card {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border: 2px solid #4caf50;
+  border-radius: 16px;
+  padding: 48px 32px;
+  text-align: center;
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.success-icon {
+  margin-bottom: 24px;
+}
+
+.success-icon i {
+  font-size: 4rem;
+  color: #4caf50;
+  animation: checkmark 0.6s ease-in-out;
+}
+
+@keyframes checkmark {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.success-card h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #2e7d32;
+  margin: 0 0 16px 0;
+}
+
+.success-card p {
+  font-size: 1rem;
+  color: #1b5e20;
+  margin: 0 0 32px 0;
+  line-height: 1.6;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #83c4a6 0%, #6fb094 100%);
+  color: white;
+  border: none;
+  padding: 14px 32px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(131, 196, 166, 0.4);
+}
+
+/* Layout de dos columnas */
+.checkout-grid {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 32px;
+  margin-top: 32px;
+}
+
+/* Columna principal */
+.main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Cards de información */
+.info-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+}
+
+.info-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+  background: linear-gradient(135deg, #f8fdf9 0%, #f0f9f5 100%);
+  padding: 20px 24px;
+  border-bottom: 2px solid #e8f5e9;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-header i {
+  color: #83c4a6;
+  font-size: 1.3rem;
+}
+
+.card-header h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #222;
+  margin: 0;
+}
+
+.card-body {
+  padding: 24px;
+}
+
+/* Tour info específico */
+.tour-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #222;
+  margin: 0 0 12px 0;
+}
+
+.tour-location {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  margin: 0 0 16px 0;
+  font-size: 1rem;
+}
+
+.tour-location i {
+  color: #83c4a6;
+}
+
+.tour-extras {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.badge i {
+  font-size: 0.9rem;
+}
+
+/* Fecha */
+.date-value {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+  text-transform: capitalize;
+}
+
+/* Participantes */
+.participants-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.participant-item {
+  text-align: center;
+  padding: 20px 16px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.participant-item:hover {
+  transform: translateY(-2px);
+  background: #e8f5e9;
+}
+
+.participant-item.total {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+}
+
+.participant-label {
+  display: block;
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.participant-value {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #222;
+}
+
+/* Sidebar - Resumen de precios */
+.sidebar {
+  position: sticky;
+  top: 100px;
+  height: fit-content;
+}
+
+.price-summary-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  padding: 28px;
+}
+
+.price-summary-card h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #222;
+  margin: 0 0 24px 0;
+}
+
+.price-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.price-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+  color: #333;
+}
+
+.price-item span:first-child {
+  color: #666;
+}
+
+.price-item span:last-child {
+  font-weight: 600;
+  color: #222;
+}
+
+.price-item.tax {
+  padding-top: 12px;
+  border-top: 1px dashed #e0e0e0;
+}
+
+.divider {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #e0e0e0, transparent);
+  margin: 20px 0;
+}
+
+.total-price {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #f0f9f5 0%, #e8f5e9 100%);
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.total-label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.total-amount {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #83c4a6;
+}
+
+.btn-pay {
+  width: 100%;
+  background: linear-gradient(135deg, #83c4a6 0%, #6fb094 100%);
+  color: white;
+  border: none;
+  padding: 16px 24px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(131, 196, 166, 0.3);
+}
+
+.btn-pay:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(131, 196, 166, 0.4);
+}
+
+.btn-pay i {
+  font-size: 1rem;
+}
+
+.payment-note {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #666;
+  margin: 16px 0 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.payment-note i {
+  color: #83c4a6;
+}
+
+/* =============================================
+   RESPONSIVE
+   ============================================= */
+@media (max-width: 968px) {
+  .checkout-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+  }
+
+  .participants-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .pagos-container {
+    margin: 60px auto 20px;
+    padding: 0 16px;
+  }
+
+  .page-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .participants-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card-body {
+    padding: 16px;
+  }
+
+  .price-summary-card {
+    padding: 20px;
+  }
+
+  .total-amount {
+    font-size: 1.6rem;
+  }
+}

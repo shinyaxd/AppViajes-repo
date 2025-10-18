@@ -1,0 +1,133 @@
+<div class="pagos-container">
+  <!-- Botón volver -->
+  <button class="back-button" (click)="volverAtras()">
+    <i class="fas fa-arrow-left"></i> Volver
+  </button>
+
+  <!-- Header -->
+  <div class="page-header">
+    <h1>Confirma tu reserva</h1>
+    <p class="subtitle">Revisa los detalles de tu tour antes de continuar</p>
+  </div>
+
+  <!-- Mensaje de éxito -->
+  <div *ngIf="reservaExitosa" class="success-card">
+    <div class="success-icon">
+      <i class="fas fa-check-circle"></i>
+    </div>
+    <h2>¡Reserva confirmada!</h2>
+    <p>Tu reserva de tour se ha procesado exitosamente. Recibirás un correo de confirmación con todos los detalles.</p>
+    <button class="btn-primary" [routerLink]="['/tours']">
+      Explorar más tours
+    </button>
+  </div>
+
+  <!-- Contenido principal -->
+  <div *ngIf="!reservaExitosa" class="checkout-grid">
+    
+    <!-- Columna izquierda -->
+    <div class="main-content">
+      
+      <!-- Info del tour -->
+      <div class="info-card">
+        <div class="card-header">
+          <i class="fas fa-map-marked-alt"></i>
+          <h2>Información del tour</h2>
+        </div>
+        <div class="card-body">
+          <h3 class="tour-name">{{ nombreTour }}</h3>
+          <p class="tour-location">
+            <i class="fas fa-map-marker-alt"></i>
+            {{ ubicacion }}
+          </p>
+          <div class="tour-extras" *ngIf="categoria || duracionFormateada">
+            <span class="badge" *ngIf="categoria">
+              <i class="fas fa-tag"></i>
+              {{ categoria }}
+            </span>
+            <span class="badge" *ngIf="duracionFormateada">
+              <i class="fas fa-clock"></i>
+              {{ duracionFormateada }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fecha de salida -->
+      <div class="info-card">
+        <div class="card-header">
+          <i class="fas fa-calendar-day"></i>
+          <h2>Fecha de salida</h2>
+        </div>
+        <div class="card-body">
+          <p class="date-value">{{ fechaSalida | date:'EEEE, d \'de\' MMMM \'de\' y':'':'es' }}</p>
+        </div>
+      </div>
+
+      <!-- Participantes -->
+      <div class="info-card">
+        <div class="card-header">
+          <i class="fas fa-users"></i>
+          <h2>Participantes</h2>
+        </div>
+        <div class="card-body">
+          <div class="participants-grid">
+            <div class="participant-item">
+              <span class="participant-label">Adultos</span>
+              <span class="participant-value">{{ adultos }}</span>
+            </div>
+            <div class="participant-item">
+              <span class="participant-label">Niños</span>
+              <span class="participant-value">{{ ninos }}</span>
+            </div>
+            <div class="participant-item total">
+              <span class="participant-label">Total</span>
+              <span class="participant-value">{{ totalPersonas }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Columna derecha: Resumen -->
+    <div class="sidebar">
+      <div class="price-summary-card">
+        <h2>Resumen de precios</h2>
+        
+        <div class="price-breakdown">
+          <div class="price-item">
+            <span>Precio por persona</span>
+            <span>{{ precioPorPersona | currency:'PEN':'symbol':'1.0-0' }}</span>
+          </div>
+          <div class="price-item">
+            <span>{{ totalPersonas }} {{ totalPersonas === 1 ? 'persona' : 'personas' }}</span>
+            <span>{{ subtotal | currency:'PEN':'symbol':'1.0-0' }}</span>
+          </div>
+          <div class="price-item tax">
+            <span>Impuestos ({{ impuesto * 100 }}%)</span>
+            <span>{{ montoImpuesto | currency:'PEN':'symbol':'1.0-0' }}</span>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="total-price">
+          <span class="total-label">Total a pagar</span>
+          <span class="total-amount">{{ totalPagar | currency:'PEN':'symbol':'1.0-0' }}</span>
+        </div>
+
+        <button class="btn-pay" (click)="procesarPago()">
+          <i class="fas fa-lock"></i>
+          Confirmar y pagar
+        </button>
+
+        <p class="payment-note">
+          <i class="fas fa-info-circle"></i>
+          Pago seguro. Confirmación inmediata.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>

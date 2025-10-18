@@ -208,8 +208,8 @@ export class PagosHotelesComponent implements OnInit {
       }
     }
 
+    // Marcar como exitosa para mostrar la página de confirmación
     this.reservaExitosa = ok;
-    if (ok) alert('✅ ¡Reserva confirmada!');
   };
 
   private toISODate(d: Date): string {

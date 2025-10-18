@@ -265,3 +265,336 @@
     font-size: 0.9rem;
   }
 }
+/* ======================= */
+/* SECCIÓN DE SALIDAS */
+/* ======================= */
+.tour-salidas-section {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 32px;
+  margin: 32px 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.tour-salidas-section .section-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tour-salidas-section .section-title i {
+  color: #83c4a6;
+  font-size: 1.5rem;
+}
+
+/* Mensaje sin salidas */
+.no-salidas-message {
+  background: #f5f5f5;
+  border-left: 4px solid #ff9800;
+  padding: 20px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.no-salidas-message i {
+  color: #ff9800;
+  font-size: 1.5rem;
+}
+
+.no-salidas-message p {
+  margin: 0;
+  color: #666;
+}
+
+/* Grid de salidas */
+.salidas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+/* Card de salida */
+.salida-card {
+  background: #ffffff;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.salida-card:hover:not(.agotada) {
+  border-color: #83c4a6;
+  box-shadow: 0 4px 16px rgba(131, 196, 166, 0.2);
+  transform: translateY(-2px);
+}
+
+.salida-card.selected {
+  border-color: #83c4a6;
+  background: linear-gradient(135deg, #f0f9f5 0%, #e8f5e9 100%);
+  box-shadow: 0 4px 16px rgba(131, 196, 166, 0.3);
+}
+
+.salida-card.agotada {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f5f5f5;
+}
+
+/* Fecha de la salida */
+.salida-fecha {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #83c4a6;
+  color: white;
+  border-radius: 8px;
+  padding: 12px 16px;
+  min-width: 70px;
+}
+
+.salida-fecha .dia {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.salida-fecha .mes {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.salida-fecha .anio {
+  font-size: 0.8rem;
+  margin-top: 2px;
+  opacity: 0.9;
+}
+
+/* Info de la salida */
+.salida-info {
+  flex: 1;
+}
+
+.salida-dia-semana {
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px 0;
+  font-size: 1.1rem;
+  text-transform: capitalize;
+}
+
+.salida-cupos {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.salida-cupos i {
+  color: #83c4a6;
+}
+
+.agotado-text {
+  color: #f44336;
+  font-weight: 600;
+}
+
+/* Check de selección */
+.salida-check {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.salida-check i {
+  color: #83c4a6;
+  font-size: 1.5rem;
+}
+
+/* ======================= */
+/* CANTIDAD DE PERSONAS */
+/* ======================= */
+.cantidad-personas-section {
+  background: linear-gradient(135deg, #f8fdf9 0%, #f0f9f5 100%);
+  border: 2px solid #83c4a6;
+  border-radius: 12px;
+  padding: 24px;
+  margin-top: 24px;
+}
+
+.cantidad-personas-section h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #222;
+  margin: 0 0 20px 0;
+}
+
+.personas-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.persona-control {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.persona-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: #333;
+}
+
+.persona-label i {
+  color: #83c4a6;
+  font-size: 1.2rem;
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.quantity-controls button {
+  width: 36px;
+  height: 36px;
+  border: 2px solid #83c4a6;
+  background: white;
+  color: #83c4a6;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quantity-controls button:hover:not(:disabled) {
+  background: #83c4a6;
+  color: white;
+}
+
+.quantity-controls button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.quantity-controls span {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  min-width: 30px;
+  text-align: center;
+}
+
+/* Preview de precio */
+.precio-preview {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid #e0e0e0;
+}
+
+.precio-detalle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.precio-detalle span:first-child {
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.precio-total {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #83c4a6;
+}
+
+/* Botón de reserva final */
+.final-reserve-section {
+  position: sticky;
+  bottom: 20px;
+  text-align: center;
+  margin: 32px 0;
+  z-index: 10;
+}
+
+.final-reserve-button {
+  background: linear-gradient(135deg, #83c4a6 0%, #6fb094 100%);
+  color: white;
+  border: none;
+  padding: 18px 48px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(131, 196, 166, 0.4);
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.final-reserve-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(131, 196, 166, 0.5);
+}
+
+.final-reserve-button i {
+  font-size: 1.3rem;
+}
+
+/* ======================= */
+/* RESPONSIVE SALIDAS */
+/* ======================= */
+@media (max-width: 768px) {
+  .salidas-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .persona-control {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .precio-detalle {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+
+  .tour-salidas-section {
+    padding: 20px;
+  }
+
+  .final-reserve-button {
+    padding: 16px 32px;
+    font-size: 1rem;
+  }
+}

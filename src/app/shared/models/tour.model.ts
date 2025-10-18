@@ -42,6 +42,8 @@ export interface TourDetalles {
     duracion: number; // en minutos
     precio: string | number;
     cosas_para_llevar: string[];
+    fecha?: string; // Fecha del tour si no tiene salidas múltiples
+    cupos?: number; // Cupos disponibles si no tiene salidas múltiples
   } | null;
   imagenes?: Array<{
     id: number;
@@ -55,8 +57,14 @@ export interface TourDetalles {
   }>;
   salidas?: Array<{
     id: number;
-    fecha_salida: string;
-    cupos_disponibles: number;
+    servicio_id: number;
+    fecha: string; // Formato: "YYYY-MM-DD" o "YYYY-MM-DDTHH:mm:ss.000000Z"
+    hora: string;
+    cupo_total: number;
+    cupo_reservado: number;
+    estado: string;
+    created_at?: string;
+    updated_at?: string;
   }>;
 }
 

@@ -24,7 +24,7 @@
       [tipo]="'tour'"
       [servicio]="servicioData"
       [breadcrumb]="breadcrumbItems"
-      (onReservar)="reservarTour()"
+      (onReservar)="scrollToSalidas()"
     ></app-servicio-detalle-header>
 
     <!-- ======================= -->
@@ -96,6 +96,121 @@
         </div>
 
       </div>
+    </div>
+
+    <!-- ======================= -->
+    <!-- SELECCIÓN DE FECHA Y PERSONAS -->
+    <!-- ======================= -->
+    <div class="tour-salidas-section" id="seccion-salidas">
+      <h2 class="section-title">
+        <i class="fas fa-calendar-check"></i>
+        Selecciona tu fecha de salida
+      </h2>
+
+      <!-- Mensaje si no hay salidas -->
+      <div *ngIf="salidasFiltradas.length === 0" class="no-salidas-message">
+        <i class="fas fa-info-circle"></i>
+        <p>No hay salidas programadas para este tour en este momento.</p>
+      </div>
+
+      <!-- Grid de salidas disponibles -->
+      <div class="salidas-grid" *ngIf="salidasFiltradas.length > 0">
+        <div 
+          *ngFor="let salida of salidasFiltradas" 
+          class="salida-card"
+          [class.selected]="salidaSeleccionada?.id === salida.id"
+          [class.agotada]="salida.cupos_disponibles === 0"
+          (click)="seleccionarSalida(salida)"
+        >
+          <!-- Fecha -->
+          <div class="salida-fecha">
+            <span class="dia">{{ salida.fecha_salida | date:'dd' }}</span>
+            <span class="mes">{{ salida.fecha_salida | date:'MMM':'':'es' | uppercase }}</span>
+            <span class="anio">{{ salida.fecha_salida | date:'yyyy' }}</span>
+          </div>
+
+          <!-- Info -->
+          <div class="salida-info">
+            <p class="salida-dia-semana">{{ salida.fecha_salida | date:'EEEE':'':'es' }}</p>
+            <div class="salida-cupos">
+              <i class="fas fa-users"></i>
+              <span *ngIf="salida.cupos_disponibles > 0">
+                {{ salida.cupos_disponibles }} cupos disponibles
+              </span>
+              <span *ngIf="salida.cupos_disponibles === 0" class="agotado-text">
+                Agotado
+              </span>
+            </div>
+          </div>
+
+          <!-- Indicador de selección -->
+          <div class="salida-check" *ngIf="salidaSeleccionada?.id === salida.id">
+            <i class="fas fa-check-circle"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Selector de cantidad de personas -->
+      <div class="cantidad-personas-section" *ngIf="salidaSeleccionada">
+        <h3>¿Cuántas personas?</h3>
+        <div class="personas-controls">
+          <!-- Adultos -->
+          <div class="persona-control">
+            <div class="persona-label">
+              <i class="fas fa-user"></i>
+              <span>Adultos</span>
+            </div>
+            <div class="quantity-controls">
+              <button 
+                (click)="actualizarCantidadPersonas('adultos', -1)"
+                [disabled]="cantidadAdultos === 1"
+              >−</button>
+              <span>{{ cantidadAdultos }}</span>
+              <button 
+                (click)="actualizarCantidadPersonas('adultos', 1)"
+                [disabled]="totalPersonas >= cuposDisponibles"
+              >+</button>
+            </div>
+          </div>
+
+          <!-- Niños -->
+          <div class="persona-control">
+            <div class="persona-label">
+              <i class="fas fa-child"></i>
+              <span>Niños</span>
+            </div>
+            <div class="quantity-controls">
+              <button 
+                (click)="actualizarCantidadPersonas('ninos', -1)"
+                [disabled]="cantidadNinos === 0"
+              >−</button>
+              <span>{{ cantidadNinos }}</span>
+              <button 
+                (click)="actualizarCantidadPersonas('ninos', 1)"
+                [disabled]="totalPersonas >= cuposDisponibles"
+              >+</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resumen de precio -->
+        <div class="precio-preview">
+          <div class="precio-detalle">
+            <span>{{ totalPersonas }} {{ totalPersonas === 1 ? 'persona' : 'personas' }}</span>
+            <span class="precio-total">
+              {{ precioTotal | currency:'PEN':'symbol':'1.0-0' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botón de reserva flotante -->
+    <div class="final-reserve-section" *ngIf="salidaSeleccionada && totalPersonas > 0">
+      <button class="final-reserve-button" (click)="reservarTour()">
+        <i class="fas fa-ticket-alt"></i>
+        Continuar con la reserva
+      </button>
     </div>
 
   </div>

@@ -84,5 +84,56 @@ export class ReservasService {
     return this.http.get<MisReservasHotelItem[]>(`${API_URL}/mis-reservas`);
   }
 
-  // ... (Tus métodos de Tours se mantienen sin cambios)
+  // ========================================================
+  // 🎫 RESERVAS DE TOURS
+  // ========================================================
+
+  /**
+   * Crear una reserva de tour (POST /api/tours/salidas/{salidaId}/reservas)
+   * REQUIERE que el tour tenga una salida válida creada en el backend
+   */
+  crearReservaTour(salidaId: number, data: any): Observable<ReservaApiRespuesta> {
+    console.log('[RESERVAS SERVICE] Creando reserva para salida:', salidaId);
+    console.log('[RESERVAS SERVICE] Payload:', data);
+    
+    return this.http.post<ReservaApiRespuesta>(
+      `${API_URL}/tours/salidas/${salidaId}/reservas`,
+      data
+    ).pipe(
+      catchError((error: HttpErrorResponse) => {
+        let errorMessage = 'Ocurrió un error inesperado al procesar la reserva del tour.';
+        
+        if (error.status === 422) {
+          errorMessage = error.error?.message || 'Error en los datos o no hay cupos disponibles.';
+        } else if (error.status === 403) {
+          errorMessage = error.error?.message || 'Permiso denegado. Asegúrate de estar logueado como viajero.';
+        } else if (error.status === 404) {
+          errorMessage = 'La salida del tour no existe. El tour no tiene fechas disponibles.';
+        } else if (error.status === 405) {
+          errorMessage = 'Método no permitido. El tour no tiene salidas configuradas.';
+        } else if (error.error?.message) {
+          errorMessage = error.error.message;
+        }
+
+        console.error('[RESERVAS SERVICE] ❌ Error al crear reserva:', error);
+        console.error('[RESERVAS SERVICE] Status:', error.status);
+        console.error('[RESERVAS SERVICE] Response:', error.error);
+        return throwError(() => new Error(errorMessage));
+      })
+    );
+  }
+
+  /**
+   * Cancelar una reserva de tour
+   */
+  cancelarReservaTour(id: number): Observable<any> {
+    return this.http.post(`${API_URL}/reservas-tours/${id}/cancelar`, {});
+  }
+
+  /**
+   * Obtener las reservas de tours del usuario
+   */
+  getMisReservasTours(): Observable<any[]> {
+    return this.http.get<any[]>(`${API_URL}/mis-reservas-tours`);
+  }
 }
