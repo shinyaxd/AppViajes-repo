@@ -4,7 +4,7 @@ import { AuthService } from '../services/auth.service';
 import { map, take, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 
-export const viajeroGuard: CanActivateFn = (route, state) => {
+export const proveedorGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
@@ -15,10 +15,10 @@ export const viajeroGuard: CanActivateFn = (route, state) => {
         return router.createUrlTree(['/auth/login'], { queryParams: { returnUrl: state.url } });
       }
       const role = String(user.rol ?? '').toLowerCase();
-      return role === 'viajero' ? true : router.createUrlTree(['/']);
+      return role === 'proveedor' ? true : router.createUrlTree(['/']);
     }),
     catchError(err => {
-      console.error('Error en viajeroGuard:', err);
+      console.error('Error en proveedorGuard:', err);
       return of(router.createUrlTree(['/auth/login'], { queryParams: { returnUrl: state.url } }));
     })
   );

@@ -259,6 +259,27 @@ h2 {
   font-weight: 400;
 }
 
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quantity-controls button {
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  width: 32px;
+  height: 32px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.quantity-controls button:hover {
+  background-color: #e6e6e6;
+}
+
 .reserve-room-button {
   background-color: #8ed1b2;
   color: #000000;
