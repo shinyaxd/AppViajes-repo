@@ -1,11 +1,13 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 
 export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
+  const router = inject(Router);
   const token = authService.getToken();
 
   // 🔹 Clonamos la petición para agregar el token si existe
@@ -13,7 +15,6 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
     ? req.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`,
-          // El 'Accept': 'application/json' está perfecto para tu backend Laravel
           Accept: 'application/json' 
         }
       })
@@ -21,14 +22,18 @@ export const AuthInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(authReq).pipe(
     catchError((error) => {
-      // 🔸 Si el token es inválido o expiró
+      // 🔸 Si el backend rechaza el token (expirado o inválido)
       if (error.status === 401) {
-        console.warn('⚠️ Token inválido o expirado. Limpiando sesión local...');
-        // ✅ Acceso directo al método, asumiendo que es público
-        authService.cleanSession(); 
+        console.warn('⚠️ Interceptor detectó 401. Limpiando sesión...');
+        authService.cleanSession(); // Limpia TODO (token + role + user)
+        
+        // Solo redirigir si NO estamos ya en la página de login
+        if (!router.url.includes('/auth/login')) {
+          router.navigate(['/auth/login']);
+        }
       }
 
-      // Re-lanza el error para que sea manejado por el componente que hizo la llamada
+      // Re-lanza el error para que sea manejado por el componente si es necesario
       return throwError(() => error);
     })
   );
