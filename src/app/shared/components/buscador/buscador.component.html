@@ -74,8 +74,8 @@
     
     <ng-container *ngIf="tipoBusqueda === 'tours'">
       <div class="input-group">
-        <label for="destino-tour">Destino</label>
-        <input type="text" id="destino-tour" placeholder="Lima, Perú" [(ngModel)]="destino" (input)="buscarSugerenciasTours()">
+        <label for="destino-tour">Destino (Ciudad)</label>
+        <input type="text" id="destino-tour" placeholder="Lima" [(ngModel)]="destino" (input)="buscarSugerenciasTours()">
         <ul *ngIf="sugerencias.length > 0" class="sugerencias-lista">
           <li *ngFor="let sugerencia of sugerencias" (click)="seleccionarDestino(sugerencia)">
             {{sugerencia}}

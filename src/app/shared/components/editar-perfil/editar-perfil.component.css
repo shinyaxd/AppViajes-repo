@@ -1,0 +1,344 @@
+/* -------------------------------------------------------------------------- */
+/* ESTILOS BASE                                */
+/* -------------------------------------------------------------------------- */
+
+/* Estilo para el contenedor principal, centrado y con ancho máximo */
+div:first-child {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    background-color: #f8f8f8;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 25px;
+    font-size: 2em;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 10px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* ESTILOS DE CARGA / SPINNER                      */
+/* -------------------------------------------------------------------------- */
+
+div[ngif="isLoading()"] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 8px;
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+div[ngif="isLoading()"] svg {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+    /* Animación de spinner simple (no usa @keyframes de Tailwind) */
+    animation: spin 1s linear infinite;
+    stroke: #4CAF50;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* -------------------------------------------------------------------------- */
+/* ESTILOS DE MENSAJES                            */
+/* -------------------------------------------------------------------------- */
+
+/* Estilos dinámicos para mensajes de éxito/error (usando [ngClass]) */
+.bg-green-100 {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.bg-red-100 {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* ESTILOS DEL FORMULARIO                      */
+/* -------------------------------------------------------------------------- */
+
+form {
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+form > div {
+    margin-bottom: 20px;
+}
+
+form h2 {
+    color: #555;
+    font-size: 1.4em;
+    padding-top: 15px;
+    margin-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+/* Agrupamiento de campos (simulando una cuadrícula simple) */
+form > div:nth-child(3) > div, 
+form > div:nth-child(7) > div {
+    display: flex;
+    gap: 20px; /* Espacio entre columnas */
+    flex-wrap: wrap;
+}
+
+form > div > div > div {
+    flex: 1 1 45%; /* Hace que los inputs ocupen casi la mitad del espacio */
+    min-width: 250px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #444;
+    font-size: 0.9em;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1em;
+    box-sizing: border-box; /* Incluye padding y borde en el ancho total */
+}
+
+input:focus {
+    border-color: #4CAF50;
+    outline: none;
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+}
+
+input:disabled {
+    background-color: #eee;
+    color: #777;
+    cursor: not-allowed;
+}
+
+/* -------------------------------------------------------------------------- */
+/* ESTILOS DE VALIDACIÓN                          */
+/* -------------------------------------------------------------------------- */
+
+div p {
+    color: #d32f2f; /* Rojo oscuro */
+    font-size: 0.85em;
+    margin-top: 5px;
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* ESTILOS DE BOTONES                            */
+/* -------------------------------------------------------------------------- */
+
+button[type="submit"] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 8px;
+    background-color: #4CAF50; /* Verde principal */
+    color: white;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, opacity 0.3s ease;
+}
+
+button[type="submit"]:hover:not(:disabled) {
+    background-color: #45a049;
+}
+
+button[type="submit"]:disabled {
+    background-color: #a5d6a7;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+button[type="submit"] svg {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    stroke: white;
+}
+
+/* -------------------------------------------------------------------------- */
+/* ESTILOS DE ELIMINAR CUENTA                        */
+/* -------------------------------------------------------------------------- */
+
+/* Sección de eliminación */
+form + div {
+    text-align: center;
+    padding: 20px;
+    margin-top: 30px;
+    border: 1px solid #f44336;
+    border-radius: 8px;
+    background-color: #ffebee;
+}
+
+form + div h3 {
+    color: #d32f2f;
+    font-size: 1.3em;
+    margin-bottom: 10px;
+}
+
+form + div p {
+    color: #555;
+    margin-bottom: 15px;
+}
+
+/* Botón de eliminar (ajustado para la clase genérica button) */
+form + div button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    background-color: #f44336; /* Rojo principal */
+    color: white;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+form + div button:hover:not(:disabled) {
+    background-color: #d32f2f;
+}
+
+/* -------------------------------------------------------------------------- */
+/* ESTILOS DEL MODAL                            */
+/* -------------------------------------------------------------------------- */
+
+/* Contenedor del Modal (backdrop) */
+div[ngif="showDeleteConfirmation()"] {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+/* Contenido del Modal (la tarjeta blanca) */
+div[ngif="showDeleteConfirmation()"] > div {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    max-width: 400px;
+    width: 90%;
+}
+
+/* Título del Modal */
+div[ngif="showDeleteConfirmation()"] h3 {
+    color: #d32f2f;
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.4em;
+}
+
+/* Texto del Modal */
+div[ngif="showDeleteConfirmation()"] p {
+    color: #333;
+    margin-bottom: 25px;
+}
+
+/* Contenedor de botones del modal */
+div[ngif="showDeleteConfirmation()"] > div > div {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* Botones dentro del modal */
+div[ngif="showDeleteConfirmation()"] button {
+    padding: 10px 15px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease;
+    border: 1px solid transparent;
+}
+
+/* Botón Cancelar */
+div[ngif="showDeleteConfirmation()"] button:first-child {
+    background-color: #ccc;
+    color: #333;
+    border-color: #bbb;
+}
+
+div[ngif="showDeleteConfirmation()"] button:first-child:hover:not(:disabled) {
+    background-color: #bbb;
+}
+
+/* Botón Eliminar Permanentemente */
+div[ngif="showDeleteConfirmation()"] button:last-child {
+    background-color: #f44336;
+    color: white;
+}
+
+div[ngif="showDeleteConfirmation()"] button:last-child:hover:not(:disabled) {
+    background-color: #d32f2f;
+}
+
+/* Estilo para el spinner dentro del modal */
+div[ngif="showDeleteConfirmation()"] button svg {
+    width: 16px;
+    height: 16px;
+    margin-right: 5px;
+    stroke: white;
+    /* Aplicar la animación de giro */
+    animation: spin 1s linear infinite;
+}
+
+/* -------------------------------------------------------------------------- */
+/* RESPONSIVE DESIGN                              */
+/* -------------------------------------------------------------------------- */
+
+@media (max-width: 600px) {
+    div:first-child {
+        margin: 20px;
+        padding: 15px;
+    }
+    
+    form > div > div > div {
+        flex: 1 1 100%; /* Una columna en pantallas pequeñas */
+        min-width: auto;
+    }
+
+    /* Ajustar el contenedor de botones del modal para apilarlos si es necesario */
+    div[ngif="showDeleteConfirmation()"] > div > div {
+        flex-direction: column;
+    }
+}

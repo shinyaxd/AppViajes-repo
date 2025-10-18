@@ -47,6 +47,12 @@ export const routes: Routes = [
       import('./features/proveedor/proveedor.routes').then(m => m.PROVEEDOR_ROUTES)
   },
 
+  { 
+    path: 'editar-perfil', 
+    loadComponent: () => 
+      import('./shared/components/editar-perfil/editar-perfil.component').then(m => m.EditarPerfilComponent) 
+  },
+
   // 🔄 Rutas legacy para mantener compatibilidad con URLs antiguas
   { 
     path: 'resultadosHoteles', 
