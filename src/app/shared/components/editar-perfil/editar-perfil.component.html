@@ -1,165 +1,166 @@
 <div>
-    <h1>Editar Perfil</h1>
-    
-    <!-- 1. Carga Inicial -->
-    <div *ngIf="isLoading()">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+  <h1>Editar Perfil</h1>
+
+  <!-- 1. Carga Inicial -->
+  <div *ngIf="isLoading()">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>
+    <p>Cargando datos del perfil...</p>
+  </div>
+
+  <!-- 2. Formulario principal (Visible cuando no está cargando y hay rol) -->
+  <ng-container *ngIf="!isLoading()">
+
+    <!-- Mensajes de estado (Éxito/Error) -->
+    <div *ngIf="message()"
+         [ngClass]="{
+            'bg-green-100': messageType() === 'success',
+            'bg-red-100': messageType() === 'error'
+         }"
+         role="alert">
+      <span class="block sm:inline">{{ message() }}</span>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="guardarCambios()">
+
+      <div>
+        Rol actual: {{ currentRole() | uppercase }}
+      </div>
+
+      <!-- Campos Comunes para Viajero -->
+      <ng-container *ngIf="currentRole() === 'viajero'">
+        <div>
+          <!-- Nombre -->
+          <div>
+            <label for="nombre">Nombre</label>
+            <input id="nombre" formControlName="nombre" type="text">
+            <div *ngIf="form.get('nombre')?.invalid && (form.get('nombre')?.dirty || form.get('nombre')?.touched)">
+              <p *ngIf="form.get('nombre')?.errors?.['required']">El nombre es obligatorio.</p>
+            </div>
+          </div>
+
+          <!-- Apellido -->
+          <div>
+            <label for="apellido">Apellido</label>
+            <input id="apellido" formControlName="apellido" type="text">
+            <div *ngIf="form.get('apellido')?.invalid && (form.get('apellido')?.dirty || form.get('apellido')?.touched)">
+              <p *ngIf="form.get('apellido')?.errors?.['required']">El apellido es obligatorio.</p>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Campos de Proveedor -->
+      <ng-container *ngIf="currentRole() === 'proveedor'">
+        <div>
+          <!-- Nombre Empresa -->
+          <div>
+            <label for="empresa_nombre">Nombre de la Empresa</label>
+            <input id="empresa_nombre" formControlName="empresa_nombre" type="text">
+            <p *ngIf="form.get('empresa_nombre')?.errors?.['required'] && (form.get('empresa_nombre')?.dirty || form.get('empresa_nombre')?.touched)">El nombre de la empresa es obligatorio.</p>
+          </div>
+
+          <!-- Teléfono -->
+          <div>
+            <label for="telefono">Celular</label>
+            <input id="telefono" formControlName="telefono" type="text">
+            <p *ngIf="form.get('telefono')?.errors?.['required'] && (form.get('telefono')?.dirty || form.get('telefono')?.touched)">El teléfono es obligatorio.</p>
+            <p *ngIf="form.get('telefono')?.errors?.['pattern'] && (form.get('telefono')?.dirty || form.get('telefono')?.touched)">
+              Formato esperado: +51 9########
+            </p>
+          </div>
+
+          <!-- RUC (solo lectura desde el FormControl, NO usar [disabled] en el template) -->
+          <div>
+            <label for="ruc">RUC</label>
+            <input id="ruc" formControlName="ruc" type="text">
+            <p>Este campo no puede ser modificado.</p>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Email (solo lectura desde el FormControl, NO usar [disabled] en el template) -->
+      <div>
+        <label for="email">Correo Electrónico</label>
+        <input id="email" formControlName="email" type="email">
+        <p>El email no puede ser modificado.</p>
+      </div>
+
+      <div>
+        <h2>Actualizar Contraseña (Opcional)</h2>
+      </div>
+
+      <div>
+        <!-- Contraseña -->
+        <div>
+          <label for="password">Nueva Contraseña</label>
+          <input id="password" formControlName="password" type="password">
+        </div>
+
+        <!-- Confirmar Contraseña -->
+        <div>
+          <label for="confirmarPassword">Confirmar Nueva Contraseña</label>
+          <input id="confirmarPassword" formControlName="confirmarPassword" type="password">
+        </div>
+      </div>
+
+      <!-- Error de Coincidencia de Contraseña (Validación de grupo) -->
+      <div *ngIf="form.hasError('passwordMismatch') && (form.get('password')?.dirty || form.get('confirmarPassword')?.dirty)">
+        Las contraseñas no coinciden.
+      </div>
+
+      <!-- Botón de Guardar -->
+      <button type="submit"
+              [disabled]="isSaving() || form.pristine || form.invalid">
+        <span *ngIf="!isSaving()">Guardar Cambios</span>
+        <span *ngIf="isSaving()">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-        <p>Cargando datos del perfil...</p>
+          </svg>
+          Guardando...
+        </span>
+      </button>
+    </form>
+
+    <!-- Sección de Eliminación de Cuenta (Con botón y modal) -->
+    <div>
+      <h3>Eliminar Cuenta</h3>
+      <p>Esta acción es irreversible y eliminará permanentemente todos tus datos.</p>
+      <button (click)="showDeleteConfirmation.set(true)"
+              [disabled]="isSaving()">
+        Eliminar Mi Cuenta
+      </button>
     </div>
+  </ng-container>
 
-    <!-- 2. Formulario principal (Visible cuando no está cargando y hay rol) -->
-    <ng-container *ngIf="!isLoading()">
+  <!-- 3. Modal de Confirmación de Eliminación -->
+  <div *ngIf="showDeleteConfirmation()">
+    <div>
+      <div>
+        <h3>Confirmar Eliminación</h3>
+        <p>¿Estás absolutamente seguro/a de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.</p>
 
-        <!-- Mensajes de estado (Éxito/Error) -->
-        <div *ngIf="message()" 
-             [ngClass]="{
-                'bg-green-100': messageType() === 'success',
-                'bg-red-100': messageType() === 'error'
-             }"
-             role="alert">
-            <span class="block sm:inline">{{ message() }}</span>
-        </div>
-
-        <form [formGroup]="form" (ngSubmit)="guardarCambios()">
-
-            <div>
-                Rol actual: {{ currentRole() | uppercase }}
-            </div>
-
-            <!-- Campos Comunes para Viajero y Proveedor -->
-            <ng-container *ngIf="currentRole() === 'viajero'">
-            <div>
-                <!-- Nombre -->
-                <div>
-                    <label for="nombre">Nombre</label>
-                    <input id="nombre" formControlName="nombre" type="text" >
-                    <!-- Validación de campo requerido -->
-                    <div *ngIf="form.get('nombre')?.invalid && (form.get('nombre')?.dirty || form.get('nombre')?.touched)">
-                        <p *ngIf="form.get('nombre')?.errors?.['required']">El nombre es obligatorio.</p>
-                    </div>
-                </div>
-
-                <!-- Apellido -->
-                <div>
-                    <label for="apellido">Apellido</label>
-                    <input id="apellido" formControlName="apellido" type="text" >
-                    <!-- Validación de campo requerido -->
-                    <div *ngIf="form.get('apellido')?.invalid && (form.get('apellido')?.dirty || form.get('apellido')?.touched)">
-                        <p *ngIf="form.get('apellido')?.errors?.['required']">El apellido es obligatorio.</p>
-                    </div>
-                </div>
-            </div>
-            </ng-container>
-
-            <!-- Campos de Proveedor -->
-            <ng-container *ngIf="currentRole() === 'proveedor'">
-                <div>
-                    <!-- Nombre Empresa -->
-                    <div>
-                        <label for="empresa_nombre">Nombre de la Empresa</label>
-                        <input id="empresa_nombre" formControlName="empresa_nombre" type="text" >
-                        <p *ngIf="form.get('empresa_nombre')?.errors?.['required'] && (form.get('empresa_nombre')?.dirty || form.get('empresa_nombre')?.touched)">El nombre de la empresa es obligatorio.</p>
-                    </div>
-                    
-                    <!-- Teléfono -->
-                    <div>
-                        <label for="telefono">Celular</label>
-                        <input id="telefono" formControlName="telefono" type="text" >
-                        <p *ngIf="form.get('telefono')?.errors?.['required'] && (form.get('telefono')?.dirty || form.get('telefono')?.touched)">El teléfono es obligatorio.</p>
-                    </div>
-                    
-                    <!-- RUC (Deshabilitado) -->
-                    <div>
-                        <label for="ruc">RUC</label>
-                        <input id="ruc" formControlName="ruc" type="text" [disabled] = true >
-                        <p>Este campo no puede ser modificado.</p>
-                    </div>
-                </div>
-            </ng-container>
-
-            <!-- Email (Deshabilitado) -->
-            <div>
-                <label for="email">Correo Electrónico</label>
-                <input id="email" formControlName="email" type="email" [disabled] = true >
-                <p>El email no puede ser modificado.</p>
-            </div>
-
-            <div>
-                <h2>Actualizar Contraseña (Opcional)</h2>
-            </div>
-            
-            <div>
-                <!-- Contraseña -->
-                <div>
-                    <label for="password">Nueva Contraseña</label>
-                    <input id="password" formControlName="password" type="password" >
-                </div>
-                
-                <!-- Confirmar Contraseña -->
-                <div>
-                    <label for="confirmarPassword">Confirmar Nueva Contraseña</label>
-                    <input id="confirmarPassword" formControlName="confirmarPassword" type="password" >
-                </div>
-            </div>
-
-            <!-- Error de Coincidencia de Contraseña (Validación de grupo) -->
-            <div *ngIf="form.hasError('passwordMismatch') && (form.get('password')?.dirty || form.get('confirmarPassword')?.dirty)">
-                Las contraseñas no coinciden.
-            </div>
-
-            <!-- Botón de Guardar -->
-            <button type="submit" 
-                    [disabled]="isSaving() || form.pristine || form.invalid">
-                <span *ngIf="!isSaving()">Guardar Cambios</span>
-                <span *ngIf="isSaving()">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Guardando...
-                </span>
-            </button>
-        </form>
-
-        <!-- Sección de Eliminación de Cuenta (Con botón y modal) -->
         <div>
-            <h3>Eliminar Cuenta</h3>
-            <p>Esta acción es irreversible y eliminará permanentemente todos tus datos.</p>
-            <button (click)="showDeleteConfirmation.set(true)" 
-                    [disabled]="isSaving()">
-                Eliminar Mi Cuenta
-            </button>
+          <button (click)="showDeleteConfirmation.set(false)"
+                  [disabled]="isSaving()">
+            Cancelar
+          </button>
+          <button (click)="eliminarCuenta()"
+                  [disabled]="isSaving()">
+            <span *ngIf="!isSaving()">Sí, Eliminar Permanentemente</span>
+            <span *ngIf="isSaving()">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Eliminando...
+            </span>
+          </button>
         </div>
-    </ng-container>
-
-    <!-- 3. Modal de Confirmación de Eliminación -->
-    <div *ngIf="showDeleteConfirmation()">
-        <div>
-            <div>
-                <h3>Confirmar Eliminación</h3>
-                <p>¿Estás absolutamente seguro/a de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.</p>
-                
-                <div>
-                    <button (click)="showDeleteConfirmation.set(false)" 
-                            [disabled]="isSaving()">
-                        Cancelar
-                    </button>
-                    <button (click)="eliminarCuenta()" 
-                            [disabled]="isSaving()">
-                        <span *ngIf="!isSaving()">Sí, Eliminar Permanentemente</span>
-                        <span *ngIf="isSaving()">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Eliminando...
-                        </span>
-                    </button>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
+  </div>
 </div>
