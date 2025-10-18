@@ -42,11 +42,28 @@
           <span class="price-amount">{{ habitacion.precio_por_noche | currency:'PEN':'symbol':'1.0-0' }}</span>
           <span class="price-per-night">/noche</span>
         </div>
-        <button class="reserve-room-button" (click)="seleccionarHabitacion(habitacion)">
-          Reservar
-        </button>
+
+        <div class="quantity-controls">
+          <button
+            (click)="actualizarSeleccion(habitacion, -1)"
+            [disabled]="(habitacion.seleccionada ?? 0) === 0"
+          >−</button>
+
+          <span>{{ habitacion.seleccionada || 0 }}</span>
+
+          <button
+            (click)="actualizarSeleccion(habitacion, 1)"
+            [disabled]="(habitacion.seleccionada ?? 0) >= (habitacion.unidades_disponibles ?? habitacion.cantidad ?? 0)"
+          >+</button>
+        </div>
       </div>
     </div>
+
+  </div>
+
+  <!-- BOTÓN FINAL DE RESERVA (multi selección) -->
+  <div *ngIf="mostrarBotonReservar" class="final-reserve-section">
+    <button class="final-reserve-button" (click)="reservarHotelFinal()">Reservar</button>
   </div>
 </div>
 
@@ -89,5 +106,5 @@
 <!-- MENSAJE SIN DISPONIBILIDAD -->
 <!-- ======================= -->
 <div *ngIf="mensajeDisponibilidad" class="sin-disponibilidad">
-  <p>{{ mensajeDisponibilidad }}</p>
+  <p>{{ mensajeDisponibilidad }}</p>
 </div>

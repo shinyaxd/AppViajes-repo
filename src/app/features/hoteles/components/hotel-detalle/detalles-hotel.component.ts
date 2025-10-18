@@ -28,8 +28,8 @@ export class DetallesHotelComponent implements OnInit {
   // 🟢 Control de formulario emergente de fechas
   mostrarFormularioFechas = false;
   mensajeDisponibilidad = '';
-  fechaMinimaHoy: string = DateUtils.getTodayISO(); // Usar DateUtils
-  fechaMinimaCheckOut: string = ''; // check-out depende del check-in
+  fechaMinimaHoy: string = DateUtils.getTodayISO();
+  fechaMinimaCheckOut: string = '';
 
   // 🔹 Parámetros de búsqueda
   hotelId: string | null = null;
@@ -42,14 +42,8 @@ export class DetallesHotelComponent implements OnInit {
   // 🔹 Datos para el componente genérico
   get servicioData(): ServicioDetalleData | null {
     if (!this.hotel) return null;
-    
-    // Usar ImageUtils para obtener galería de imágenes
     const galeria = ImageUtils.getAllImages(this.hotel.imagen_url, this.hotel.galeria_imagenes);
-    
-    // Si no hay imágenes, agregar placeholder
-    const galeriaFinal = galeria.length > 0 
-      ? galeria 
-      : [ImageUtils.getPlaceholder('hotel')];
+    const galeriaFinal = galeria.length > 0 ? galeria : [ImageUtils.getPlaceholder('hotel')];
 
     return {
       nombre: this.hotel.nombre,
@@ -68,21 +62,27 @@ export class DetallesHotelComponent implements OnInit {
     return [this.hotel.ciudad, this.hotel.pais, this.hotel.nombre];
   }
 
+  // ==========================================================
+  // 🔸 Ciclo de vida
+  // ==========================================================
   ngOnInit(): void {
-    // Leer parámetros del query string (si existen)
     this.route.queryParams.subscribe(qParams => {
       this.checkInDate = qParams['checkIn'] || '';
       this.checkOutDate = qParams['checkOut'] || '';
       this.adultos = +qParams['adultos'] || 1;
       this.ninos = +qParams['ninos'] || 0;
       this.habitaciones = +qParams['habitaciones'] || 1;
+      console.log('[INIT] queryParams', {
+        checkIn: this.checkInDate, checkOut: this.checkOutDate,
+        adultos: this.adultos, ninos: this.ninos, habitaciones: this.habitaciones
+      });
     });
 
-    // Leer el ID del hotel
     this.route.paramMap.subscribe(params => {
-      const idParam = params.get('id'); // ✅ Cambiado de 'servicio_id' a 'id'
+      const idParam = params.get('id');
       this.hotelId = idParam;
       const hotelId = idParam ? parseInt(idParam, 10) : undefined;
+      console.log('[INIT] route param id', { idParam, hotelId });
 
       if (hotelId) this.getHotelDetails(hotelId);
       else console.error("❌ No se encontró 'id' en los parámetros de la ruta.");
@@ -93,20 +93,20 @@ export class DetallesHotelComponent implements OnInit {
   // 🔹 Obtener hotel y habitaciones
   // ==========================================================
   getHotelDetails(id: number): void {
-    console.log(`Cargando detalles para hotel ID: ${id}`);
+    console.log(`[API] getHotelCompleto(${id})`);
     this.hotelService.getHotelCompleto(id).subscribe({
       next: (detalle) => {
         this.hotel = detalle.hotel;
-        this.habitacionesFiltradas = detalle.habitaciones.map(h => ({
-          ...h,
-          seleccionada: 0
-        }));
+        this.habitacionesFiltradas = detalle.habitaciones.map(h => ({ ...h, seleccionada: 0 }));
+        console.log('[DATA] hotel cargado', { hotel: this.hotel?.nombre, habitaciones: this.habitacionesFiltradas.length });
         this.verificarDisponibilidad();
+        this.verificarSeleccion();
       },
       error: (error) => {
         console.error(`❌ Error al cargar el hotel ID ${id}:`, error);
         this.hotel = undefined;
         this.habitacionesFiltradas = [];
+        this.mostrarBotonReservar = false;
       }
     });
   }
@@ -119,38 +119,47 @@ export class DetallesHotelComponent implements OnInit {
 
     if (!this.checkInDate || !this.checkOutDate) {
       this.mensajeDisponibilidad = '';
+      console.log('[DISPO] sin fechas → no filtro');
       return;
     }
 
-    const disponibles = this.habitacionesFiltradas.filter(h => (h.cantidad ?? 0) > 0);
+    const antes = this.habitacionesFiltradas.length;
+    const disponibles = this.habitacionesFiltradas.filter(h => {
+      const stock = (h.unidades_disponibles ?? h.cantidad ?? 0);
+      return stock > 0;
+    });
 
     this.mensajeDisponibilidad = disponibles.length === 0
       ? '❌ El hotel no tiene disponibilidad entre las fechas seleccionadas.'
       : '';
 
     this.habitacionesFiltradas = disponibles;
+    console.log('[DISPO] filtrado por fechas', { antes, despues: disponibles.length, mensaje: this.mensajeDisponibilidad });
+    this.verificarSeleccion();
   }
 
   // ==========================================================
-  // 🔸 Guardar fechas seleccionadas manualmente
+  // 🔸 Guardar fechas seleccionadas manualmente (modal)
   // ==========================================================
   guardarFechas(): void {
+    console.log('[MODAL] guardarFechas click', { checkIn: this.checkInDate, checkOut: this.checkOutDate });
     if (!this.checkInDate || !this.checkOutDate) {
       alert('Por favor selecciona ambas fechas.');
+      console.warn('[MODAL] faltan fechas');
       return;
     }
 
     const noches = this.calcularNoches();
+    console.log('[MODAL] noches calculadas', { noches });
     if (noches <= 0) {
       alert('Las fechas no son válidas.');
+      console.warn('[MODAL] noches <= 0');
       return;
     }
 
     this.mostrarFormularioFechas = false;
     this.verificarDisponibilidad();
-
-    // Si ahora las fechas son válidas, continuar con reserva
-    this.reservarHotelFinal();
+    this.reservarHotelFinal(); // vuelve al flujo multi
   }
 
   // ==========================================================
@@ -158,16 +167,18 @@ export class DetallesHotelComponent implements OnInit {
   // ==========================================================
   onFechaCheckInChange(event: any): void {
     this.checkInDate = event.target.value;
-    // Usar DateUtils para calcular la fecha mínima de checkout
     this.fechaMinimaCheckOut = DateUtils.getMinCheckoutDate(this.checkInDate);
+    console.log('[UI] checkIn change', { checkIn: this.checkInDate, minCheckout: this.fechaMinimaCheckOut });
   }
 
   onFechaCheckOutChange(event: any): void {
     this.checkOutDate = event.target.value;
+    console.log('[UI] checkOut change', { checkOut: this.checkOutDate });
   }
 
   cancelarFormularioFechas(): void {
     this.mostrarFormularioFechas = false;
+    console.log('[UI] modal fechas → cancelar');
   }
 
   // ==========================================================
@@ -179,95 +190,45 @@ export class DetallesHotelComponent implements OnInit {
     if (this.hotel.precio_por_noche && this.hotel.precio_por_noche > 0)
       return this.hotel.precio_por_noche;
 
-    const precios = this.habitacionesFiltradas
-      .map(h => h.precio_por_noche)
-      .filter(p => p > 0);
-
+    const precios = this.habitacionesFiltradas.map(h => h.precio_por_noche).filter(p => p > 0);
     return precios.length > 0 ? Math.min(...precios) : null;
   }
 
   // ==========================================================
-  // 🔹 Selección de habitaciones (nuevo método para botón individual)
+  // 🔹 Selección de habitaciones (+ / −)
   // ==========================================================
-  seleccionarHabitacion(habitacion: Habitacion): void {
-    // Si no hay fechas, abrir modal de fechas
-    if (!this.checkInDate || !this.checkOutDate) {
-      this.mostrarFormularioFechas = true;
-      // Marcar temporalmente esta habitación como seleccionada
-      this.resetearSelecciones();
-      habitacion.seleccionada = 1;
-      return;
-    }
-
-    const noches = this.calcularNoches();
-    if (noches <= 0) {
-      alert('Por favor selecciona fechas válidas antes de continuar.');
-      return;
-    }
-
-    // Resetear selecciones anteriores y seleccionar solo esta habitación
-    this.resetearSelecciones();
-    habitacion.seleccionada = 1;
-    
-    // Navegar directamente a pagos con esta habitación
-    this.procesarReservaSingle(habitacion);
-  }
-
-  private resetearSelecciones(): void {
-    this.habitacionesFiltradas.forEach(h => h.seleccionada = 0);
-  }
-
-  private procesarReservaSingle(habitacion: Habitacion): void {
-    if (!this.hotel) return;
-
-    const noches = this.calcularNoches();
-    const cant = 1; // Una habitación por defecto
-    const precio = habitacion.precio_por_noche;
-    const subtotal = precio * cant * noches;
-
-    const queryParams: Record<string, any> = {
-      hotelNombre: this.hotel.nombre,
-      ubicacion: `${this.hotel.pais}, ${this.hotel.ciudad}`,
-      checkIn: this.checkInDate,
-      checkOut: this.checkOutDate,
-      adultos: this.adultos,
-      ninos: this.ninos,
-      habitaciones: 1,
-      noches,
-      numTiposReservados: 1,
-      reserva_0_tipo: habitacion.nombre,
-      reserva_0_cant: cant,
-      reserva_0_precio_unitario: precio,
-      reserva_0_precio_total: subtotal.toFixed(2),
-      reserva_0_habitacion_id: habitacion.id,
-      precioTotalGeneral: subtotal.toFixed(2)
-    };
-
-    console.log('✅ Reserva individual procesada. Navegando a pagos.', queryParams);
-    this.router.navigate(['/pagos-hoteles'], { queryParams });
-  }
-
-  actualizarSeleccion(habitacion: Habitacion, cambio: number): void {
-    const limite = habitacion.cantidad ?? 0;
-    habitacion.seleccionada = Math.max(
-      0,
-      Math.min((habitacion.seleccionada ?? 0) + cambio, limite)
-    );
+  actualizarSeleccion(h: Habitacion, cambio: number): void {
+    const limite = (h.unidades_disponibles ?? h.cantidad ?? 0);
+    const prev = h.seleccionada ?? 0;
+    h.seleccionada = Math.max(0, Math.min(prev + cambio, limite));
+    console.log('[UI] cambiar seleccion', { id: h.id, nombre: h.nombre, prev, cambio, limite, ahora: h.seleccionada });
     this.verificarSeleccion();
   }
 
   private verificarSeleccion(): void {
-    this.mostrarBotonReservar = this.habitacionesFiltradas.some(
-      h => (h.seleccionada ?? 0) > 0
-    );
+    const seleccionadas = this.habitacionesFiltradas.filter(h => (h.seleccionada ?? 0) > 0);
+    this.mostrarBotonReservar = seleccionadas.length > 0;
+    console.log('[STATE] verificarSeleccion', { haySeleccion: this.mostrarBotonReservar, seleccionadas: seleccionadas.map(s => ({ id: s.id, cant: s.seleccionada })) });
   }
 
   // ==========================================================
-  // 📅 Cálculo de noches
+  // 📅 Cálculo de noches (LOCAL, sin sorpresas de timezone)
   // ==========================================================
   private calcularNoches(): number {
-    // Usar DateUtils para calcular noches
-    return DateUtils.calculateNights(this.checkInDate, this.checkOutDate);
+    if (!this.checkInDate || !this.checkOutDate) return 0;
+
+    // Parse YYYY-MM-DD a fecha LOCAL (00:00 local)
+    const toLocal = (s: string) => {
+      const [y, m, d] = s.split('-').map(Number);
+      return new Date(y, (m ?? 1) - 1, d ?? 1);
+    };
+    const inD = toLocal(this.checkInDate);
+    const outD = toLocal(this.checkOutDate);
+
+    const MS_DAY = 24 * 60 * 60 * 1000;
+    const diff = outD.getTime() - inD.getTime();
+    const noches = diff > 0 ? Math.round(diff / MS_DAY) : 0;
+    return noches;
   }
 
   // ==========================================================
@@ -275,6 +236,7 @@ export class DetallesHotelComponent implements OnInit {
   // ==========================================================
   volverAResultados(): void {
     if (!this.hotel) return;
+    console.log('[NAV] volver a resultados con queryParams');
     this.router.navigate(['/resultadosHoteles'], {
       queryParams: {
         ciudad: this.hotel.ciudad,
@@ -288,39 +250,47 @@ export class DetallesHotelComponent implements OnInit {
   }
 
   // ==========================================================
-  // 📜 Scroll a sección habitaciones
+  // 📜 Scroll
   // ==========================================================
   scrollToHabitaciones(): void {
     const element = document.getElementById('seccion-habitaciones');
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      console.log('[UI] scroll a seccion-habitaciones');
     }
   }
 
   // ==========================================================
-  // 🧾 Generar reserva
+  // 🧾 Generar reserva (multi) → NAV a pagos-hoteles
   // ==========================================================
   reservarHotelFinal(): void {
-    // Si no hay fechas seleccionadas, mostrar formulario emergente
+    console.log('[RESERVA] iniciar', { checkIn: this.checkInDate, checkOut: this.checkOutDate });
+
     if (!this.checkInDate || !this.checkOutDate) {
       this.mostrarFormularioFechas = true;
+      console.warn('[RESERVA] faltan fechas → abrir modal');
       return;
     }
 
     const noches = this.calcularNoches();
+    console.log('[RESERVA] noches calculadas', { noches });
     if (noches <= 0) {
       alert('Por favor selecciona fechas válidas antes de continuar.');
+      console.warn('[RESERVA] noches <= 0');
       return;
     }
 
     const seleccionadas = this.habitacionesFiltradas.filter(h => (h.seleccionada ?? 0) > 0);
+    console.log('[RESERVA] seleccionadas', seleccionadas.map(h => ({ id: h.id, cant: h.seleccionada, precio: h.precio_por_noche })));
     if (!this.hotel || seleccionadas.length === 0) {
       alert('No hay habitaciones seleccionadas.');
+      console.warn('[RESERVA] sin seleccionadas');
       return;
     }
 
-    if (this.habitacionesFiltradas.every(h => (h.cantidad ?? 0) === 0)) {
+    if (this.habitacionesFiltradas.every(h => (h.unidades_disponibles ?? h.cantidad ?? 0) === 0)) {
       alert('❌ El hotel no tiene disponibilidad entre las fechas seleccionadas.');
+      console.warn('[RESERVA] sin disponibilidad');
       return;
     }
 
@@ -347,15 +317,14 @@ export class DetallesHotelComponent implements OnInit {
       queryParams[`reserva_${i}_cant`] = cant;
       queryParams[`reserva_${i}_precio_unitario`] = precio;
       queryParams[`reserva_${i}_precio_total`] = subtotal.toFixed(2);
-      
-      // ✅ CORRECCIÓN: Usar 'reserva_${i}_habitacion_id' para que el componente de pagos lo reconozca.
-      queryParams[`reserva_${i}_habitacion_id`] = hab.id; 
+      queryParams[`reserva_${i}_habitacion_id`] = hab.id;
     });
 
     queryParams['precioTotalGeneral'] = total.toFixed(2);
 
-
-    console.log('✅ VALIDACIÓN SUPERADA. Iniciando navegación a pagos.', queryParams); 
-    this.router.navigate(['/pagos-hoteles'], { queryParams });
+    console.log('[NAV] ruta destino:', '/hoteles/pagos');
+    console.log('[NAV] queryParams:', queryParams);
+    this.router.navigate(['/hoteles/pagos'], { queryParams })
+      .then(ok => console.log('[NAV] navigate() result:', ok));
   }
 }
