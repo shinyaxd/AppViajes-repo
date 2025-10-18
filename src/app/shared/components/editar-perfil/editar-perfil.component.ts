@@ -231,7 +231,7 @@ export class EditarPerfilComponent implements OnInit {
 
       if (response.ok) {
         this.messageType.set('success');
-        this.message.set('Cambios guardados correctamente.');
+        this.message.set('Cambios guardados correctamente. Redirigiendo...');
 
         const rawResponse = await response.json();
         const responseData = rawResponse.data || rawResponse;
@@ -240,8 +240,25 @@ export class EditarPerfilComponent implements OnInit {
 
         const updatedUser = { ...this.currentUser(), ...responseData };
         this.currentUser.set(updatedUser);
+        
+        // **********************************************
+        // ******* INICIO: CAMBIO EN LA REDIRECCIÓN *******
+        // **********************************************
+        const rolActualizado = updatedUser.rol || 'viajero';
+        let rutaRedireccion = '/';
 
-        setTimeout(() => this.router.navigate(['/']), 500);
+        if (rolActualizado === 'proveedor') {
+          // Si es proveedor, redirigir a su dashboard (ajusta esta ruta si es diferente)
+          rutaRedireccion = '/proveedor'; 
+        } else {
+          // Si es viajero, redirigir a la vista de hoteles (ajusta esta ruta si es diferente)
+          rutaRedireccion = '/hoteles'; 
+        }
+
+        setTimeout(() => this.router.navigate([rutaRedireccion]), 500);
+        // **********************************************
+        // ******* FIN: CAMBIO EN LA REDIRECCIÓN **********
+        // **********************************************
       } else {
         const errorText = await response.text();
         let errorMessage = `Error al guardar: ${response.status}.`;
