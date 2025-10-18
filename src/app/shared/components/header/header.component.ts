@@ -44,7 +44,7 @@ export class HeaderComponent {
 
       if (user.rol === 'proveedor') {
         // Prioridad para proveedores: Nombre de la empresa > Nombre personal > Email
-        return user.empresa_nombre || user.nombre || user.email;
+        return user.empresa_nombre || user.email;
       } else {
         // Prioridad para viajeros: Nombre personal > Email
         return user.nombre || user.email;
