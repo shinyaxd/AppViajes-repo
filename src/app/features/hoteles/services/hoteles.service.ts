@@ -230,7 +230,8 @@ export class HotelService {
             direccion: h.direccion,
             estrellas: h.estrellas,
             imagen_url: h.imagen_url || 'assets/images/placeholder-hotel.jpg',
-            galeria_imagenes: h.galeria_imagenes ?? [],
+            // ✅ FIX: Backend retorna "imagenes[]" (array de objetos con url), no "galeria_imagenes"
+            galeria_imagenes: (h.imagenes ?? []).map((img: any) => img.url).filter((url: string) => !!url),
             precio_por_noche: null,
             descripcion: null,
             reservations: 0
