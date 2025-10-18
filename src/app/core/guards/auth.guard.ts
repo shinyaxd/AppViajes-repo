@@ -11,25 +11,13 @@ export const authGuard: CanActivateFn = (route, state) => {
   return authService.currentUser$.pipe(
     take(1),
     map(user => {
-      // 🟡 Si no hay usuario logueado, redirigir al login
-      if (!user) {
-        router.navigate(['/login']);
-        return false;
-      }
-
-      // 🔒 Verificar que el rol sea "proveedor"
-      if (user.rol !== 'proveedor') {
-        router.navigate(['/']);
-        return false;
-      }
-
-      // ✅ Usuario autenticado y con rol correcto
-      return true;
+      const isLogged = !!user;
+      return isLogged ? true
+        : router.createUrlTree(['/auth/login'], { queryParams: { returnUrl: state.url } });
     }),
     catchError(err => {
-      console.error('Error en AuthGuard:', err);
-      router.navigate(['/login']);
-      return of(false);
+      console.error('[GUARD][authGuard] error:', err);
+      return of(router.createUrlTree(['/auth/login'], { queryParams: { returnUrl: state.url } }));
     })
   );
 };
