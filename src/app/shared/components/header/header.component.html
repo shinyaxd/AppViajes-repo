@@ -3,10 +3,7 @@
     <div class="tourhotel">
       
       <!-- Lógica para Proveedores (Rol: 'proveedor') -->
-      <!-- isProveedor$ se resuelve a true/false -->
       <ng-container *ngIf="isProveedor$ | async; else clienteLinks">
-        
-        <!-- Enlaza a la nueva ruta dedicada para Tours -->
         <a 
           routerLink="/crear-tour"
           routerLinkActive="activo" 
@@ -14,14 +11,12 @@
           <i class="fa-solid fa-square-plus"></i> Crear Tour
         </a>
 
-        <!-- Enlaza a la nueva ruta dedicada para Hoteles -->
         <a 
           routerLink="/crear-hotel"
           routerLinkActive="activo" 
           class="somb">
           <i class="fa-solid fa-building-circle-check"></i> Crear Hotel
         </a>
-
       </ng-container>
 
       <!-- Lógica para Viajeros (Rol: 'viajero' o no logueado) -->
@@ -52,14 +47,36 @@
         
         <div class="dropdown-usuario">
           <button class="bienvenida dropdown-toggle">
-            <!-- 🔑 MEJORA CLAVE: Uso del async pipe para acceder al nombre -->
-            Hola, {{ (currentUser$ | async)?.nombre || 'Usuario' }}
+            Hola, 
+            
+            <!-- CORRECCIÓN CLAVE: Usamos 'currentUser$ | async as user' para acceder a las propiedades -->
+            <ng-container *ngIf="currentUser$ | async as user">
+                <!-- LÓGICA DE VISUALIZACIÓN DE NOMBRE SEGÚN ROL -->
+                <ng-container *ngIf="user.rol === 'proveedor'; else travelerName">
+                  <!-- Prioridad de Proveedor: 
+                       1. empresa_nombre, 
+                       2. nombre (por si usa su nombre personal), 
+                       3. email (último recurso) -->
+                  {{ user.empresa_nombre || user.nombre || user.email || 'Proveedor' }}
+                </ng-container>
+
+                <ng-template #travelerName>
+                  <!-- Prioridad de Viajero: 1. nombre, 2. email (último recurso) -->
+                  {{ user.nombre || user.email || 'Usuario' }}
+                </ng-template>
+            </ng-container>
+            
             <i class="fa-solid fa-caret-down fa-xs"></i>
           </button>
           
           <div class="dropdown-menu">
+            <!-- Botón Editar Perfil -->
+            <a routerLink="/editar-perfil" class="dropdown-item">
+              <i class="fa-solid fa-user-pen"></i> Editar perfil
+            </a>
+
             <button (click)="logout()" class="dropdown-item">
-              <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+              <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
             </button>
           </div>
         </div>
@@ -68,7 +85,6 @@
 
       <!-- Lógica: Usuario No Autenticado -->
       <ng-template #authButtons>
-        <!-- 💡 Sugerencia: El primer enlace puede ser para redirigir a proveedores -->
         <a routerLink="/login" class="btn">Registra tu alojamiento, proveedor</a> 
         <a routerLink="/login" class="btn">Iniciar sesión</a>
         <a routerLink="/registro" class="btn">Registrarse</a>

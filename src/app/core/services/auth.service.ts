@@ -146,7 +146,7 @@ export class AuthService {
         if (response.data?.token && isPlatformBrowser(this.platformId)) {
           localStorage.setItem(this.TOKEN_KEY, response.data.token);
           this.isAuthenticatedSubject.next(true);
-          this.setCurrentUser(response.data.user);
+          this._setCurrentUser(response.data.user); // Usar el nuevo nombre
         }
       }),
       catchError((error: HttpErrorResponse) => this.handleError(error, 'registro')),
@@ -171,7 +171,7 @@ export class AuthService {
             localStorage.setItem(this.ROLE_KEY, response.user.rol);
           }
           this.isAuthenticatedSubject.next(true);
-          this.setCurrentUser(response.user);
+          this._setCurrentUser(response.user); // Usar el nuevo nombre
         }
       }),
       catchError((error: HttpErrorResponse) => this.handleError(error, 'inicio de sesión')),
@@ -187,7 +187,7 @@ export class AuthService {
     return this.http.get<{ data: User }>(url).pipe(
       map(res => res.data),
       tap(user => {
-        this.setCurrentUser(user);
+        this._setCurrentUser(user); // Usar el nuevo nombre
         if (isPlatformBrowser(this.platformId) && user?.rol) {
           localStorage.setItem(this.ROLE_KEY, user.rol);
         }
@@ -222,6 +222,17 @@ export class AuthService {
   // ==========================================================
   // UTILIDADES
   // ==========================================================
+  
+  /**
+   * ACTUALIZACIÓN CLAVE: Inyecta el objeto User actualizado en el stream reactivo.
+   * Este método es llamado por el componente 'EditarPerfil' después de un PATCH exitoso.
+   * @param user El objeto User retornado por el backend (UsuarioController::updateMe).
+   */
+  public updateUserInState(user: User): void {
+      console.log('🔄 Estado del usuario actualizado por el componente de Edición de Perfil.');
+      this._setCurrentUser(user);
+  }
+
   public isLoggedIn(): boolean {
     return this.hasToken();
   }
@@ -244,7 +255,8 @@ export class AuthService {
     return this.currentUser$.pipe(map(user => user?.rol === 'viajero'));
   }
 
-  public setCurrentUser(user: User | null): void {
+  // Se hace privado y se renombra para que solo sea llamado internamente o por el nuevo método público.
+  private _setCurrentUser(user: User | null): void {
     this.currentUserSubject.next(user);
     
     // Guardar en localStorage SOLO para UX rápida en próximo refresh
