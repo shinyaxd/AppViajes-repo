@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
 import { AuthService, User } from '../../../../app/core/services/auth.service';
+import { LoadingService } from '../../../core/services/loading.service';
+import { SpinnerComponent } from '../ui/spinner/spinner.component';
 
 const BASE_URL = environment.apiUrl;
 const API_GET_PROFILE_URL = `${BASE_URL}/auth/me`;
@@ -24,7 +26,7 @@ function passwordMatchValidator(): ValidatorFn {
 @Component({
   selector: 'app-editar-perfil',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, SpinnerComponent],
   templateUrl: './editar-perfil.component.html',
   styleUrls: ['./editar-perfil.component.css']
 })
@@ -34,7 +36,6 @@ export class EditarPerfilComponent implements OnInit {
   currentUser = signal<any>(null);
   currentRole = computed(() => this.currentUser()?.rol || 'viajero');
   isSaving = signal(false);
-  isLoading = signal(true);
 
   showDeleteConfirmation = signal(false);
 
@@ -44,6 +45,7 @@ export class EditarPerfilComponent implements OnInit {
   rol: string = '';
 
   private authService = inject(AuthService);
+  loadingService = inject(LoadingService);
 
   constructor(private fb: FormBuilder, private router: Router) {}
 
@@ -52,7 +54,7 @@ export class EditarPerfilComponent implements OnInit {
   }
 
   async cargarPerfil(): Promise<void> {
-    this.isLoading.set(true);
+    this.loadingService.show('Cargando datos del perfil...');
     this.message.set('');
 
     try {
@@ -97,7 +99,7 @@ export class EditarPerfilComponent implements OnInit {
       console.error('Error general cargando el perfil:', error);
       this.buildForm({});
     } finally {
-      this.isLoading.set(false);
+      this.loadingService.hide();
     }
   }
 
@@ -177,6 +179,7 @@ export class EditarPerfilComponent implements OnInit {
       return;
     }
 
+    this.loadingService.show('Guardando cambios...');
     this.isSaving.set(true);
 
     const originalData = this.currentUser();
@@ -283,6 +286,7 @@ export class EditarPerfilComponent implements OnInit {
       this.message.set('Error de red. No se pudo conectar con el servidor.');
       console.error('Error de red/fetch:', error);
     } finally {
+      this.loadingService.hide();
       this.isSaving.set(false);
       passwordControl?.setValue('');
       confirmControl?.setValue('');
@@ -291,6 +295,7 @@ export class EditarPerfilComponent implements OnInit {
 
   async eliminarCuenta(): Promise<void> {
     this.message.set('');
+    this.loadingService.show('Eliminando cuenta...');
     this.isSaving.set(true);
 
     try {
@@ -329,6 +334,7 @@ export class EditarPerfilComponent implements OnInit {
       this.message.set('Error de red. No se pudo conectar con el servidor para eliminar la cuenta.');
       console.error('Error de red/fetch DELETE:', error);
     } finally {
+      this.loadingService.hide();
       this.isSaving.set(false);
       this.showDeleteConfirmation.set(false);
     }

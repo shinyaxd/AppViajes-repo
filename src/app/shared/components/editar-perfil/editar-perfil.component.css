@@ -23,36 +23,13 @@ h1 {
 }
 
 /* -------------------------------------------------------------------------- */
-/* ESTILOS DE CARGA / SPINNER                      */
+/* ESTILOS DE MENSAJES                            */
 /* -------------------------------------------------------------------------- */
 
-div[ngif="isLoading()"] {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 30px;
-    background-color: #fff;
-    border-radius: 8px;
-    color: #4CAF50;
-    font-weight: bold;
-}
-
-div[ngif="isLoading()"] svg {
-    width: 24px;
-    height: 24px;
-    margin-right: 10px;
-    /* Animación de spinner simple (no usa @keyframes de Tailwind) */
-    animation: spin 1s linear infinite;
-    stroke: #4CAF50;
-}
-
+/* Animación de spinner para iconos dentro de botones */
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
-
-/* -------------------------------------------------------------------------- */
-/* ESTILOS DE MENSAJES                            */
-/* -------------------------------------------------------------------------- */
 
 /* Estilos dinámicos para mensajes de éxito/error (usando [ngClass]) */
 .bg-green-100 {
