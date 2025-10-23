@@ -51,6 +51,7 @@ export class ServicioTransformers {
       ubicacion: `${tour.ciudad}, ${tour.pais}`,
       rating: this.getDefaultRating('tour'),
       ratingTexto: tourData.categoria === 'Aventura' ? 'Excelente' : 'Muy bueno',
+      categoria: tourData.categoria || '',
       resenias: this.generateReviewCount('tour'),
       precio: parseFloat(tourData.precio || '0'),
       precioUnidad: 'persona',

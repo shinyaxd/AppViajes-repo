@@ -19,6 +19,7 @@ export interface ResultadoItem {
   // Campos específicos
   estrellas?: number; // Solo hoteles
   duracionHoras?: number; // Solo tours
+  categoria?: string; // Solo tours: categoría del tour (p. ej. Aventura)
 }
 
 @Component({
@@ -29,7 +30,7 @@ export interface ResultadoItem {
   styleUrls: ['./resultados-lista.component.css']
 })
 export class ResultadosListaComponent {
-  @Input() tipo: 'hoteles' | 'tours' = 'hoteles';
+  @Input() tipo: 'hoteles' | 'tours' = 'hoteles'; 
   @Input() items: ResultadoItem[] = [];
   @Input() totalItems: number = 0;
   @Input() mostrarMas: boolean = false; // Si hay más resultados para cargar
