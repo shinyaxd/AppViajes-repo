@@ -232,8 +232,8 @@ export class HotelService {
             imagen_url: h.imagen_url || 'assets/images/placeholder-hotel.jpg',
             // ✅ FIX: Backend retorna "imagenes[]" (array de objetos con url), no "galeria_imagenes"
             galeria_imagenes: (h.imagenes ?? []).map((img: any) => img.url).filter((url: string) => !!url),
-            precio_por_noche: null,
-            descripcion: null,
+            precio_por_noche: h.precio_por_noche ?? null,
+            descripcion: h.descripcion ?? null,
             reservations: 0
           };
 
@@ -265,8 +265,8 @@ export class HotelService {
 
         if (hotelLista) {
           detalle.hotel = {
-            ...hotelLista,
-            ...detalle.hotel // fusiona ambos sin perder campos
+            ...detalle.hotel,
+            ...hotelLista // fusiona ambos sin perder campos
           };
         }
 

@@ -30,99 +30,138 @@
       </label>
 
       <label>
-        Dirección:
-        <input type="text" formControlName="direccion" placeholder="Dirección completa" required />
+        Dirección (Punto de llegada):
+        <input type="text" formControlName="direccion" placeholder="Dirección de inicio del tour" required />
       </label>
-
+      
+      <!-- 🔄 CORRECCIÓN: Se añaden ciudad y país para que el formulario sea válido con el TS -->
       <div class="inline-group">
-        <label>Cosas para llevar: </label>
+        <label>
+          Ciudad:
+          <input type="text" formControlName="ciudad" placeholder="Ej: Cusco" required >
+        </label>
+        <label>
+          País:
+          <input type="text" formControlName="pais" placeholder="Ej: Perú" required >
+        </label>
+      </div>
+
+      <div class="inline-group"> 
+         <label> 
+           Ubicacion (Punto de Encuentro/Referencia):
+           <!-- Este campo también es requerido por el TS -->
+           <input type="text" formControlName="ubicacion" placeholder="Lugar de referencia o encuentro" required > 
+         </label> 
+      </div>
+      <!-- FIN DE CORRECCIÓN DE UBICACIÓN -->
+
+      <!-- ✅ Sección "Cosas para llevar" (funciona correctamente) --> 
+      <div class="inline-group cosas-group"> 
+        <label> Cosas para llevar</label> 
+        <div formArrayName="cosasParaLlevar"> 
+          <div *ngFor="let item of cosasParaLlevar.controls; let i = index"> 
+            <input 
+              [formControlName]="i" 
+              type="text" 
+              placeholder="Ej: Cámara, protector solar..." 
+            /> 
+            <button  
+              type="button"  
+              class="btn-remove"  
+              (click)="quitarCosa(i)" 
+            > 
+              ❌ Eliminar 
+            </button> 
+          </div> 
+        </div> 
+
+        <div> 
+          <input #nuevaCosa placeholder="Ej: Protector solar" /> 
+          <button  
+            type="button"  
+            class="btn-add"  
+            (click)="agregarCosa(nuevaCosa.value); nuevaCosa.value=''" 
+          > 
+            ➕ Agregar objeto 
+          </button> 
+        </div> 
+      </div> 
+
+      <label> 
+        Precio: 
+        <input type="number" formControlName="precio" min="0" required /> 
+      </label> 
+
+      <div class="inline-group categorias-group"> 
+        <label> 
+          Categoría: 
+          <select formControlName="categoria" required> 
+            <option value="" disabled selected>Selecciona una categoría</option> 
+            <option value="Aventura">Aventura</option> 
+            <option value="Gastronomía">Gastronomía</option> 
+            <option value="Cultura">Cultura</option> 
+            <option value="Relajación">Relajación</option> 
+          </select> 
+        </label> 
+      </div> 
         
-        <div formArrayName="cosasParaLlevar">
-          <div *ngFor="let item of cosasParaLlevar.controls; let i = index" class="item-row">
-            <input
-              [formControlName]="i"
-              type="text"
-              placeholder="Ej: Cámara, protector solar..."
-            />
-            <button type="button" (click)="quitarCosa(i)">❌</button>
-          </div>
-        </div>
+      <label> 
+        Duración (Minutos): 
+        <input type="number" formControlName="duracion" required /> 
+      </label> 
+        
+      <div class="inline-group"> 
+        <label> 
+          Fecha: 
+          <!-- 🔄 CORRECCIÓN: Se añade [min]="minDate" para aplicar la lógica del constructor TS -->
+          <input type="date" formControlName="fecha" [min]="minDate" required /> 
+        </label> 
 
-        <button type="button" (click)="agregarCosa()">Agregar ➕</button>
-      </div>
+        <label> 
+          Cupos disponibles 
+          <input type="number" formControlName="cupos" placeholder="Cupos disponibles" required /> 
+        </label> 
+      </div> 
 
-      <label>
-        Precio:
-        <input type="number" formControlName="precio" min="0" required />
-      </label>
+      <label> 
+        Imagen principal (URL): 
+        <input type="text" formControlName="imagen_url" 
+placeholder="https://denomades.imgix.net/destinos/cusco/336/plaza-city-tour-cusco.jpg"
+ /> 
+      </label> 
 
-      <label>
-        Ubicación:
-        <input type="text" formControlName="ubicacion" required />
-      </label>
+      <div class="galeria"> 
+        <h4>Galería de imágenes (Máx. 5)</h4> 
 
-      <label>
-        Categoría:
-        <select formControlName="categoria" required>
-          <option value="" disabled selected>Selecciona una categoría</option>
-          <option value="Aventura">Aventura</option>
-          <option value="Gastronomía">Gastronomía</option>
-          <option value="Cultura">Cultura</option>
-          <option value="Relajación">Relajación</option>
-        </select>
-      </label>
+        <div *ngFor="let imgCtrl of galeriaImagenes?.controls; let i = index"> 
+          <input [formControl]="imgCtrl" placeholder="https://imagen.jpg" /> 
+          <button type="button" class="btn-remove" (click)="eliminarImagen(i)">❌ Eliminar</button> 
+        </div> 
 
-      <label>
-        Duración:
-        <input type="number" formControlName="duracion" required />
-      </label>
+        <div *ngIf="galeriaImagenes.controls.length < 5"> 
+          <input #nuevaImagen placeholder="URL de nueva imagen" /> 
+          <button 
+            type="button" class="btn-add" 
+            (click)="agregarImagen(nuevaImagen.value); nuevaImagen.value=''" 
+          > 
+            ➕ Agregar imagen 
+          </button> 
+        </div> 
+        <p *ngIf="galeriaImagenes.controls.length >= 5" class="limit-message"> 
+            Límite de 5 imágenes alcanzado. 
+        </p> 
+      </div> 
+    </div> 
 
-      <div class="inline-group">
-        <label>
-          Fecha:
-          <input type="date" formControlName="fecha" placeholder="Fecha" required />
-        </label>
-
-        <label>
-          Cupos disponibles
-          <input type="number" formControlName="cupos" placeholder="Cupos disponibles" required />
-        </label>
-      </div>
-
-      <label>
-        Imagen principal (URL):
-        <input type="text" formControlName="imagen_url" placeholder="https://denomades.imgix.net/destinos/cusco/336/plaza-city-tour-cusco.jpg" />
-      </label>
-
-      <!-- 👇 Galería de imágenes -->
-      <div class="galeria">
-        <h4>Galería de imágenes</h4>
-
-        <!-- ✅ Sin 'as FormArray' (ya se maneja en el TS) -->
-        <div *ngFor="let imgCtrl of galeriaImagenes?.controls; let i = index">
-          <input [formControl]="imgCtrl" placeholder="https://imagen.jpg" />
-          <button type="button" (click)="eliminarImagen(i)">🗑️</button>
-        </div>
-
-        <input #nuevaImagen placeholder="URL de nueva imagen" />
-        <button
-          type="button"
-          (click)="agregarImagen(nuevaImagen.value); nuevaImagen.value=''"
-        >
-          ➕ Agregar imagen
-        </button>
-      </div>
-    </div>
-
-    <!-- ========================= -->
-    <!-- BOTÓN DE ENVÍO -->
-    <!-- ========================= -->
-    <button
-      type="submit"
-      class="btn-submit"
-      [disabled]="tourForm.invalid || enviando"
-    >
-      {{ enviando ? 'Enviando...' : 'Publicar tour' }}
-    </button>
-  </form>
+    <!-- ========================= --> 
+    <!-- BOTÓN DE ENVÍO --> 
+    <!-- ========================= --> 
+    <button 
+      type="submit" 
+      class="btn-submit" 
+      [disabled]="tourForm.invalid || enviando" 
+    > 
+      {{ enviando ? 'Enviando...' : 'Publicar tour' }} 
+    </button> 
+  </form> 
 </div>

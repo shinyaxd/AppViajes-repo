@@ -1,4 +1,4 @@
-<div>
+<div class="profile-container">
   <h1>Editar Perfil</h1>
 
   <!-- Spinner Global -->
@@ -19,15 +19,17 @@
 
     <form [formGroup]="form" (ngSubmit)="guardarCambios()">
 
-      <div>
+      <!-- Rol actual (Ahora usa la clase .role-display) -->
+      <div class="role-display">
         Rol actual: {{ currentRole() | uppercase }}
       </div>
 
       <!-- Campos Comunes para Viajero -->
       <ng-container *ngIf="currentRole() === 'viajero'">
-        <div>
+        <!-- field-group-container para la cuadrícula de Nombre y Apellido -->
+        <div class="field-group field-group-container">
           <!-- Nombre -->
-          <div>
+          <div class="field-card">
             <label for="nombre">Nombre</label>
             <input id="nombre" formControlName="nombre" type="text">
             <div *ngIf="form.get('nombre')?.invalid && (form.get('nombre')?.dirty || form.get('nombre')?.touched)">
@@ -36,7 +38,7 @@
           </div>
 
           <!-- Apellido -->
-          <div>
+          <div class="field-card">
             <label for="apellido">Apellido</label>
             <input id="apellido" formControlName="apellido" type="text">
             <div *ngIf="form.get('apellido')?.invalid && (form.get('apellido')?.dirty || form.get('apellido')?.touched)">
@@ -48,16 +50,17 @@
 
       <!-- Campos de Proveedor -->
       <ng-container *ngIf="currentRole() === 'proveedor'">
-        <div>
+        <!-- field-group-container para la cuadrícula de Empresa, Teléfono y RUC -->
+        <div class="field-group field-group-container">
           <!-- Nombre Empresa -->
-          <div>
+          <div class="field-card">
             <label for="empresa_nombre">Nombre de la Empresa</label>
             <input id="empresa_nombre" formControlName="empresa_nombre" type="text">
             <p *ngIf="form.get('empresa_nombre')?.errors?.['required'] && (form.get('empresa_nombre')?.dirty || form.get('empresa_nombre')?.touched)">El nombre de la empresa es obligatorio.</p>
           </div>
 
-          <!-- Teléfono -->
-          <div>
+          <!-- Teléfono (Celular) - Ahora usa la clase .field-card -->
+          <div class="field-card">
             <label for="telefono">Celular</label>
             <input id="telefono" formControlName="telefono" type="text">
             <p *ngIf="form.get('telefono')?.errors?.['required'] && (form.get('telefono')?.dirty || form.get('telefono')?.touched)">El teléfono es obligatorio.</p>
@@ -66,8 +69,8 @@
             </p>
           </div>
 
-          <!-- RUC (solo lectura desde el FormControl, NO usar [disabled] en el template) -->
-          <div>
+          <!-- RUC - Ahora usa la clase .field-card -->
+          <div class="field-card">
             <label for="ruc">RUC</label>
             <input id="ruc" formControlName="ruc" type="text">
             <p>Este campo no puede ser modificado.</p>
@@ -75,33 +78,35 @@
         </div>
       </ng-container>
 
-      <!-- Email (solo lectura desde el FormControl, NO usar [disabled] en el template) -->
-      <div>
+      <!-- Email - Ahora usa la clase .field-card -->
+      <div class="field-group field-card">
         <label for="email">Correo Electrónico</label>
         <input id="email" formControlName="email" type="email">
         <p>El email no puede ser modificado.</p>
       </div>
 
-      <div>
+      <!-- Título para Contraseña -->
+      <div class="field-group">
         <h2>Actualizar Contraseña (Opcional)</h2>
       </div>
 
-      <div>
+      <!-- Grupo de Contraseña - field-group-container para la cuadrícula de campos -->
+      <div class="field-group field-group-container">
         <!-- Contraseña -->
-        <div>
+        <div class="field-card">
           <label for="password">Nueva Contraseña</label>
           <input id="password" formControlName="password" type="password">
         </div>
 
-        <!-- Confirmar Contraseña -->
-        <div>
+        <!-- Confirmar Contraseña - Ahora usa la clase .field-card -->
+        <div class="field-card">
           <label for="confirmarPassword">Confirmar Nueva Contraseña</label>
           <input id="confirmarPassword" formControlName="confirmarPassword" type="password">
         </div>
       </div>
 
       <!-- Error de Coincidencia de Contraseña (Validación de grupo) -->
-      <div *ngIf="form.hasError('passwordMismatch') && (form.get('password')?.dirty || form.get('confirmarPassword')?.dirty)">
+      <div class="field-group" *ngIf="form.hasError('passwordMismatch') && (form.get('password')?.dirty || form.get('confirmarPassword')?.dirty)">
         Las contraseñas no coinciden.
       </div>
 
@@ -119,8 +124,8 @@
       </button>
     </form>
 
-    <!-- Sección de Eliminación de Cuenta (Con botón y modal) -->
-    <div>
+    <!-- Sección de Eliminación de Cuenta - Ahora usa la clase .delete-section -->
+    <div class="delete-section">
       <h3>Eliminar Cuenta</h3>
       <p>Esta acción es irreversible y eliminará permanentemente todos tus datos.</p>
       <button (click)="showDeleteConfirmation.set(true)"
@@ -131,17 +136,13 @@
   </ng-container>
 
   <!-- 3. Modal de Confirmación de Eliminación -->
-  <div *ngIf="showDeleteConfirmation()">
+  <div *ngIf="showDeleteConfirmation()" class="delete-modal-backdrop">
     <div>
       <div>
         <h3>Confirmar Eliminación</h3>
         <p>¿Estás absolutamente seguro/a de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.</p>
 
         <div>
-          <button (click)="showDeleteConfirmation.set(false)"
-                  [disabled]="isSaving()">
-            Cancelar
-          </button>
           <button (click)="eliminarCuenta()"
                   [disabled]="isSaving()">
             <span *ngIf="!isSaving()">Sí, Eliminar Permanentemente</span>
@@ -152,6 +153,11 @@
               </svg>
               Eliminando...
             </span>
+          </button>
+
+          <button (click)="showDeleteConfirmation.set(false)"
+                  [disabled]="isSaving()">
+            Cancelar
           </button>
         </div>
       </div>

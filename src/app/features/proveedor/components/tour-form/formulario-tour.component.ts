@@ -20,7 +20,7 @@ import { AuthService } from '../../../../core/services/auth.service';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './formulario-tour.component.html',
-  styleUrls: ['../hotel-form/formulario.component.css'],
+  styleUrls: ['./formulario-tour.component.css'],
 })
 export class TourFormComponent implements OnInit {
   tourForm!: FormGroup;
@@ -28,11 +28,20 @@ export class TourFormComponent implements OnInit {
   enviando = false;
   mensajeExito = '';
   mensajeError = '';
+  // 🆕 PROPIEDAD PARA ALMACENAR LA FECHA MÍNIMA (HOY)
+  minDate: string; 
 
   private fb = inject(FormBuilder);
   private tourService = inject(TourService);
   private authService = inject(AuthService);
   private router = inject(Router);
+
+  constructor() {
+    // 🆕 Calculamos la fecha actual en formato YYYY-MM-DD al inicializar el componente.
+    const today = new Date();
+    // Usamos toISOString().split('T')[0] para asegurar el formato YYYY-MM-DD
+    this.minDate = today.toISOString().split('T')[0]; 
+  }
 
   ngOnInit(): void {
     this.crearFormulario();
@@ -47,19 +56,19 @@ export class TourFormComponent implements OnInit {
         nombre: ['', [Validators.required]],
         descripcion: ['', [Validators.required, Validators.minLength(10)]],
         direccion: ['', [Validators.required]],
-        ciudad: ['', [Validators.required]],
-        pais: ['', [Validators.required]],
+        ciudad: ['', [Validators.required]], // ✅ Campo 1 para ubicación
+        pais: ['', [Validators.required]],   // ✅ Campo 2 para ubicación
         precio: [0, [Validators.required, Validators.min(0)]],
-        ubicacion: ['', [Validators.required]],
+        // ❌ ELIMINADO: 'ubicacion' era redundante si ya tenemos ciudad y país
         categoria: ['', [Validators.required]],
         duracion: [1, [Validators.required, Validators.min(1)]],
-        fecha: ['', [Validators.required]],
+        fecha: ['', [Validators.required]], 
         cupos: [1, [Validators.required, Validators.min(1)]],
         imagen_url: ['', [Validators.required]],
         // Galería de imágenes dinámica
         galeria_imagenes: this.fb.array<FormControl<string | null>>([]),
         // Cosas para llevar dinámico
-        cosasParaLlevar: this.fb.array<FormControl<string | null>>([this.fb.control('', Validators.required)]),
+        cosasParaLlevar: this.fb.array<FormControl<string | null>>([]),
       }),
     });
   }
@@ -83,8 +92,21 @@ export class TourFormComponent implements OnInit {
   // 🖼️ Galería de imágenes
   // ================================================
   agregarImagen(url: string): void {
+     const MAX_IMAGES = 5; // Definimos el límite máximo de imágenes
+  
+    // 1. Verificación de límite máximo
+    if (this.galeriaImagenes.length >= MAX_IMAGES) {
+      console.warn(`[GALERIA] Límite de ${MAX_IMAGES} imágenes alcanzado. No se agregará la URL.`);
+      return;
+    }
+    
+    // Solo agrega el control si la URL no está vacía.
     if (url && url.trim().length > 0) {
-      this.galeriaImagenes.push(this.fb.control(url, { validators: [Validators.required], nonNullable: true }));
+      this.galeriaImagenes.push(this.fb.control(url, { 
+        validators: [Validators.required],
+        nonNullable: true
+      }) as FormControl<string>);
+      console.log(`[GALERIA] Imagen agregada. Total: ${this.galeriaImagenes.length}/${MAX_IMAGES}`);
     }
   }
 
@@ -93,16 +115,17 @@ export class TourFormComponent implements OnInit {
   }
 
   // ================================================
-  // ➕/❌ Cosas para llevar
+  // ➕/❌ Cosas para llevar (ahora idéntica a la galería)
   // ================================================
-  agregarCosa(): void {
-    this.cosasParaLlevar.push(this.fb.control('', Validators.required));
-  }
-
-  quitarCosa(index: number): void {
-    if (this.cosasParaLlevar.length > 1) {
-      this.cosasParaLlevar.removeAt(index);
+  agregarCosa(item: string): void {
+    // ✅ Se valida y agrega solo si el texto no está vacío.
+    if (item && item.trim().length > 0) {
+      this.cosasParaLlevar.push(this.fb.control(item, { validators: [Validators.required], nonNullable: true }));
     }
+  }
+  
+  quitarCosa(index: number): void {
+    this.cosasParaLlevar.removeAt(index);
   }
 
   // ================================================
@@ -114,6 +137,8 @@ export class TourFormComponent implements OnInit {
     this.mensajeExito = '';
 
     if (this.tourForm.invalid) {
+      // ⚠️ Si la aplicación seguía fallando, este era el punto de error:
+      // 'ciudad' y 'pais' eran requeridos pero no tenían input en el HTML.
       this.mensajeError = '❌ Por favor, completa todos los campos requeridos correctamente.';
       this.tourForm.markAllAsTouched();
       return;
