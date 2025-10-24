@@ -132,7 +132,7 @@ export class HotelService {
   getSupplierHotels(): Observable<HotelData[]> {
     // ASUMIMOS este endpoint. Si no existe, pregúntale al backend si /api/hoteles
     // acepta un parámetro para filtrar por el usuario logueado.
-    const endpoint = `${this.API_URL}/hoteles/mis-publicaciones`; 
+    const endpoint = `${this.API_URL}/proveedor/servicios`; 
 
     return this.http
       .get<SupplierHotelListApiRespuesta>(endpoint, {
