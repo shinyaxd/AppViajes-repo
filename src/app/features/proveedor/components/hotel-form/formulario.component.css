@@ -69,7 +69,7 @@ h4 {
 }
 
 input, textarea {
-  width: 100%;
+  width: 97%;
   padding: 0.75rem; /* Aumentado el padding */
   margin-top: 0.4rem;
   border: 1px solid #ddd;
@@ -190,7 +190,38 @@ button:not(.btn-submit):disabled {
   padding: 0.6rem 0.8rem;
   font-size: 0.9rem;
 }
+select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 0.75rem;
+  background-color: #fff;
+  font-size: 14px;
+  appearance: none; /* elimina el estilo por defecto del navegador */
+  cursor: pointer;
+}
 
+select:focus {
+  outline: none;
+  border-color: #4a90e2; /* color al enfocar */
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+/* Para agregar una flecha personalizada */
+select {
+  background-image: url('data:image/svg+xml;utf8,<svg fill="gray" height="12" viewBox="0 0 24 24" width="12" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+}
+.tour_button{
+  display: block;
+  padding: 0.8rem;
+  background: #d2ddf8;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
 /* ==========================================================
 // BOTÓN DE ENVÍO
 // ========================================================== */

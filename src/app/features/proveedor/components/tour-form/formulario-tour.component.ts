@@ -45,19 +45,17 @@ export class TourFormComponent implements OnInit {
     this.tourForm = this.fb.group({
       tour: this.fb.group({
         nombre: ['', [Validators.required]],
-        descripcion: ['', [Validators.required, Validators.minLength(10)]],
-        direccion: ['', [Validators.required]],
+        descripcion: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(300)]],
         ciudad: ['', [Validators.required]],
         pais: ['', [Validators.required]],
         precio: [0, [Validators.required, Validators.min(0)]],
-        ubicacion: ['', [Validators.required]],
         categoria: ['', [Validators.required]],
         duracion: [1, [Validators.required, Validators.min(1)]],
         fecha: ['', [Validators.required]],
         cupos: [1, [Validators.required, Validators.min(1)]],
         imagen_url: ['', [Validators.required]],
         // Galería de imágenes dinámica
-        galeria_imagenes: this.fb.array<FormControl<string | null>>([]),
+        imagenes: this.fb.array<FormControl<string | null>>([]),
         // Cosas para llevar dinámico
         cosasParaLlevar: this.fb.array<FormControl<string | null>>([this.fb.control('', Validators.required)]),
       }),
@@ -71,8 +69,8 @@ export class TourFormComponent implements OnInit {
     return this.tourForm.get('tour') as FormGroup;
   }
 
-  get galeriaImagenes(): FormArray<FormControl<string | null>> {
-    return this.tourGroup.get('galeria_imagenes') as FormArray<FormControl<string | null>>;
+  get imagenesArray(): FormArray<FormGroup> {
+    return this.tourGroup.get('imagenes') as FormArray<FormGroup>;
   }
 
   get cosasParaLlevar(): FormArray<FormControl<string | null>> {
@@ -82,14 +80,22 @@ export class TourFormComponent implements OnInit {
   // ================================================
   // 🖼️ Galería de imágenes
   // ================================================
-  agregarImagen(url: string): void {
-    if (url && url.trim().length > 0) {
-      this.galeriaImagenes.push(this.fb.control(url, { validators: [Validators.required], nonNullable: true }));
+  agregarImagen(url: string, alt: string): void {
+    if (this.imagenesArray.length >= 5) {
+      this.mensajeError = '⚠️ Solo puedes agregar hasta 5 imágenes.';
+      return;
     }
+
+    const nuevaImagen = this.fb.group({
+      url: [url.trim(), [Validators.required, Validators.pattern(/^https?:\/\/.+/)]],
+      alt: [alt.trim(), [Validators.required, Validators.minLength(3)]],
+    });
+
+    this.imagenesArray.push(nuevaImagen);
   }
 
   eliminarImagen(index: number): void {
-    this.galeriaImagenes.removeAt(index);
+    this.imagenesArray.removeAt(index);
   }
 
   // ================================================

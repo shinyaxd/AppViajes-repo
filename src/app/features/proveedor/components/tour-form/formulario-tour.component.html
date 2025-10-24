@@ -19,99 +19,89 @@
     <div formGroupName="tour" class="form-section">
       <h3>🏨 Datos del Tour</h3>
 
-      <label>
-        Nombre:
-        <input type="text" formControlName="nombre" placeholder="Nombre del tour" required />
-      </label>
+      <label for="nombre">Nombre: </label>
+      <input id="nombre" type="text" formControlName="nombre" placeholder="Nombre del tour" required />
 
-      <label>
-        Descripción:
-        <textarea formControlName="descripcion" placeholder="Describe tu tour" required></textarea>
-      </label>
+      <label for="descripcion">Descripción:</label>
+      <textarea id="descripcion" formControlName="descripcion" placeholder="Describe tu tour" required></textarea>
 
-      <label>
-        Dirección:
-        <input type="text" formControlName="direccion" placeholder="Dirección completa" required />
-      </label>
+      <label for="ciudad">Ciudad:</label>
+      <input id="ciudad" type="text" formControlName="ciudad" placeholder="Ciudad" required />
 
+      <label for="pais">Pais:</label>
+      <input id="pais" type="text" formControlName="pais" placeholder="Pais" required />
+
+      <label>Cosas para llevar: </label>
       <div class="inline-group">
-        <label>Cosas para llevar: </label>
         
         <div formArrayName="cosasParaLlevar">
           <div *ngFor="let item of cosasParaLlevar.controls; let i = index" class="item-row">
-            <input
-              [formControlName]="i"
-              type="text"
-              placeholder="Ej: Cámara, protector solar..."
-            />
-            <button type="button" (click)="quitarCosa(i)">❌</button>
+            <div class="inline-group">
+              <input
+                [formControlName]="i"
+                type="text"
+                placeholder="Ej: Cámara, protector solar..."
+              />
+              <button class="tour_button" type="button" (click)="quitarCosa(i)">❌</button>
+            </div>        
+          </div>
+        </div>
+      </div>
+      <button class="tour_button" type="button" (click)="agregarCosa()">Agregar ➕</button><br>
+
+      <label for="precio" >Precio: </label>
+      <input id="precio" type="number" formControlName="precio" min="0" required />
+
+      <label for="categoria">Categoría:</label>
+      <select id="categoria" formControlName="categoria" required>
+        <option value="" disabled selected>Selecciona una categoría</option>
+        <option value="Aventura">Aventura</option>
+        <option value="Gastronomía">Gastronomía</option>
+        <option value="Cultura">Cultura</option>
+        <option value="Relajación">Relajación</option>
+      </select> 
+
+      <br>
+      <label for="duracion">Duración: </label>
+      <input id="duracion" type="number" formControlName="duracion" required />
+
+      <div class="inline-group">
+        <label for="fecha">Fecha:</label>
+        <input id="fecha" type="date" formControlName="fecha" placeholder="Fecha" required />
+
+        <label for="cupos">Cupos disponibles</label>
+        <input id="cupos" type="number" formControlName="cupos" placeholder="Cupos disponibles" required />
+        
+      </div>
+
+      <label for="imagen_url">Imagen principal (URL):</label>
+      <input id="imagen_url" type="text" formControlName="imagen_url" placeholder="https://denomades.imgix.net/destinos/cusco/336/plaza-city-tour-cusco.jpg" />
+
+      <!-- 👇 Galería de imágenes -->
+      <div formArrayName="imagenes">
+        <h4>🖼️ Galería de imágenes</h4>
+
+        <div *ngFor="let img of imagenesArray.controls; let i = index" [formGroupName]="i" class="input-wrapper">
+          <div class="inline-group">
+            <input formControlName="url" placeholder="URL de imagen" />
+            <input formControlName="alt" placeholder="Texto alternativo" />
+            <button type="button" (click)="eliminarImagen(i)">🗑️</button>
           </div>
         </div>
 
-        <button type="button" (click)="agregarCosa()">Agregar ➕</button>
-      </div>
-
-      <label>
-        Precio:
-        <input type="number" formControlName="precio" min="0" required />
-      </label>
-
-      <label>
-        Ubicación:
-        <input type="text" formControlName="ubicacion" required />
-      </label>
-
-      <label>
-        Categoría:
-        <select formControlName="categoria" required>
-          <option value="" disabled selected>Selecciona una categoría</option>
-          <option value="Aventura">Aventura</option>
-          <option value="Gastronomía">Gastronomía</option>
-          <option value="Cultura">Cultura</option>
-          <option value="Relajación">Relajación</option>
-        </select>
-      </label>
-
-      <label>
-        Duración:
-        <input type="number" formControlName="duracion" required />
-      </label>
-
-      <div class="inline-group">
-        <label>
-          Fecha:
-          <input type="date" formControlName="fecha" placeholder="Fecha" required />
-        </label>
-
-        <label>
-          Cupos disponibles
-          <input type="number" formControlName="cupos" placeholder="Cupos disponibles" required />
-        </label>
-      </div>
-
-      <label>
-        Imagen principal (URL):
-        <input type="text" formControlName="imagen_url" placeholder="https://denomades.imgix.net/destinos/cusco/336/plaza-city-tour-cusco.jpg" />
-      </label>
-
-      <!-- 👇 Galería de imágenes -->
-      <div class="galeria">
-        <h4>Galería de imágenes</h4>
-
-        <!-- ✅ Sin 'as FormArray' (ya se maneja en el TS) -->
-        <div *ngFor="let imgCtrl of galeriaImagenes?.controls; let i = index">
-          <input [formControl]="imgCtrl" placeholder="https://imagen.jpg" />
-          <button type="button" (click)="eliminarImagen(i)">🗑️</button>
+        <div *ngIf="imagenesArray.length < 5" class="input-wrapper">
+          <div class="inline-group">
+            <input #urlInput type="text" placeholder="URL de nueva imagen" />
+            <input #altInput type="text" placeholder="Texto alternativo" />
+           </div> 
+          <button class="tour_button" type="button" (click)="agregarImagen(urlInput.value, altInput.value)">➕ Agregar imagen</button>
         </div>
 
-        <input #nuevaImagen placeholder="URL de nueva imagen" />
-        <button
-          type="button"
-          (click)="agregarImagen(nuevaImagen.value); nuevaImagen.value=''"
-        >
-          ➕ Agregar imagen
-        </button>
+        <p *ngIf="imagenesArray.length >= 5" class="info-text">
+          ✅ Has alcanzado el máximo de 5 imágenes.
+        </p>
       </div>
+
     </div>
 
     <!-- ========================= -->
