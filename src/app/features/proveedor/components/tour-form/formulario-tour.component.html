@@ -107,10 +107,19 @@
         <input #nuevaImagen placeholder="URL de nueva imagen" />
         <button
           type="button"
+          [disabled]="galeriaImagenes.length >= 5"
           (click)="agregarImagen(nuevaImagen.value); nuevaImagen.value=''"
         >
           ➕ Agregar imagen
         </button>
+
+        <div *ngIf="galeriaMensaje" class="gallery-message">
+          <small>{{ galeriaMensaje }}</small>
+        </div>
+
+        <div class="gallery-count">
+          <small>{{ galeriaImagenes.length }} / 5 imágenes</small>
+        </div>
       </div>
     </div>
 

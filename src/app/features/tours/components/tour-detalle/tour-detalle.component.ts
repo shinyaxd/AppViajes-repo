@@ -150,6 +150,7 @@ export class TourDetalleComponent implements OnInit {
       nombre: this.tour.nombre || 'Tour sin nombre',
       ciudad: this.tour.ciudad || '',
       pais: this.tour.pais || '',
+      categoria: this.tour.tour?.categoria || '',
       precio: tourData?.precio ? parseFloat(tourData.precio as any) : null,
       descripcion: this.tour.descripcion || '',
       duracion: duracionHoras,
