@@ -10,7 +10,6 @@ export interface TourData {
   ciudad: string;
   pais: string;
   precio: number;
-  ubicacion: string;
   categoria: 'Aventura' | 'Gastronomía' | 'Cultura' | 'Relajación';
   duracion: number;
   fecha: string;

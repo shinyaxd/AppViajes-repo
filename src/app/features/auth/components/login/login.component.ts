@@ -29,7 +29,6 @@ export class LoginComponent implements OnInit {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required],
-      // ✅ CORRECCIÓN: Se añade el control 'rememberMe' que faltaba en el FormGroup
       rememberMe: [false] 
     });
   }
@@ -52,9 +51,7 @@ export class LoginComponent implements OnInit {
     
     // Al obtener los valores, Angular incluirá 'rememberMe', aunque tu API probablemente lo ignore.
     const formValue = this.loginForm.getRawValue();
-    
-    // Creamos los credenciales solo con email y password, tal como espera tu servicio.
-    // Si la API espera 'rememberMe', tendrías que incluirlo en LoginCredentials.
+  
     const data: LoginCredentials = {
         email: formValue.email,
         password: formValue.password

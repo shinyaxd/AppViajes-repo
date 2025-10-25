@@ -3,11 +3,11 @@
 // ========================================================== */
 .formulario-container {
   max-width: 900px;
-  margin: 2rem auto; /* Añadido margen superior/inferior */
-  background: #f7f7f7; /* Fondo ligeramente gris para contraste */
+  margin: 2rem auto; 
+  background: #f7f7f7; 
   padding: 2.5rem;
-  border-radius: 1.5rem; /* Bordes más redondeados */
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08); /* Sombra más suave */
+  border-radius: 1.5rem; 
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
   font-family: 'Inter', sans-serif;
 }
 
@@ -49,9 +49,10 @@ h4 {
   margin-top: 1.5rem;
 }
 
+/* ⚠️ Se mantiene para Fecha/Cupos, que deben ser horizontales */
 .inline-group {
   display: flex;
-  gap: 1.5rem; /* Aumentado el espacio */
+  gap: 1.5rem; 
   width:98%;
 }
 
@@ -59,26 +60,45 @@ h4 {
   flex: 1;
 }
 
+/* 🆕 NUEVA CLASE para 'Cosas para llevar' que ahora debe ser vertical */
+.inline-group.cosas-group {
+    display: block; /* Vuelve al flujo normal de bloque */
+    margin-bottom: 2rem;
+    width: 100%;
+}
+
+.inline-group.categorias-group {
+    display: block; /* Vuelve al flujo normal de bloque */
+    margin-bottom: 2rem;
+    width: 103%;
+}
+
 /* ==========================================================
 // ETIQUETAS, INPUTS Y ERRORES
 // ========================================================== */
-.input-label { /* Clase usada en el HTML */
-  display: block;
-  margin-bottom: 1.2rem;
-  font-weight: 600;
-  color: #333;
+label { /* Asegura que todas las etiquetas sean bloques verticales */
+    display: block;
+    margin-bottom: 1.2rem;
+    font-weight: 600;
+    color: #333;
 }
 
-input, textarea {
+input, textarea, select { /* Incluimos <select> */
   width: 96%;
-  padding: 0.75rem; /* Aumentado el padding */
+  padding: 0.75rem; 
   margin-top: 0.4rem;
   border: 1px solid #ddd;
   border-radius: 0.75rem;
   transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-input:focus, textarea:focus {
+/* Asegura que los inputs dentro de item-row y add-item-row no tengan margen superior extra */
+.item-row input, .add-item-row input {
+    margin-top: 0; 
+    flex-grow: 1;
+}
+
+input:focus, textarea:focus, select:focus {
   border-color: #007bff;
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
   outline: none;
@@ -89,15 +109,15 @@ textarea {
   resize: vertical;
 }
 
-.error-message { /* Clase usada en el HTML */
+.error-message { 
   display: block;
-  color: #dc3545; /* Rojo de error */
+  color: #dc3545; 
   font-size: 0.85rem;
   margin-top: 0.3rem;
   font-weight: 500;
 }
 
-.validation-summary { /* Clase usada en el HTML */
+.validation-summary { 
     padding: 1rem;
     background-color: #f8d7da;
     color: #721c24;
@@ -108,17 +128,10 @@ textarea {
 }
 
 /* ==========================================================
-// GALERÍA DE IMÁGENES
+// GALERÍA DE IMÁGENES (Ajustes menores)
 // ========================================================== */
-.gallery-item {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  align-items: center;
-}
-
-.gallery-item input {
-  margin-top: 0;
+.galeria {
+    margin-top: 1rem;
 }
 
 .add-item-row {
@@ -128,28 +141,6 @@ textarea {
   align-items: center;
 }
 
-.input-new-item {
-  flex-grow: 1;
-  margin-top: 0;
-}
-
-/* ==========================================================
-// HABITACIONES
-// ========================================================== */
-.habitacion-card {
-  margin-bottom: 1.5rem;
-  padding: 1.5rem;
-  background: #fdfdfd;
-  border: 1px solid #eee;
-  border-radius: 0.75rem;
-  position: relative;
-}
-
-.habitacion-card h4 {
-  margin-top: 0;
-  color: #000000;
-  font-size: 1.1rem;
-}
 
 /* ==========================================================
 // BOTONES (Comunes)
@@ -165,9 +156,9 @@ button:not(.btn-submit):disabled {
   cursor: not-allowed;
 }
 
-/* Botones de acción dentro de FormArrays */
+/* Botones de acción dentro de FormArrays (btn-add/remove) */
 .btn-add, .btn-add-small {
-  background: #6eb97f; /* Verde */
+  background: #6eb97f; 
   color: white;
   border: none;
   padding: 0.6rem 1rem;
@@ -177,7 +168,7 @@ button:not(.btn-submit):disabled {
 }
 
 .btn-remove, .btn-remove-small {
-  background: #dc3545; /* Rojo */
+  background: #dc3545; 
   color: white;
   border: none;
   padding: 0.6rem 1rem;
@@ -197,7 +188,7 @@ button:not(.btn-submit):disabled {
 .btn-submit {
   display: block;
   width: 100%;
-  background: #007bff; /* Usamos el color primario para enviar */
+  background: #007bff; 
   color: white;
   padding: 1.2rem;
   font-size: 1.2rem;
@@ -238,4 +229,29 @@ button:not(.btn-submit):disabled {
   background-color: #f8d7da;
   color: #721c24;
   border: 1px solid #f5c6cb;
+}
+
+/* ==========================================================
+// ESTILOS ESPECÍFICOS PARA SALIDAS DINÁMICAS
+// ========================================================== */
+.salidas-section {
+    /* Asegura que la sección de salidas tenga un buen espacio inferior */
+    margin-bottom: 2.5rem; 
+}
+
+.salida-item {
+    /* Aumenta la separación vertical entre cada grupo de fecha/cupo */
+    margin-bottom: 1.75rem !important; /* Más separación entre items, sobrescribe mb-4 si fuera necesario */
+    align-items: flex-start; /* Alinea el contenido (label, input) al inicio */
+    /* Aseguramos que los labels dentro del item no hereden el margin-bottom grande */
+}
+
+.salida-item label {
+    margin-bottom: 0.5rem; /* Pequeña separación entre la etiqueta y el input dentro del item */
+}
+
+.salida-item .btn-remove {
+    /* Alinea el botón de eliminar verticalmente */
+    align-self: center;
+    margin-top: 1.5rem; /* Asegura que no tenga el margin-top de 0.5rem por defecto */
 }

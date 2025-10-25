@@ -3,12 +3,13 @@
 /* -------------------------------------------------------------------------- */
 
 /* Estilo para el contenedor principal, centrado y con ancho máximo */
-div:first-child {
+/* REEMPLAZADO: div:first-child -> .profile-container */
+.profile-container {
     max-width: 800px;
     margin: 40px auto;
     padding: 20px;
-    font-family: Arial, sans-serif;
-    background-color: #f8f8f8;
+    font-family: 'Inter', Arial, sans-serif;
+    background-color: #f8f8f8; /* Fondo gris claro (El que quieres replicar) */
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
@@ -23,7 +24,7 @@ h1 {
 }
 
 /* -------------------------------------------------------------------------- */
-/* ESTILOS DE MENSAJES                            */
+/* ESTILOS DE MENSAJES Y ROLE DISPLAY               */
 /* -------------------------------------------------------------------------- */
 
 /* Animación de spinner para iconos dentro de botones */
@@ -52,19 +53,35 @@ h1 {
     text-align: center;
 }
 
+/* NUEVO: Estilo para sombrear la línea del Rol Actual */
+/* REEMPLAZADO: form > div:first-child -> .role-display */
+.role-display {
+    text-align: center;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #464947; 
+    background-color: #f2f3f3; 
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #727a76; 
+    margin-bottom: 30px; 
+}
+
 
 /* -------------------------------------------------------------------------- */
 /* ESTILOS DEL FORMULARIO                      */
 /* -------------------------------------------------------------------------- */
 
 form {
-    background: #fff;
+    background: #fff; /* La tarjeta interior es blanca */
     padding: 30px;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-form > div {
+/* Todos los bloques de campo principal dentro del form tendrán margen */
+/* REEMPLAZADO: form > div:not(:first-child) -> .field-group */
+.field-group {
     margin-bottom: 20px;
 }
 
@@ -76,18 +93,39 @@ form h2 {
     border-top: 1px solid #eee;
 }
 
+/* -------------------------------------------------------------------------- */
+/* ESTILOS DE CAMPOS DESTACADOS (TARJETA GRIS) */
+/* -------------------------------------------------------------------------- */
+
+/* Campos específicos que deben tener el fondo gris claro (celular, ruc, email, confirmar contraseña) */
+/* Estos elementos ahora llevan la clase .field-card directamente en el HTML */
+.field-card {
+    /* Aplicar el estilo de tarjeta gris claro */
+    background-color: #f8f8f8; 
+    border-radius: 8px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.05);
+    padding: 15px;
+}
+
+/* -------------------------------------------------------------------------- */
+/* ESTILOS GENERALES DE AGRUPAMIENTO Y CONTROLES */
+/* -------------------------------------------------------------------------- */
+
 /* Agrupamiento de campos (simulando una cuadrícula simple) */
-form > div:nth-child(3) > div, 
-form > div:nth-child(7) > div {
+/* REEMPLAZADO: form > ng-container > div > div, form > div:nth-child(7) > div -> .field-group-container */
+.field-group-container { 
     display: flex;
-    gap: 20px; /* Espacio entre columnas */
+    gap: 20px; 
     flex-wrap: wrap;
 }
 
-form > div > div > div {
-    flex: 1 1 45%; /* Hace que los inputs ocupen casi la mitad del espacio */
+/* Los contenedores de campo dentro de los grupos flex */
+/* REEMPLAZADO: form ng-container > div > div > div, form > div:nth-child(7) > div > div -> .field-group-container > div */
+.field-group-container > div {
+    flex: 1 1 45%; 
     min-width: 250px;
 }
+
 
 label {
     display: block;
@@ -103,7 +141,7 @@ input {
     border: 1px solid #ccc;
     border-radius: 6px;
     font-size: 1em;
-    box-sizing: border-box; /* Incluye padding y borde en el ancho total */
+    box-sizing: border-box; 
 }
 
 input:focus {
@@ -122,16 +160,27 @@ input:disabled {
 /* ESTILOS DE VALIDACIÓN                          */
 /* -------------------------------------------------------------------------- */
 
+/* Esto apunta a los <p> que muestran errores de validación */
 div p {
-    color: #d32f2f; /* Rojo oscuro */
+    color: #d32f2f; 
     font-size: 0.85em;
     margin-top: 5px;
 }
 
-
 /* -------------------------------------------------------------------------- */
 /* ESTILOS DE BOTONES                            */
 /* -------------------------------------------------------------------------- */
+
+button {
+    /* Estilos base para todos los botones que no sean submit ni modal */
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, opacity 0.3s ease;
+}
 
 button[type="submit"] {
     display: flex;
@@ -140,14 +189,9 @@ button[type="submit"] {
     width: 100%;
     padding: 12px;
     margin-top: 20px;
-    border: none;
-    border-radius: 8px;
-    background-color: #4CAF50; /* Verde principal */
+    background-color: #4CAF50; 
     color: white;
     font-size: 1.1em;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s ease, opacity 0.3s ease;
 }
 
 button[type="submit"]:hover:not(:disabled) {
@@ -165,14 +209,17 @@ button[type="submit"] svg {
     height: 20px;
     margin-right: 8px;
     stroke: white;
+    /* Animación del spinner */
+    animation: spin 1s linear infinite;
 }
 
 /* -------------------------------------------------------------------------- */
 /* ESTILOS DE ELIMINAR CUENTA                        */
 /* -------------------------------------------------------------------------- */
 
-/* Sección de eliminación */
-form + div {
+/* Sección de eliminación (es el div después del form) */
+/* REEMPLAZADO: form + div -> .delete-section */
+.delete-section {
     text-align: center;
     padding: 20px;
     margin-top: 30px;
@@ -181,31 +228,13 @@ form + div {
     background-color: #ffebee;
 }
 
-form + div h3 {
-    color: #d32f2f;
-    font-size: 1.3em;
-    margin-bottom: 10px;
-}
-
-form + div p {
-    color: #555;
-    margin-bottom: 15px;
-}
-
-/* Botón de eliminar (ajustado para la clase genérica button) */
-form + div button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 6px;
-    background-color: #f44336; /* Rojo principal */
+/* Botones dentro de la sección de eliminación. Usamos el selector descendiente, ya que solo hay un botón aquí. */
+.delete-section button {
+    background-color: #f44336; 
     color: white;
-    font-size: 1em;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
 }
 
-form + div button:hover:not(:disabled) {
+.delete-section button:hover:not(:disabled) {
     background-color: #d32f2f;
 }
 
@@ -214,107 +243,125 @@ form + div button:hover:not(:disabled) {
 /* -------------------------------------------------------------------------- */
 
 /* Contenedor del Modal (backdrop) */
-div[ngif="showDeleteConfirmation()"] {
+.delete-modal-backdrop {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(0, 0, 0, 0.7); 
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 9999; 
 }
 
 /* Contenido del Modal (la tarjeta blanca) */
-div[ngif="showDeleteConfirmation()"] > div {
-    background-color: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    max-width: 400px;
+.delete-modal-backdrop > div {
+    background-color: rgb(255, 230, 230);
+    padding: 40px; 
+    border-radius: 8px; 
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+    max-width: 500px; 
     width: 90%;
+    border: 2px solid #f44336; 
 }
 
-/* Título del Modal */
-div[ngif="showDeleteConfirmation()"] h3 {
-    color: #d32f2f;
+/* Título del Modal: Confirmar Eliminación (en rojo) */
+.delete-modal-backdrop h3 {
+    color: #d32f2f; 
     margin-top: 0;
     margin-bottom: 15px;
-    font-size: 1.4em;
+    font-size: 1.6em; 
+    font-weight: 700;
+    text-align: center;
 }
 
 /* Texto del Modal */
-div[ngif="showDeleteConfirmation()"] p {
+.delete-modal-backdrop p {
     color: #333;
-    margin-bottom: 25px;
+    margin-bottom: 30px;
+    text-align: center; 
+    font-size: 1.1em;
 }
 
-/* Contenedor de botones del modal */
-div[ngif="showDeleteConfirmation()"] > div > div {
+/* Contenedor de botones del modal (alineado a la derecha, respetando padding) */
+/* MODIFICADO: Stack y Centrado */
+.delete-modal-backdrop > div > div {
     display: flex;
-    justify-content: flex-end;
-    gap: 10px;
+    justify-content: center; /* Centra los botones horizontalmente */
+    flex-direction: column; /* Apila los botones verticalmente */
+    gap: 15px;
+    padding-top: 10px; 
 }
 
 /* Botones dentro del modal */
-div[ngif="showDeleteConfirmation()"] button {
-    padding: 10px 15px;
+.delete-modal-backdrop button {
+    width: 100%; /* Hace que los botones llenen todo el ancho para un apilado limpio */
+    padding: 12px 20px; 
     border-radius: 6px;
     font-weight: bold;
-    font-size: 0.9em;
+    font-size: 1em;
     transition: background-color 0.2s ease;
     border: 1px solid transparent;
 }
 
-/* Botón Cancelar */
-div[ngif="showDeleteConfirmation()"] button:first-child {
-    background-color: #ccc;
+/* Botón Cancelar (en gris) */
+/* El selector button:first-child en este contexto es correcto porque selecciona el primer botón dentro del div de botones. */
+.delete-modal-backdrop button:last-child {
+    background-color: #e0e0e0; 
     color: #333;
-    border-color: #bbb;
+    border-color: #bdbdbd;
 }
 
-div[ngif="showDeleteConfirmation()"] button:first-child:hover:not(:disabled) {
-    background-color: #bbb;
+.delete-modal-backdrop button:last-child:hover:not(:disabled) {
+    background-color: #bdbdbd;
 }
 
-/* Botón Eliminar Permanentemente */
-div[ngif="showDeleteConfirmation()"] button:last-child {
+/* Botón Eliminar Permanentemente (en rojo) */
+/* El selector button:last-child en este contexto es correcto. */
+.delete-modal-backdrop button:first-child {
     background-color: #f44336;
     color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-div[ngif="showDeleteConfirmation()"] button:last-child:hover:not(:disabled) {
-    background-color: #d32f2f;
+.delete-modal-backdrop button:first-child:hover:not(:disabled) {
+    background-color: #000000;
 }
 
 /* Estilo para el spinner dentro del modal */
-div[ngif="showDeleteConfirmation()"] button svg {
+.delete-modal-backdrop button svg {
     width: 16px;
     height: 16px;
     margin-right: 5px;
     stroke: white;
-    /* Aplicar la animación de giro */
     animation: spin 1s linear infinite;
 }
+
 
 /* -------------------------------------------------------------------------- */
 /* RESPONSIVE DESIGN                              */
 /* -------------------------------------------------------------------------- */
 
 @media (max-width: 600px) {
-    div:first-child {
+    /* REEMPLAZADO: div:first-child -> .profile-container */
+    .profile-container {
         margin: 20px;
         padding: 15px;
     }
     
-    form > div > div > div {
-        flex: 1 1 100%; /* Una columna en pantallas pequeñas */
+    /* Hace que los grupos de dos campos se apilen en una sola columna */
+    /* REEMPLAZADO: form ng-container > div > div > div, form > div:nth-child(7) > div > div -> .field-group-container > div */
+    .field-group-container > div {
+        flex: 1 1 100%; 
         min-width: auto;
     }
 
     /* Ajustar el contenedor de botones del modal para apilarlos si es necesario */
+    /* Este selector sigue siendo válido ya que apunta al div del modal por ngIf */
     div[ngif="showDeleteConfirmation()"] > div > div {
         flex-direction: column;
     }
