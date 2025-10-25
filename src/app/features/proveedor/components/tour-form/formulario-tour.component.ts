@@ -38,12 +38,6 @@ export class TourFormComponent implements OnInit {
     this.crearFormulario();
   }
 
-  // Límite máximo de imágenes en la galería
-  readonly MAX_GALERIA_IMAGENES = 5;
-
-  // Mensaje específico para la galería (por ejemplo, cuando se alcanza el límite)
-  galeriaMensaje: string = '';
-
   // ================================================
   // 🏗️ Construcción del formulario
   // ================================================
@@ -89,25 +83,13 @@ export class TourFormComponent implements OnInit {
   // 🖼️ Galería de imágenes
   // ================================================
   agregarImagen(url: string): void {
-    // Limitar a MAX_GALERIA_IMAGENES
-    if (this.galeriaImagenes.length >= this.MAX_GALERIA_IMAGENES) {
-      this.galeriaMensaje = `Máximo ${this.MAX_GALERIA_IMAGENES} imágenes permitidas en la galería.`;
-      return;
-    }
-
     if (url && url.trim().length > 0) {
-      this.galeriaImagenes.push(this.fb.control(url.trim(), { validators: [Validators.required], nonNullable: true }));
-      // limpiar mensaje si se añadió correctamente
-      this.galeriaMensaje = '';
+      this.galeriaImagenes.push(this.fb.control(url, { validators: [Validators.required], nonNullable: true }));
     }
   }
 
   eliminarImagen(index: number): void {
     this.galeriaImagenes.removeAt(index);
-    // si se eliminó, limpiar el mensaje para permitir agregar nuevas
-    if (this.galeriaImagenes.length < this.MAX_GALERIA_IMAGENES) {
-      this.galeriaMensaje = '';
-    }
   }
 
   // ================================================

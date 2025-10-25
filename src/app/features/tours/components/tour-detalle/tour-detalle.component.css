@@ -266,7 +266,7 @@
   }
 }
 /* ======================= */
-/* SECCIï¿½N DE SALIDAS */
+/* SECCIÓN DE SALIDAS */
 /* ======================= */
 .tour-salidas-section {
   background: #ffffff;
@@ -412,7 +412,7 @@
   font-weight: 600;
 }
 
-/* Check de selecciï¿½n */
+/* Check de selección */
 .salida-check {
   position: absolute;
   top: 10px;
@@ -535,7 +535,7 @@
   color: #83c4a6;
 }
 
-/* Botï¿½n de reserva final */
+/* Botón de reserva final */
 .final-reserve-section {
   position: sticky;
   bottom: 20px;

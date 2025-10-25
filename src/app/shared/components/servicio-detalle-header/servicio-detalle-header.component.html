@@ -15,11 +15,6 @@
   <div class="servicio-info-header">
     <div class="main-info">
       <h1>{{ servicio.nombre }}</h1>
-      <!-- Categoría (solo para tours) -->
-      <p class="service-category" *ngIf="tipo === 'tour' && servicio.categoria">
-        <strong>Categoría:</strong>
-        <span class="service-category-text">{{ servicio.categoria }}</span>
-      </p>
       
       <!-- Rating y Reseñas (prioritario) -->
       <div class="rating-section" *ngIf="servicio.rating || servicio.resenas">
@@ -76,7 +71,7 @@
 <div class="image-gallery">
   <!-- Imagen principal (grande, izquierda) -->
   <div class="main-image">
-    <img [src]="imagenPrincipal" [alt]="servicio.nombre" (click)="openViewer(0)" style="cursor:pointer">
+    <img [src]="imagenPrincipal" [alt]="servicio.nombre">
   </div>
   
   <!-- Imágenes secundarias (4 pequeñas, derecha en 2x2) -->
@@ -85,18 +80,7 @@
       class="secondary-image" 
       *ngFor="let imagen of imagenesSecundarias; let i = index"
     >
-      <img [src]="imagen" [alt]="servicio.nombre + ' - Imagen ' + (i + 2)" (click)="openViewer(i + 1)" style="cursor:pointer">
-    </div>
-  </div>
-
-  <!-- VISOR / MODAL DE IMAGEN -->
-  <div class="image-modal" *ngIf="viewerOpen" (click)="closeViewer()" role="dialog" aria-modal="true">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <button class="close-btn" aria-label="Cerrar" (click)="closeViewer()">✕</button>
-      <img [src]="currentImage" [alt]="servicio.nombre" class="modal-image">
-  <button class="nav-btn prev" aria-label="Anterior" (click)="$event.stopPropagation(); prevImage()">◀</button>
-  <button class="nav-btn next" aria-label="Siguiente" (click)="$event.stopPropagation(); nextImage()">▶</button>
-      <div class="counter">{{ currentIndex + 1 }} / {{ imagenesParaGrid.length }}</div>
+      <img [src]="imagen" [alt]="servicio.nombre + ' - Imagen ' + (i + 2)">
     </div>
   </div>
 </div>

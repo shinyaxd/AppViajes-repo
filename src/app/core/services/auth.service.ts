@@ -140,7 +140,7 @@ export class AuthService {
     this.loadingService.show('Registrando usuario...');
 
     return this.http.post<RegisterResponse>(url, payload).pipe(
-      tap(response => { 
+      tap(response => {
         console.log('✅ Registro exitoso:', response.data.user);
 
         if (response.data?.token && isPlatformBrowser(this.platformId)) {
