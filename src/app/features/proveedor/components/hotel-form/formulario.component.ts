@@ -70,6 +70,8 @@ export class HotelFormComponent implements OnInit {
         ciudad: ['', [Validators.required]],
         pais: ['', [Validators.required]],
         estrellas: [3, [Validators.required, Validators.min(1), Validators.max(5)]], 
+        // AÑADIDO: Campo para el precio principal del Hotel, como lo pide la API
+        precio_por_noche: [100, [Validators.required, Validators.min(1)]], 
         imagen_url: ['', [Validators.required]],
         // Inicializamos la galería con un solo campo de control vacío por defecto
         galeria_imagenes: this.fb.array<FormControl<string>>([]), 
@@ -98,6 +100,15 @@ export class HotelFormComponent implements OnInit {
   // 🖼️ Lógica de Galería de Imágenes
   // ======================================================
   agregarImagen(url: string): void {
+    const MAX_IMAGES = 5; // Definimos el límite máximo de imágenes
+  
+    // 1. Verificación de límite máximo
+    if (this.galeriaImagenes.length >= MAX_IMAGES) {
+      console.warn(`[GALERIA] Límite de ${MAX_IMAGES} imágenes alcanzado. No se agregará la URL.`);
+      // Opcional: podrías mostrar un mensaje de error al usuario aquí
+      return;
+    }
+    
     // Acepta el argumento 'url' enviado desde el template, resolviendo el error de argumentos.
     // Solo agrega el control si la URL no está vacía.
     if (url && url.trim().length > 0) {
@@ -105,12 +116,14 @@ export class HotelFormComponent implements OnInit {
         validators: [Validators.required],
         nonNullable: true
       }) as FormControl<string>);
+      console.log(`[GALERIA] Imagen agregada. Total: ${this.galeriaImagenes.length}/${MAX_IMAGES}`);
     }
   }
-
+  
   eliminarImagen(index: number): void {
     // Elimina el campo de imagen en el índice dado
     this.galeriaImagenes.removeAt(index);
+    console.log(`[GALERIA] Imagen eliminada. Total: ${this.galeriaImagenes.length}/5`);
   }
 
   // ======================================================
@@ -183,7 +196,7 @@ export class HotelFormComponent implements OnInit {
         
         // Limpiar y resetear el formulario
         this.hotelForm.reset({
-            hotel: { estrellas: 3 }, // Mantener valores por defecto si los hay
+            hotel: { estrellas: 3, precio_por_noche: 100 }, // Incluir valores por defecto
             habitaciones: []
         });
         // Asegurar que el FormArray de habitaciones se reinicie con 1 control

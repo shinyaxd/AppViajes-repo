@@ -255,6 +255,23 @@ export class AuthService {
     return this.currentUser$.pipe(map(user => user?.rol === 'viajero'));
   }
 
+  /**
+   * Obtiene el ID del usuario actual
+   * @returns ID del usuario o null si no está autenticado
+   */
+  public getCurrentUserId(): number | null {
+    const user = this.currentUserSubject.value;
+    return user?.id || null;
+  }
+
+  /**
+   * Verifica si el usuario está autenticado
+   * @returns true si está autenticado, false en caso contrario
+   */
+  public isAuthenticated(): boolean {
+    return this.isAuthenticatedSubject.value;
+  }
+
   // Se hace privado y se renombra para que solo sea llamado internamente o por el nuevo método público.
   private _setCurrentUser(user: User | null): void {
     this.currentUserSubject.next(user);

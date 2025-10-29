@@ -52,27 +52,36 @@
       </label>
 
       <label>
+        Precio por noche (PEN):
+        <input type="number" formControlName="precio_por_noche" min="1" required />
+      </label>
+
+      <label>
         Imagen principal (URL):
         <input type="text" formControlName="imagen_url" placeholder="https://ejemplo.com/hotel.jpg" />
       </label>
 
-      <!-- 👇 Galería de imágenes -->
       <div class="galeria">
-        <h4>Galería de imágenes</h4>
+        <h4>Galería de imágenes (Máx. 5)</h4>
 
-        <!-- ✅ Sin 'as FormArray' (ya se maneja en el TS) -->
         <div *ngFor="let imgCtrl of galeriaImagenes?.controls; let i = index">
           <input [formControl]="imgCtrl" placeholder="https://imagen.jpg" />
-          <button type="button" (click)="eliminarImagen(i)">🗑️</button>
+          <button type="button" class= "btn-remove" (click)="eliminarImagen(i)">❌ Eliminar</button>
         </div>
 
-        <input #nuevaImagen placeholder="URL de nueva imagen" />
-        <button
-          type="button"
-          (click)="agregarImagen(nuevaImagen.value); nuevaImagen.value=''"
-        >
-          ➕ Agregar imagen
-        </button>
+        <div *ngIf="galeriaImagenes.controls.length < 5">
+            <input #nuevaImagen placeholder="URL de nueva imagen" />
+            <button
+              type="button" class="btn-add"
+              (click)="agregarImagen(nuevaImagen.value); nuevaImagen.value=''"
+            >
+              ➕ Agregar imagen
+            </button>
+        </div>
+        <p *ngIf="galeriaImagenes.controls.length >= 5" class="limit-message">
+            Límite de 5 imágenes alcanzado.
+        </p>
+
       </div>
     </div>
 

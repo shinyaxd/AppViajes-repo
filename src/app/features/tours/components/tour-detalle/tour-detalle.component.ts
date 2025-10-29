@@ -3,12 +3,13 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { TourService, TourDetalles } from '../../services/tour.service';
 import { ServicioDetalleHeaderComponent, ServicioDetalleData } from '../../../../shared/components/servicio-detalle-header/servicio-detalle-header.component';
+import { ReviewsSectionComponent } from '../../../../shared/components/reviews-section/reviews-section.component';
 import { ImageUtils } from '../../../../shared/utils/image.utils';
 
 @Component({
   selector: 'app-tour-detalle',
   standalone: true,
-  imports: [CommonModule, RouterModule, ServicioDetalleHeaderComponent, CurrencyPipe, DatePipe],
+  imports: [CommonModule, RouterModule, ServicioDetalleHeaderComponent, ReviewsSectionComponent, CurrencyPipe, DatePipe],
   templateUrl: './tour-detalle.component.html',
   styleUrls: ['./tour-detalle.component.css']
 })
@@ -21,6 +22,11 @@ export class TourDetalleComponent implements OnInit {
   loading = true;
   error = false;
 
+  // 🆕 PROPIEDADES DE FILTRADO POR FECHA
+  checkInDate: string | null = null;
+  checkOutDate: string | null = null;
+  mensajeDisponibilidad: string = ''; // Mensaje para indicar si hay o no tours
+
   // Nuevas propiedades para reserva
   salidaSeleccionada: any = null;
   salidasFiltradas: any[] = [];
@@ -29,6 +35,13 @@ export class TourDetalleComponent implements OnInit {
   usarFechaTourDirecta = false; // Si el tour tiene fecha directa sin salidas
 
   ngOnInit(): void {
+    // 🆕 1. Obtener fechas de los QueryParams (como en el detalle-hotel)
+    this.route.queryParams.subscribe(qParams => {
+      this.checkInDate = qParams['checkIn'] || null;
+      this.checkOutDate = qParams['checkOut'] || null;
+      console.log('[INIT] Fechas de búsqueda:', { checkIn: this.checkInDate, checkOut: this.checkOutDate });
+    });
+
     this.route.paramMap.subscribe(params => {
       const idParam = params.get('id');
       const tourId = idParam ? parseInt(idParam, 10) : undefined;
@@ -50,7 +63,7 @@ export class TourDetalleComponent implements OnInit {
         this.tour = data;
         this.loading = false;
         console.log('✅ Tour cargado:', this.tour);
-        this.procesarSalidas();
+        this.procesarSalidas(); 
       },
       error: (error) => {
         console.error(`❌ Error al cargar el tour ID ${id}:`, error);
@@ -68,37 +81,67 @@ export class TourDetalleComponent implements OnInit {
 
     // Si tiene salidas definidas, usarlas
     if (this.tour.salidas && this.tour.salidas.length > 0) {
-      this.filtrarSalidasDisponibles();
+      this.filtrarSalidasDisponibles(); 
       this.usarFechaTourDirecta = false;
-      console.log(`✅ Tour tiene ${this.salidasFiltradas.length} salidas disponibles`);
+      console.log(`✅ Tour tiene ${this.salidasFiltradas.length} salidas disponibles después de filtro`);
     } 
     // Si no tiene salidas pero tiene fecha en tour, crear una salida virtual
     else if (this.tour.tour?.fecha && this.tour.tour?.cupos) {
-      this.usarFechaTourDirecta = true;
-      // ⚠️ IMPORTANTE: El ID debe ser real, no 0
-      // Por ahora usamos el servicio_id del tour como workaround
-      const salidaVirtual = {
-        id: this.tour.tour.servicio_id || this.tour.id, // Usar servicio_id o tour id
-        fecha_salida: this.tour.tour.fecha,
-        cupos_disponibles: this.tour.tour.cupos
-      };
-      this.salidasFiltradas = [salidaVirtual];
-      console.log('📅 Usando fecha directa del tour (salida virtual):', salidaVirtual);
-      console.warn('⚠️ Tour sin salidas múltiples definidas - usando ID del servicio');
+      
+      // 🆕 FILTRADO DE FECHA DIRECTA: Verificar si la fecha única cae dentro del rango
+      const tourDate = new Date(this.tour.tour.fecha);
+      const startFilter = this.checkInDate ? new Date(this.checkInDate) : null;
+      const endFilter = this.checkOutDate ? new Date(this.checkOutDate) : null;
+
+      const estaDentroDelRango = (!startFilter || tourDate >= startFilter) &&
+                                 (!endFilter || tourDate <= endFilter);
+
+      if (estaDentroDelRango) {
+        this.usarFechaTourDirecta = true;
+        const salidaVirtual = {
+          id: this.tour.tour.servicio_id || this.tour.id, 
+          fecha_salida: this.tour.tour.fecha,
+          cupos_disponibles: this.tour.tour.cupos
+        };
+        this.salidasFiltradas = [salidaVirtual];
+        this.mensajeDisponibilidad = '';
+        console.log('📅 Usando fecha directa del tour (salida virtual):', salidaVirtual);
+      } else {
+        this.usarFechaTourDirecta = false;
+        this.salidasFiltradas = [];
+        this.mensajeDisponibilidad = '❌ No hay tours disponibles para las fechas seleccionadas.';
+        console.log('❌ Fecha directa no coincide con el rango de búsqueda.');
+      }
     } else {
       console.error('❌ Tour sin salidas ni fecha definida');
       this.salidasFiltradas = [];
     }
+    
+    // 🆕 Si el resultado final de salidas es 0, mostrar mensaje
+    if (!this.usarFechaTourDirecta && this.salidasFiltradas.length === 0) {
+      this.mensajeDisponibilidad = '❌ No hay tours disponibles para las fechas seleccionadas.';
+    } else {
+      this.mensajeDisponibilidad = '';
+    }
   }
 
   /**
-   * Filtra salidas disponibles (solo fechas futuras y con cupos)
+   * Filtra salidas disponibles (solo fechas futuras, con cupos y DENTRO DEL RANGO)
    */
   filtrarSalidasDisponibles(): void {
     if (!this.tour?.salidas) return;
     
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
+
+    // 🆕 Convertir las fechas de búsqueda a objetos Date para la comparación
+    const fechaInicioBusqueda = this.checkInDate ? new Date(this.checkInDate) : null;
+    const fechaFinBusqueda = this.checkOutDate ? new Date(this.checkOutDate) : null;
+    
+    if (fechaInicioBusqueda) fechaInicioBusqueda.setHours(0, 0, 0, 0);
+    // El fin de la búsqueda debe incluir todo el día de checkOutDate
+    if (fechaFinBusqueda) fechaFinBusqueda.setHours(23, 59, 59, 999);
+
 
     this.salidasFiltradas = this.tour.salidas
       .map(salida => {
@@ -115,15 +158,34 @@ export class TourDetalleComponent implements OnInit {
         };
       })
       .filter(salida => {
-        // Filtrar solo fechas futuras y con cupos disponibles
+        // Normalizar la fecha de salida a medianoche para comparación
         const fechaSalida = new Date(salida.fecha_salida);
-        return fechaSalida >= hoy && salida.cupos_disponibles > 0;
+        const fechaSalidaSoloDia = new Date(fechaSalida.getFullYear(), fechaSalida.getMonth(), fechaSalida.getDate());
+
+        // 1. Filtrar solo fechas futuras (desde hoy) y con cupos disponibles
+        const esFuturaYConCupos = fechaSalidaSoloDia >= hoy && salida.cupos_disponibles > 0;
+        if (!esFuturaYConCupos) return false;
+        
+        // 🆕 2. FILTRO POR RANGO DE FECHAS (Check In / Check Out)
+        let estaEnRango = true;
+        
+        // La fecha de salida debe ser mayor o igual al Check In
+        if (fechaInicioBusqueda && fechaSalidaSoloDia < fechaInicioBusqueda) {
+          estaEnRango = false;
+        }
+        
+        // La fecha de salida debe ser menor o igual al Check Out (incluyendo todo el día)
+        if (fechaFinBusqueda && fechaSalida > fechaFinBusqueda) {
+          estaEnRango = false;
+        }
+
+        return estaEnRango;
       })
       .sort((a, b) => {
         return new Date(a.fecha_salida).getTime() - new Date(b.fecha_salida).getTime();
       });
 
-    console.log(`📅 Salidas disponibles: ${this.salidasFiltradas.length}`, this.salidasFiltradas);
+    console.log(`📅 Salidas disponibles después del filtro de rango: ${this.salidasFiltradas.length}`, this.salidasFiltradas);
   }
 
   get servicioData(): ServicioDetalleData | null {
@@ -163,7 +225,13 @@ export class TourDetalleComponent implements OnInit {
   }
 
   volverAResultados(): void {
-    this.router.navigate(['/tour/resultados']);
+    // 🆕 Incluir las fechas de búsqueda al volver
+    this.router.navigate(['/tour/resultados'], {
+        queryParams: {
+            checkIn: this.checkInDate,
+            checkOut: this.checkOutDate,
+        }
+    });
   }
 
   /**

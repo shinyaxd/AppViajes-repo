@@ -5,6 +5,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { HotelService, HotelData, Habitacion } from '../../services/hoteles.service';
 import { ServicioDetalleHeaderComponent, ServicioDetalleData } from '../../../../shared/components/servicio-detalle-header/servicio-detalle-header.component';
+import { ReviewsSectionComponent } from '../../../../shared/components/reviews-section/reviews-section.component';
 import { DateUtils } from '../../../../shared/utils/date.utils';
 import { ImageUtils } from '../../../../shared/utils/image.utils';
 
@@ -13,7 +14,7 @@ import { ImageUtils } from '../../../../shared/utils/image.utils';
   templateUrl: './detalles-hotel.component.html',
   styleUrls: ['./detalles-hotel.component.css'],
   standalone: true,
-  imports: [CommonModule, HttpClientModule, RouterModule, FormsModule, ServicioDetalleHeaderComponent]
+  imports: [CommonModule, HttpClientModule, RouterModule, FormsModule, ServicioDetalleHeaderComponent, ReviewsSectionComponent]
 })
 export class DetallesHotelComponent implements OnInit {
 
@@ -114,30 +115,57 @@ export class DetallesHotelComponent implements OnInit {
   // ==========================================================
   // 🔹 Validar disponibilidad según fechas
   // ==========================================================
-  verificarDisponibilidad(): void {
+verificarDisponibilidad(): void {
     if (!this.hotel) return;
 
     if (!this.checkInDate || !this.checkOutDate) {
       this.mensajeDisponibilidad = '';
       console.log('[DISPO] sin fechas → no filtro');
+      // No aplicamos ningún filtro si faltan fechas
       return;
     }
 
     const antes = this.habitacionesFiltradas.length;
+    
+    // --- Lógica de Filtrado Actualizada ---
     const disponibles = this.habitacionesFiltradas.filter(h => {
+      
+      // 1. FILTRO DE STOCK/UNIDADES
       const stock = (h.unidades_disponibles ?? h.cantidad ?? 0);
-      return stock > 0;
+      if (stock <= 0) {
+        return false; // No hay stock
+      }
+      
+      // 2. FILTRO DE CAPACIDAD POR HUÉSPEDES (NUEVA LÓGICA)
+      // Asumimos que la habitación debe tener la capacidad para alojar a TODOS los adultos/niños buscados
+      // Si el hotel permite alojar X adultos en Y habitaciones, esta lógica debe ser más compleja.
+      // Aquí, filtramos la habitación si su capacidad es menor a lo que busca el usuario.
+      
+      const capacidadAdultos = h.capacidad_adultos ?? 0; // Se asume esta propiedad existe
+      const capacidadNinos = h.capacidad_ninos ?? 0;     // Se asume esta propiedad existe
+      
+      if (this.adultos > capacidadAdultos) {
+        console.log(`[DISPO] ❌ Habitación ${h.id} (${h.nombre}) filtrada: Adultos buscados (${this.adultos}) > Capacidad Adultos (${capacidadAdultos})`);
+        return false;
+      }
+      
+      if (this.ninos > capacidadNinos) {
+        console.log(`[DISPO] ❌ Habitación ${h.id} (${h.nombre}) filtrada: Niños buscados (${this.ninos}) > Capacidad Niños (${capacidadNinos})`);
+        return false;
+      }
+
+      return true; // Pasa ambos filtros: tiene stock y tiene capacidad suficiente
     });
+    // --- Fin de Lógica de Filtrado Actualizada ---
 
     this.mensajeDisponibilidad = disponibles.length === 0
-      ? '❌ El hotel no tiene disponibilidad entre las fechas seleccionadas.'
+      ? '❌ El hotel no tiene disponibilidad entre las fechas seleccionadas o sus habitaciones no cumplen con los requisitos de huéspedes.'
       : '';
 
     this.habitacionesFiltradas = disponibles;
-    console.log('[DISPO] filtrado por fechas', { antes, despues: disponibles.length, mensaje: this.mensajeDisponibilidad });
+    console.log('[DISPO] filtrado por fechas y capacidad', { antes, despues: disponibles.length, mensaje: this.mensajeDisponibilidad });
     this.verificarSeleccion();
   }
-
   // ==========================================================
   // 🔸 Guardar fechas seleccionadas manualmente (modal)
   // ==========================================================

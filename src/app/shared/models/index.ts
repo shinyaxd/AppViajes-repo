@@ -23,3 +23,6 @@ export * from './tour.model';
 
 // Modelos de Reservas
 export * from './reserva.model';
+
+// Modelos de Reseñas
+export * from './review.model';

@@ -39,6 +39,12 @@ export class EditarPerfilComponent implements OnInit {
 
   showDeleteConfirmation = signal(false);
 
+  // ********************************************
+  // * NUEVAS SEÑALES PARA MOSTRAR/OCULTAR PASSWORD
+  showPassword = signal(false);
+  showConfirmPassword = signal(false);
+  // ********************************************
+
   message = signal('');
   messageType = signal<'success' | 'error'>('success');
 
@@ -157,6 +163,17 @@ export class EditarPerfilComponent implements OnInit {
       { validators: passwordMatchValidator() }
     );
   }
+
+  // ********************************************
+  // * NUEVOS MÉTODOS PARA MOSTRAR/OCULTAR PASSWORD
+  togglePassword(): void {
+    this.showPassword.update(state => !state);
+  }
+
+  toggleConfirmPassword(): void {
+    this.showConfirmPassword.update(state => !state);
+  }
+  // ********************************************
 
   async guardarCambios(): Promise<void> {
     this.message.set('');

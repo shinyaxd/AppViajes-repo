@@ -1,0 +1,97 @@
+<div class="reviews-section">
+  <!-- ======================= -->
+  <!-- ENCABEZADO DE OPINIONES -->
+  <!-- ======================= -->
+  <div class="reviews-header">
+    <div class="reviews-title-container">
+      <h2 class="reviews-title">Opiniones</h2>
+      <button class="btn-dejar-opinion" (click)="abrirFormulario()">
+        Deja tu opinión
+      </button>
+    </div>
+
+    <!-- Promedio de calificación -->
+    <div class="rating-summary" *ngIf="totalReviews > 0">
+      <div class="rating-number">{{ promedioCalificacion }}</div>
+      <div class="rating-text">{{ textoCalificacion }}</div>
+    </div>
+
+    <div class="no-reviews" *ngIf="totalReviews === 0 && !loading">
+      <p>Aún no hay reseñas. ¡Sé el primero en dejar una opinión!</p>
+    </div>
+  </div>
+
+  <!-- ======================= -->
+  <!-- ESTADO DE CARGA -->
+  <!-- ======================= -->
+  <div class="loading-state" *ngIf="loading">
+    <p>Cargando reseñas...</p>
+  </div>
+
+  <!-- ======================= -->
+  <!-- ESTADO DE ERROR -->
+  <!-- ======================= -->
+  <div class="error-state" *ngIf="error && !loading">
+    <p>{{ errorMessage }}</p>
+    <button class="btn-reintentar" (click)="loadReviews()">Reintentar</button>
+  </div>
+
+  <!-- ======================= -->
+  <!-- LISTA DE RESEÑAS -->
+  <!-- ======================= -->
+  <div class="reviews-list" *ngIf="!loading && !error && reviews.length > 0">
+    <div class="review-card" *ngFor="let review of reviews">
+      <!-- Usuario y fecha -->
+      <div class="review-header">
+        <div class="user-info">
+          <div class="user-avatar">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="user-details">
+            <div class="user-name-container">
+              <span class="user-name">{{ review.usuario.nombre_completo }}</span>
+              <div class="review-stars">
+                <i 
+                  *ngFor="let estrella of getEstrellas(review.calificacion)" 
+                  class="fas fa-star"
+                  [class.filled]="estrella.llena"
+                  [class.empty]="!estrella.llena"
+                ></i>
+              </div>
+            </div>
+            <span class="review-date">{{ review.fecha_formateada }}</span>
+          </div>
+        </div>
+
+        <!-- Botón de eliminar (solo si es el autor) -->
+        <button 
+          *ngIf="isAuthor(review)" 
+          class="btn-delete-review"
+          (click)="eliminarReview(review)"
+          title="Eliminar reseña"
+        >
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+
+      <!-- Comentario -->
+      <div class="review-content">
+        <p>{{ review.comentario }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= -->
+  <!-- MODAL DEL FORMULARIO -->
+  <!-- ======================= -->
+  <div class="modal-overlay" *ngIf="mostrarFormulario" (click)="cerrarFormulario()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <app-review-form
+        [servicioId]="servicioId"
+        [servicioTipo]="servicioTipo"
+        (onSubmit)="onReviewCreated($event)"
+        (onCancel)="cerrarFormulario()"
+      ></app-review-form>
+    </div>
+  </div>
+</div>
