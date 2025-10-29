@@ -3,12 +3,13 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { TourService, TourDetalles } from '../../services/tour.service';
 import { ServicioDetalleHeaderComponent, ServicioDetalleData } from '../../../../shared/components/servicio-detalle-header/servicio-detalle-header.component';
+import { ReviewsSectionComponent } from '../../../../shared/components/reviews-section/reviews-section.component';
 import { ImageUtils } from '../../../../shared/utils/image.utils';
 
 @Component({
   selector: 'app-tour-detalle',
   standalone: true,
-  imports: [CommonModule, RouterModule, ServicioDetalleHeaderComponent, CurrencyPipe, DatePipe],
+  imports: [CommonModule, RouterModule, ServicioDetalleHeaderComponent, ReviewsSectionComponent, CurrencyPipe, DatePipe],
   templateUrl: './tour-detalle.component.html',
   styleUrls: ['./tour-detalle.component.css']
 })
