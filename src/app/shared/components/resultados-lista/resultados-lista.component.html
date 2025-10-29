@@ -25,6 +25,11 @@
           {{ item.ubicacion }}
         </p>
 
+        <!-- Categoría (solo tours) -->
+        <p *ngIf="tipo === 'tours' && item.categoria" class="resultado-categoria">
+          <strong>Categoría:</strong> {{ item.categoria }}
+        </p>
+
         <!-- Estrellas (solo hoteles) -->
         <div *ngIf="tipo === 'hoteles' && item.estrellas" class="resultado-estrellas">
           <span class="estrellas-icon">{{ '⭐'.repeat(item.estrellas) }}</span>

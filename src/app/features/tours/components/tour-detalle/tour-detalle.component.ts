@@ -212,6 +212,7 @@ export class TourDetalleComponent implements OnInit {
       nombre: this.tour.nombre || 'Tour sin nombre',
       ciudad: this.tour.ciudad || '',
       pais: this.tour.pais || '',
+      categoria: tourData?.categoria || this.route.snapshot.queryParamMap.get('categoria') || '',
       precio: tourData?.precio ? parseFloat(tourData.precio as any) : null,
       descripcion: this.tour.descripcion || '',
       duracion: duracionHoras,

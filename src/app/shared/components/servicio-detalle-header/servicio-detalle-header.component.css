@@ -322,3 +322,85 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ======================= */
+/* VISOR / MODAL DE IMÁGENES */
+/* ======================= */
+.image-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.image-modal .modal-content {
+  position: relative;
+  max-width: 1100px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-modal .modal-image {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+}
+
+.image-modal .close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-modal .nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.image-modal .nav-btn.prev { left: 12px; }
+.image-modal .nav-btn.next { right: 12px; }
+
+.image-modal .counter {
+  position: absolute;
+  bottom: 14px;
+  right: 16px;
+  color: #fff;
+  background: rgba(0,0,0,0.4);
+  padding: 6px 10px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 640px) {
+  .image-modal .nav-btn { width: 40px; height: 40px; }
+  .image-modal .close-btn { width: 36px; height: 36px; }
+}

@@ -1,7 +1,7 @@
 import { Component, OnInit, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+ import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 
 import { HotelService, Habitacion, HotelData, HotelDetalles } from '../../../features/hoteles/services/hoteles.service'; 
 import { DateUtils } from '../../utils/date.utils'; 
@@ -36,6 +36,7 @@ export class BuscadorComponent implements OnInit {
   // 🔑 Inyección de servicios usando inject()
   private router = inject(Router);
   private hotelService = inject(HotelService); 
+  private route = inject(ActivatedRoute);
 
   // La propiedad de entrada para determinar qué tipo de buscador mostrar
   @Input() tipoBusqueda: 'hoteles' | 'tours' | undefined;
@@ -74,6 +75,46 @@ export class BuscadorComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarDestinosDisponibles();
+    // Inicializar campos desde query params para conservar "memoria" al navegar
+    try {
+      this.route.queryParams.subscribe(params => {
+        // Hoteles usan 'ciudad', tours usan 'destino'
+        if (params['ciudad']) {
+          this.destino = params['ciudad'];
+        } else if (params['destino']) {
+          this.destino = params['destino'];
+        }
+
+        if (params['checkIn']) {
+          this.checkInDate = params['checkIn'];
+          this.minCheckoutDate = DateUtils.getMinCheckoutDate(this.checkInDate);
+        }
+        if (params['checkOut']) {
+          this.checkOutDate = params['checkOut'];
+        }
+
+        // Hoteles
+        if (params['adultos']) {
+          this.huespedes.adultos = +params['adultos'] || this.huespedes.adultos;
+        }
+        if (params['ninos']) {
+          this.huespedes.ninos = +params['ninos'] || this.huespedes.ninos;
+        }
+        if (params['habitaciones']) {
+          this.huespedes.habitaciones = +params['habitaciones'] || this.huespedes.habitaciones;
+        }
+
+        // Tours
+        if (params['categoria']) {
+          this.categoriaTour = params['categoria'] || '';
+        }
+        if (params['personas']) {
+          this.personas.total = +params['personas'] || this.personas.total;
+        }
+      });
+    } catch (e) {
+      // ignore
+    }
   }
 
   /**

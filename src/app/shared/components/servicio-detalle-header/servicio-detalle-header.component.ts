@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ImageUtils } from '../../utils/image.utils';
@@ -12,6 +12,7 @@ export interface ServicioDetalleData {
   rating?: number;
   resenas?: number; // Cantidad de reseñas (sin ñ para evitar problemas de encoding)
   calificacion_texto?: string; // "Excelente", "Muy bueno", etc.
+  categoria?: string; // Para tours: e.g. "Aventura", "Cultural"
   precio: number | null;
   descripcion: string;
   duracion?: string; // Solo para tours: "10 Horas"
@@ -58,6 +59,44 @@ export class ServicioDetalleHeaderComponent {
 
   reservar(): void {
     this.onReservar.emit();
+  }
+
+  // Visor / modal de imágenes (solo reimplementado)
+  viewerOpen = false;
+  currentIndex = 0;
+
+  openViewer(index: number): void {
+    this.currentIndex = index;
+    this.viewerOpen = true;
+    // prevent body scroll
+    document.body.style.overflow = 'hidden';
+  }
+
+  closeViewer(): void {
+    this.viewerOpen = false;
+    document.body.style.overflow = '';
+  }
+
+  nextImage(): void {
+    const length = this.imagenesParaGrid.length;
+    this.currentIndex = (this.currentIndex + 1) % length;
+  }
+
+  prevImage(): void {
+    const length = this.imagenesParaGrid.length;
+    this.currentIndex = (this.currentIndex - 1 + length) % length;
+  }
+
+  get currentImage(): string {
+    return this.imagenesParaGrid[this.currentIndex];
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeydown(event: KeyboardEvent) {
+    if (!this.viewerOpen) return;
+    if (event.key === 'Escape') this.closeViewer();
+    if (event.key === 'ArrowRight') this.nextImage();
+    if (event.key === 'ArrowLeft') this.prevImage();
   }
 
   repetirEstrellas(cantidad: number): string {
