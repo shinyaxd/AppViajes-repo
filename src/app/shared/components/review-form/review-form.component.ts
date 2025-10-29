@@ -67,11 +67,38 @@ export class ReviewFormComponent {
    * Validar si el formulario es válido
    */
   get isValid(): boolean {
+    const comentarioLength = this.comentario.trim().length;
     return (
       this.calificacion > 0 &&
-      this.comentario.trim().length >= this.MIN_CARACTERES &&
-      this.comentario.trim().length <= this.MAX_CARACTERES
+      this.calificacion <= 5 &&
+      comentarioLength >= this.MIN_CARACTERES &&
+      comentarioLength <= this.MAX_CARACTERES
     );
+  }
+
+  /**
+   * Obtener mensaje de validación si el formulario no es válido
+   */
+  get validationMessage(): string {
+    if (this.calificacion === 0) {
+      return 'Selecciona una calificación';
+    }
+    
+    const comentarioLength = this.comentario.trim().length;
+    
+    if (comentarioLength === 0) {
+      return 'Escribe un comentario';
+    }
+    
+    if (comentarioLength < this.MIN_CARACTERES) {
+      return `El comentario debe tener al menos ${this.MIN_CARACTERES} caracteres`;
+    }
+    
+    if (comentarioLength > this.MAX_CARACTERES) {
+      return `El comentario no puede exceder los ${this.MAX_CARACTERES} caracteres`;
+    }
+    
+    return '';
   }
 
   /**
@@ -95,7 +122,15 @@ export class ReviewFormComponent {
    * Enviar formulario
    */
   enviarReview(): void {
-    if (!this.isValid || this.submitting) {
+    // Validación previa
+    if (this.submitting) {
+      return;
+    }
+
+    // Mostrar mensaje si no es válido
+    if (!this.isValid) {
+      this.error = true;
+      this.errorMessage = this.validationMessage;
       return;
     }
 
@@ -108,6 +143,8 @@ export class ReviewFormComponent {
       comentario: this.comentario.trim()
     };
 
+    console.log('📤 Enviando reseña:', reviewData);
+
     this.reviewsService.createReview(reviewData).subscribe({
       next: (review: Review) => {
         console.log('✅ Reseña creada exitosamente:', review);
@@ -116,7 +153,7 @@ export class ReviewFormComponent {
         this.resetForm();
       },
       error: (error: Error) => {
-        console.error('❌ Error al crear reseña:', error);
+        console.error('Error completo al crear reseña:', error);
         this.error = true;
         this.errorMessage = error.message || 'No se pudo enviar tu reseña. Intenta nuevamente.';
         this.submitting = false;

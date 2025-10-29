@@ -97,13 +97,66 @@ export class ReviewsService {
       headers: this.getHeaders()
     }).pipe(
       catchError((error: any) => {
-        console.error('Error al crear reseña:', error);
+        console.group('❌ ERROR AL CREAR RESEÑA');
+        console.log('Status:', error.status);
+        console.log('Status Text:', error.statusText);
+        console.log('Error completo:', error);
+        console.log('Error.error:', error.error);
+        console.log('Tipo de error.error:', typeof error.error);
+        console.groupEnd();
+        
+        // Error de autenticación
         if (error.status === 401) {
           return throwError(() => new Error('Debes iniciar sesión para dejar una reseña.'));
         }
+        
+        // Error de validación (422)
         if (error.status === 422) {
-          return throwError(() => new Error('Datos inválidos. Verifica que la calificación y el comentario sean correctos.'));
+          console.log('🔍 Procesando error 422...');
+          let errorMessage = '';
+          
+          if (error.error?.errors) {
+            console.log('✓ Tiene error.error.errors:', error.error.errors);
+            // Laravel devuelve errores en formato { errors: { campo: [mensajes] } }
+            const errors = error.error.errors;
+            const firstErrorKey = Object.keys(errors)[0];
+            const firstError = errors[firstErrorKey];
+            
+            if (Array.isArray(firstError) && firstError.length > 0) {
+              errorMessage = firstError[0];
+            } else if (typeof firstError === 'string') {
+              errorMessage = firstError;
+            }
+            console.log('Mensaje extraído de errors:', errorMessage);
+          } else if (error.error?.message) {
+            console.log('✓ Tiene error.error.message:', error.error.message);
+            // Si hay un mensaje general
+            errorMessage = error.error.message;
+          } else if (typeof error.error === 'string') {
+            console.log('✓ error.error es un string:', error.error);
+            errorMessage = error.error;
+          }
+          
+          // Si no se pudo extraer mensaje, usar uno por defecto
+          if (!errorMessage) {
+            console.log('⚠️ No se pudo extraer mensaje, usando default');
+            errorMessage = 'No se pudo crear la reseña. Verifica:\n';
+            errorMessage += '• La calificación sea entre 1 y 5 estrellas\n';
+            errorMessage += '• El comentario tenga entre 10 y 300 caracteres\n';
+            errorMessage += '• No hayas dejado una reseña anteriormente';
+          }
+          
+          console.log('📢 Mensaje final:', errorMessage);
+          return throwError(() => new Error(errorMessage));
         }
+        
+        // Error de permisos (403)
+        if (error.status === 403) {
+          return throwError(() => new Error('No tienes permiso para dejar una reseña en este servicio.'));
+        }
+        
+        // Otros errores
+        console.log('⚠️ Error no manejado específicamente, status:', error.status);
         return throwError(() => new Error('No se pudo crear la reseña. Intenta nuevamente.'));
       })
     );
