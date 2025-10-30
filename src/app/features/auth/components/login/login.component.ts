@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators, ReactiveFormsModule, FormGroup } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-// Asumiendo que has actualizado LoginCredentials en auth.service.ts para ser opcional
-import { AuthService, LoginCredentials } from '../../../../core/services/auth.service'; 
+import { AuthService, LoginCredentials, AuthResponse, User } from '../../../../core/services/auth.service'; 
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-login',
@@ -31,6 +31,12 @@ export class LoginComponent implements OnInit {
       password: ['', Validators.required],
       rememberMe: [false] 
     });
+    
+    // Pre-cargar el CSRF Token al cargar el componente
+    this.authService.getCSRFToken().subscribe({
+      next: () => console.log('✅ CSRF Token de seguridad inicial cargado.'),
+      error: (err) => console.error('❌ Error al cargar el CSRF Token inicial:', err)
+    });
   }
 
   togglePassword(): void {
@@ -49,27 +55,36 @@ export class LoginComponent implements OnInit {
 
     this.isSubmitting = true;
     
-    // Al obtener los valores, Angular incluirá 'rememberMe', aunque tu API probablemente lo ignore.
     const formValue = this.loginForm.getRawValue();
-  
     const data: LoginCredentials = {
         email: formValue.email,
         password: formValue.password
     };
-
-    this.authService.login(data).subscribe({
-      next: (res) => {
+    
+    // 1. Obtener/actualizar CSRF Token
+    this.authService.getCSRFToken().pipe(
+      // 2. Encadenar con la llamada de login
+      switchMap(() => this.authService.login(data))
+      
+    ).subscribe({
+      next: (res: AuthResponse) => {
         this.message = res.message || '✅ Sesión iniciada exitosamente.';
         this.isSubmitting = false;
 
-        console.log('Login exitoso. Usuario:', res.user.email, 'Rol:', res.user.rol);
+        // 🟢 CORRECCIÓN FINAL: Accedemos al usuario vía res.data.user
+        const user: User = res.data.user;
+        if (!user) {
+            this.error = '❌ Login exitoso, pero faltan datos del usuario en la respuesta.';
+            return;
+        }
+
+        console.log('Login exitoso. Usuario:', user.email, 'Rol:', user.rol);
 
         // ==========================================================
         // ✅ LÓGICA DE REDIRECCIÓN SEGÚN EL ROL
         // ==========================================================
-        const userRole = res.user.rol;
+        const userRole = user.rol;
 
-        // 🧠 Guardamos el rol explícitamente (por si el AuthService no lo hizo aún)
         if (userRole) {
           localStorage.setItem('user_role', userRole);
         }
@@ -81,12 +96,10 @@ export class LoginComponent implements OnInit {
           redirectPath = '/hoteles';
         }
 
-        // Redirigimos después de un pequeño delay
         setTimeout(() => {
           this.router.navigate([redirectPath]);
         }, 400);
 
-        // Usamos el valor de rememberMe del formulario para el reset
         this.loginForm.reset({ rememberMe: formValue.rememberMe }); 
       },
       error: (err) => {
