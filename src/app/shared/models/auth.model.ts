@@ -27,15 +27,15 @@ export interface RegisterData {
 }
 
 /**
- * 🔴 CAMBIO: Nueva Respuesta del servidor al hacer login (JWT con Cookie)
- * Coincide con la estructura JSON devuelta por JwtAuthController::login()
+ * Respuesta del servidor al hacer login (JWT con Cookies)
  */
 export interface AuthResponse {
   message: string;
-  // 🔴 ELIMINAMOS: El token ya no viene en el body
+  // ELIMINAR: El token ahora se envía en una cookie HttpOnly.
   // token: string; 
-  // 🔴 AÑADIMOS: La respuesta ahora tiene un nivel 'data' que contiene el usuario
-  expires_in: number;
+
+  // NUEVO: La información del usuario está anidada en 'data' y se incluye 'expires_in'
+  expires_in: number; // Tiempo de vida del token en segundos
   data: {
     user: User;
   };
@@ -43,7 +43,6 @@ export interface AuthResponse {
 
 /**
  * Respuesta del servidor al registrar un usuario
- * (Se mantiene igual, ya que usa 'data: { user: User }')
  */
 export interface RegisterResponse {
   message: string;

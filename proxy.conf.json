@@ -4,7 +4,6 @@
     "target": "http://host.docker.internal:8000",
     "secure": false,
     "changeOrigin": true,
-    "logLevel": "debug",
-    "cookieDomainRewrite": "localhost"
+    "logLevel": "debug"
   }
 }
