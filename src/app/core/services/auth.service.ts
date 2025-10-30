@@ -3,7 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
 // Se agrega switchMap para encadenar la petición CSRF antes del login/logout
-import { tap, catchError, map, finalize, switchMap } from 'rxjs/operators'; 
+import { tap, catchError, map, finalize, switchMap } from 'rxjs/operators'; // Se elimina 'concatMap'
 import { environment } from '../../../environments/environment';
 import { LoadingService } from './loading.service';
 
@@ -140,7 +140,8 @@ export class AuthService {
   // ==========================================================
   // REGISTRO (Se asume que la ruta /auth/register se mantiene)
   // ==========================================================
-  register(data: RegisterData): Observable<RegisterResponse> {
+  // 💡 El tipo de retorno vuelve a ser RegisterResponse, no User
+  register(data: RegisterData): Observable<RegisterResponse> { 
     const url = `${this.BASE_ENDPOINT}/auth/register`;
     // Lógica de payload original (ajusta si es necesario para tu backend)
     const basePayload = {
@@ -164,15 +165,15 @@ export class AuthService {
     this.loadingService.show('Registrando usuario...');
 
     return this.http.post<RegisterResponse>(url, payload).pipe(
-      tap(response => {
-        console.log('✅ Registro exitoso:', response.data.user);
-
-        if (response.data.user) {
-          this.isAuthenticatedSubject.next(true);
-          this._setCurrentUser(response.data.user);
-        }
+      tap(() => {
+        // 🚨 CRUCIAL: Eliminamos la actualización de estado para evitar el autologin.
+        console.log('✅ Registro exitoso. Cookie de sesión establecida, pero NO se actualiza el estado local.');
       }),
-      catchError((error: HttpErrorResponse) => this.handleError(error, 'registro')),
+      // 🚨 CRUCIAL: Eliminamos el concatMap(() => this.getMe()) para que no se autologee.
+      catchError((error: HttpErrorResponse) => {
+        this.loadingService.hide();
+        return this.handleError(error, 'registro'); // Contexto de error simple
+      }),
       finalize(() => this.loadingService.hide())
     );
   }
@@ -201,6 +202,7 @@ export class AuthService {
               if (user.rol) {
                 localStorage.setItem(this.ROLE_KEY, user.rol);
               }
+              // Aquí sí se inicia sesión
               this.isAuthenticatedSubject.next(true);
               this._setCurrentUser(user);
             }

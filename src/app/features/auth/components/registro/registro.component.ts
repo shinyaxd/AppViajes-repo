@@ -11,7 +11,8 @@ import {
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService, RegisterData } from '../../../../core/services/auth.service';
+// Importamos RegisterResponse para manejar la respuesta del servidor (éxito/mensaje)
+import { AuthService, RegisterData, RegisterResponse } from '../../../../core/services/auth.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -168,15 +169,20 @@ export class RegistroComponent implements OnInit, OnDestroy {
     const { confirmPassword, ...formValue } = this.registerForm.getRawValue();
     const data: RegisterData = formValue as RegisterData;
 
+    // Ahora esperamos RegisterResponse, ya que auth.service.ts ya no hace autologin
     this.authService.register(data).subscribe({
-      next: (res) => {
-        this.message = res.message || '✅ Cuenta creada exitosamente.';
+      next: (res: RegisterResponse) => { // Especificamos el tipo RegisterResponse
+        // Establecer un mensaje de éxito genérico
+        this.message = res.message || '✅ Registro exitoso. Por favor, inicia sesión con tus nuevas credenciales.';
         this.isSubmitting = false;
         this.registerForm.reset({ rol: data.rol });
+        
+        // Redirigir a /hoteles después de 2 segundos.
         setTimeout(() => this.router.navigate(['/hoteles']), 2000);
       },
       error: (err) => {
         this.isSubmitting = false;
+        // El error ya viene formateado como un Error con un 'message' por el AuthService
         this.error = err?.message || '❌ Ocurrió un error durante el registro.';
       }
     });
