@@ -27,12 +27,18 @@ export interface RegisterData {
 }
 
 /**
- * Respuesta del servidor al hacer login
+ * Respuesta del servidor al hacer login (JWT con Cookies)
  */
 export interface AuthResponse {
   message: string;
-  token: string;
-  user: User;
+  // ELIMINAR: El token ahora se envía en una cookie HttpOnly.
+  // token: string; 
+
+  // NUEVO: La información del usuario está anidada en 'data' y se incluye 'expires_in'
+  expires_in: number; // Tiempo de vida del token en segundos
+  data: {
+    user: User;
+  };
 }
 
 /**

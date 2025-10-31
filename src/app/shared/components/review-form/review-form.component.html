@@ -1,0 +1,90 @@
+<div class="review-form-container">
+  <!-- ======================= -->
+  <!-- TÍTULO -->
+  <!-- ======================= -->
+  <div class="form-header">
+    <h3>Cuéntanos cómo fue tu experiencia...</h3>
+  </div>
+
+  <!-- ======================= -->
+  <!-- SELECTOR DE ESTRELLAS -->
+  <!-- ======================= -->
+  <div class="rating-selector">
+    <div class="stars-container">
+      <i
+        *ngFor="let num of estrellasArray"
+        class="fas fa-star"
+        [class.selected]="num <= estrellasAMostrar"
+        [class.unselected]="num > estrellasAMostrar"
+        (click)="seleccionarCalificacion(num)"
+        (mouseenter)="onMouseEnter(num)"
+        (mouseleave)="onMouseLeave()"
+      ></i>
+    </div>
+    <p class="rating-hint" *ngIf="calificacion === 0">
+      Selecciona tu calificación
+    </p>
+  </div>
+
+  <!-- ======================= -->
+  <!-- ÁREA DE TEXTO -->
+  <!-- ======================= -->
+  <div class="comentario-container">
+    <textarea
+      [(ngModel)]="comentario"
+      placeholder="El tour a Lunahuana fue increíble. La experiencia de hacer rafting en el río fue muy emocionante y siempre nos sentimos seguros gracias a las instrucciones del guía. Además, la tirolesa estuvo espectacular con una vista impresionante del valle. El transporte fue puntual y cómodo, y el almuerzo incluido superó mis expectativas. ¡Definitivamente lo recomiendo para quienes buscan aventura y naturalezalh"
+      rows="6"
+      [maxlength]="MAX_CARACTERES"
+      class="comentario-textarea"
+      [class.error]="caracteresRestantes < 0"
+    ></textarea>
+    
+    <div class="caracteres-info">
+      <span class="min-caracteres" *ngIf="comentario.length < MIN_CARACTERES">
+        Mínimo {{ MIN_CARACTERES }} caracteres
+      </span>
+      <span class="contador-caracteres" [style.color]="contadorColor">
+        <span *ngIf="caracteresRestantes >= 0">
+          Mínimo {{ MIN_CARACTERES }} caracteres, máximo {{ MAX_CARACTERES }} caracteres
+        </span>
+        <span *ngIf="caracteresRestantes < 0" class="excedido">
+          Has excedido el límite por {{ -caracteresRestantes }} caracteres
+        </span>
+      </span>
+    </div>
+  </div>
+
+  <!-- ======================= -->
+  <!-- MENSAJE DE ERROR -->
+  <!-- ======================= -->
+  <div class="error-message" *ngIf="error">
+    <i class="fas fa-exclamation-circle"></i>
+    <div class="error-text">
+      <p *ngFor="let line of errorMessage.split('\n')">{{ line }}</p>
+    </div>
+  </div>
+
+  <!-- ======================= -->
+  <!-- BOTONES DE ACCIÓN -->
+  <!-- ======================= -->
+  <div class="form-actions">
+    <button
+      class="btn-cancelar"
+      (click)="cancelar()"
+      [disabled]="submitting"
+      type="button"
+    >
+      Cancelar
+    </button>
+    <button
+      class="btn-enviar"
+      (click)="enviarReview()"
+      [disabled]="submitting"
+      [title]="!isValid ? validationMessage : ''"
+      type="button"
+    >
+      <span *ngIf="!submitting">Enviar</span>
+      <span *ngIf="submitting">Enviando...</span>
+    </button>
+  </div>
+</div>

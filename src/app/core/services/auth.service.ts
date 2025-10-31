@@ -2,12 +2,15 @@ import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
-import { tap, catchError, map, finalize } from 'rxjs/operators';
+// Se agrega switchMap para encadenar la petición CSRF antes del login/logout
+import { tap, catchError, map, finalize, switchMap } from 'rxjs/operators'; // Se elimina 'concatMap'
 import { environment } from '../../../environments/environment';
 import { LoadingService } from './loading.service';
 
 // ==========================================================
 // MODELOS IMPORTADOS DESDE SHARED
+// ¡ATENCIÓN! Asegúrate de que AuthResponse refleje el nuevo formato del backend
+// { expires_in, data: { user } }
 // ==========================================================
 import {
   User,
@@ -26,6 +29,13 @@ export type {
   RegisterResponse
 };
 
+/**
+ * Interface para la respuesta simple de /auth2/csrf (aunque el valor importante es la cookie)
+ */
+interface CsrfResponse {
+  csrf_token: string;
+}
+
 // ==========================================================
 // SERVICIO DE AUTENTICACIÓN
 // ==========================================================
@@ -38,11 +48,12 @@ export class AuthService {
   private loadingService = inject(LoadingService);
 
   private readonly BASE_ENDPOINT = environment.apiUrl;
-  private readonly TOKEN_KEY = 'sanctum_token';
+  // TOKEN_KEY ha sido removido ya que el access_token es HttpOnly.
   private readonly ROLE_KEY = 'user_role';
   private readonly USER_KEY = 'current_user'; // Datos temporales del usuario
 
-  private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
+  // La autenticación ahora se basa en la existencia de un usuario local validado por el backend
+  private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasLocalUser());
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
   
   private currentUserSubject = new BehaviorSubject<User | null>(null);
@@ -50,26 +61,48 @@ export class AuthService {
 
   constructor() {
     if (isPlatformBrowser(this.platformId)) {
-      // Carga datos temporales para UX rápida (se validan después con el backend)
       this.loadUserFromStorage();
-      // Inicializa y VALIDA con el backend
-      this.initializeAuth();
+      
+      // 🚨 CORRECCIÓN CLAVE: Eliminar la llamada initializeAuth() del constructor.
+      // Esto previene el error NG0200 de dependencia circular.
+      // La llamada se MOVERÁ a un lugar donde el DI ya haya terminado (ej: AppComponent.ngOnInit)
+      // Inicializa y VALIDA con el backend usando la cookie HttpOnly
+      // this.initializeAuth(); 
     }
+  }
+
+  // ==========================================================
+  // CSRF (FUNCIÓN CLAVE PARA auth2)
+  // ==========================================================
+  /**
+   * Obtiene la cookie 'XSRF-TOKEN' (No-HttpOnly) del backend.
+   * Esto debe ejecutarse ANTES de cualquier POST, PUT, PATCH o DELETE 
+   * que requiera protección CSRF (ej: login, logout).
+   */
+  public getCsrfToken(): Observable<CsrfResponse> {
+    const url = `${this.BASE_ENDPOINT}/auth2/csrf`;
+    console.log('🔄 Solicitando cookie CSRF...');
+    // El AuthInterceptor se encarga de 'withCredentials: true'
+    return this.http.get<CsrfResponse>(url).pipe(
+      tap(() => console.log('✅ Cookie XSRF-TOKEN recibida.')),
+      catchError(error => {
+        console.error('❌ Error al obtener CSRF token:', error);
+        return throwError(() => new Error('Error de seguridad al obtener CSRF token.'));
+      })
+    );
   }
 
   // ==========================================================
   // INICIALIZACIÓN DE SESIÓN
   // ==========================================================
-  /**
-   * Carga datos del usuario desde localStorage para mostrar rápidamente.
-   * IMPORTANTE: Estos datos son TEMPORALES y se validan con el backend en initializeAuth().
-   */
+  
   private loadUserFromStorage(): void {
     const storedUser = localStorage.getItem(this.USER_KEY);
     if (storedUser) {
       try {
         const user = JSON.parse(storedUser) as User;
         this.currentUserSubject.next(user);
+        this.isAuthenticatedSubject.next(true); 
         console.log('⚡ Datos temporales cargados (pendiente validación con backend):', user.nombre);
       } catch (error) {
         console.error('❌ Error al parsear usuario de localStorage:', error);
@@ -79,38 +112,38 @@ export class AuthService {
   }
 
   /**
-   * Inicializa la autenticación VALIDANDO con el backend.
-   * Si el token existe, SIEMPRE verifica con el backend que sea válido.
+   * Este método debe ser llamado desde un punto seguro (ej: AppComponent.ngOnInit)
+   * para evitar el error de dependencia circular.
    */
-  private initializeAuth(): void {
-    if (this.hasToken()) {
-      console.log('🔐 Token encontrado. Validando con backend...');
+  public initializeAuth(): void { // 🚨 CAMBIO: Puede ser público para llamarlo desde AppComponent
+    if (this.hasLocalUser()) {
+      console.log('🔐 Posible sesión encontrada. Validando con backend (vía cookie JWT)...');
       this.getMe().subscribe({
         next: (user) => {
-          console.log('✅ Token válido. Sesión restaurada desde backend:', user.nombre);
+          console.log('✅ Cookie JWT válida. Sesión restaurada desde /auth2/me:', user.nombre);
+          this.isAuthenticatedSubject.next(true);
         },
         error: (error) => {
-          // El interceptor ya maneja el 401 y llama a cleanSession()
-          // Aquí solo logueamos para depuración
           if (error.status === 401) {
-            console.warn('⚠️ Token rechazado en initializeAuth (401). El interceptor manejará la limpieza.');
+            console.warn('⚠️ Cookie JWT rechazada (401). Limpiando sesión local.');
+            this.cleanSession(); 
           } else {
-            // Otros errores (red, CORS, 500, etc.) NO deben cerrar la sesión
-            console.error('❌ Error al validar token (no es 401, sesión mantenida):', error);
+            console.error('❌ Error al validar sesión (no es 401, sesión mantenida):', error);
           }
         }
       });
     } else {
-      console.log('ℹ️ No hay token. Usuario no autenticado.');
+      console.log('ℹ️ No hay datos locales. Usuario no autenticado.');
     }
   }
 
   // ==========================================================
-  // REGISTRO
+  // REGISTRO (Se asume que la ruta /auth/register se mantiene)
   // ==========================================================
-  register(data: RegisterData): Observable<RegisterResponse> {
+  // 💡 El tipo de retorno vuelve a ser RegisterResponse, no User
+  register(data: RegisterData): Observable<RegisterResponse> { 
     const url = `${this.BASE_ENDPOINT}/auth/register`;
-
+    // Lógica de payload original (ajusta si es necesario para tu backend)
     const basePayload = {
       email: data.email,
       password: data.password,
@@ -119,122 +152,155 @@ export class AuthService {
     };
 
     let payload: any;
-
+    // ... (Tu lógica para construir payload)
     if (data.rol === 'viajero') {
-      payload = {
-        ...basePayload,
-        nombre: data.nombre,
-        apellido: data.apellido
-      };
+      payload = { ...basePayload, nombre: data.nombre, apellido: data.apellido };
     } else if (data.rol === 'proveedor') {
-      payload = {
-        ...basePayload,
-        empresa_nombre: data.empresa_nombre,
-        telefono: data.telefono,
-        ruc: data.ruc
-      };
+      payload = { ...basePayload, empresa_nombre: data.empresa_nombre, telefono: data.telefono, ruc: data.ruc };
     } else {
       payload = basePayload;
     }
 
+
     this.loadingService.show('Registrando usuario...');
 
     return this.http.post<RegisterResponse>(url, payload).pipe(
-      tap(response => {
-        console.log('✅ Registro exitoso:', response.data.user);
-
-        if (response.data?.token && isPlatformBrowser(this.platformId)) {
-          localStorage.setItem(this.TOKEN_KEY, response.data.token);
-          this.isAuthenticatedSubject.next(true);
-          this._setCurrentUser(response.data.user); // Usar el nuevo nombre
-        }
+      tap(() => {
+        // 🚨 CRUCIAL: Eliminamos la actualización de estado para evitar el autologin.
+        console.log('✅ Registro exitoso. Cookie de sesión establecida, pero NO se actualiza el estado local.');
       }),
-      catchError((error: HttpErrorResponse) => this.handleError(error, 'registro')),
+      // 🚨 CRUCIAL: Eliminamos el concatMap(() => this.getMe()) para que no se autologee.
+      catchError((error: HttpErrorResponse) => {
+        this.loadingService.hide();
+        return this.handleError(error, 'registro'); // Contexto de error simple
+      }),
       finalize(() => this.loadingService.hide())
     );
   }
 
   // ==========================================================
-  // LOGIN
+  // LOGIN (Actualizado para /auth2 y CSRF)
   // ==========================================================
   login(credentials: LoginCredentials): Observable<AuthResponse> {
-    const url = `${this.BASE_ENDPOINT}/auth/login`;
-    const payload = { ...credentials, device_name: 'WebApp' };
+    // 1. Obtener el CSRF token primero
+    return this.getCsrfToken().pipe(
+      // 2. Encadenar la petición de login
+      switchMap(() => {
+        const url = `${this.BASE_ENDPOINT}/auth2/login`; // <<< RUTA ACTUALIZADA
+        // device_name ya no es relevante en el flujo JWT/Cookie
+        
+        this.loadingService.show('Iniciando sesión...');
 
-    this.loadingService.show('Iniciando sesión...');
+        // 3. Ejecutar el login (el AuthInterceptor adjuntará el X-XSRF-TOKEN)
+        return this.http.post<AuthResponse>(url, credentials).pipe(
+          tap(response => {
+            console.log('✅ Login OK. Cookie HttpOnly recibida.', response);
 
-    return this.http.post<AuthResponse>(url, payload).pipe(
-      tap(response => {
-        if (isPlatformBrowser(this.platformId)) {
-          localStorage.setItem(this.TOKEN_KEY, response.token);
-          if (response.user?.rol) {
-            localStorage.setItem(this.ROLE_KEY, response.user.rol);
-          }
-          this.isAuthenticatedSubject.next(true);
-          this._setCurrentUser(response.user); // Usar el nuevo nombre
-        }
-      }),
-      catchError((error: HttpErrorResponse) => this.handleError(error, 'inicio de sesión')),
-      finalize(() => this.loadingService.hide())
+            // ADAPTACIÓN AL NUEVO MODELO: Los datos están en 'data.user'
+            const user = response.data.user; 
+            if (isPlatformBrowser(this.platformId) && user) {
+              if (user.rol) {
+                localStorage.setItem(this.ROLE_KEY, user.rol);
+              }
+              // Aquí sí se inicia sesión
+              this.isAuthenticatedSubject.next(true);
+              this._setCurrentUser(user);
+            }
+          }),
+          catchError((error: HttpErrorResponse) => this.handleError(error, 'inicio de sesión')),
+          finalize(() => this.loadingService.hide())
+        );
+      })
     );
   }
 
   // ==========================================================
-  // PERFIL
+  // PERFIL (Actualizado para /auth2)
   // ==========================================================
   getMe(): Observable<User> {
-    const url = `${this.BASE_ENDPOINT}/auth/me`;
+    const url = `${this.BASE_ENDPOINT}/auth2/me`; // <<< RUTA ACTUALIZADA
+    // El backend responde { data: User }
     return this.http.get<{ data: User }>(url).pipe(
       map(res => res.data),
       tap(user => {
-        this._setCurrentUser(user); // Usar el nuevo nombre
+        this._setCurrentUser(user);
         if (isPlatformBrowser(this.platformId) && user?.rol) {
           localStorage.setItem(this.ROLE_KEY, user.rol);
         }
       }),
       catchError(error => {
-        // NO llamar a cleanSession() aquí - lo maneja el interceptor
-        // Solo re-lanzar el error para que initializeAuth() lo capture
+        // Se relanza el error para que initializeAuth() pueda manejar el 401
         return throwError(() => error);
       })
     );
   }
 
   // ==========================================================
-  // LOGOUT
+  // LOGOUT (Actualizado para /auth2 y CSRF)
   // ==========================================================
   logout(): Observable<any> {
-    const url = `${this.BASE_ENDPOINT}/auth/logout`;
-    
-    this.loadingService.show('Cerrando sesión...');
-    
-    return this.http.post(url, {}).pipe(
-      tap(() => this.cleanSession()),
-      catchError(error => {
-        console.warn('⚠️ Error cerrando sesión, limpiando local.', error);
-        this.cleanSession();
-        return of(null);
-      }),
-      finalize(() => this.loadingService.hide())
+    // 1. Obtener el CSRF token primero
+    return this.getCsrfToken().pipe(
+      // 2. Encadenar la petición de logout
+      switchMap(() => {
+        const url = `${this.BASE_ENDPOINT}/auth2/logout`; // <<< RUTA ACTUALIZADA
+        
+        this.loadingService.show('Cerrando sesión...');
+        
+        // 3. Ejecutar el logout (el AuthInterceptor adjuntará el X-XSRF-TOKEN)
+        return this.http.post(url, {}).pipe(
+          tap(() => this.cleanSession()),
+          catchError(error => {
+            console.warn('⚠️ Error cerrando sesión, limpiando local.', error);
+            // Limpia la sesión local incluso si el backend falla (para no quedar en estado zombie)
+            this.cleanSession(); 
+            return of(null);
+          }),
+          finalize(() => this.loadingService.hide())
+        );
+      })
     );
+  }
+
+  // ==========================================================
+  // REFRESCAR TOKEN
+  // ==========================================================
+  /**
+   * Solicita un nuevo JWT al backend usando la cookie existente.
+   * Se usa para mantener la sesión activa sin que el usuario lo note.
+   */
+  refresh(): Observable<any> { 
+      const url = `${this.BASE_ENDPOINT}/auth2/refresh`;
+      console.log('🔄 Solicitando refresh de token...');
+      
+      // Si esperas un cuerpo de respuesta (incluso vacío), HttpClient.get() devuelve Observable<Object>
+      return this.http.get(url).pipe( 
+          tap(() => {
+              console.log('✅ Token JWT refrescado con éxito.');
+          }),
+          catchError((error: HttpErrorResponse) => {
+              console.error('❌ Error en refresh:', error); // 🚨 LOG DETALLADO
+              // ... (el manejo de errores se mantiene igual)
+              if (error.status === 401) {
+                  this.cleanSession();
+              }
+              // Aseguramos que cualquier error (401, 500, etc.) se relanza para detener la cadena en el componente
+              return throwError(() => error);
+          })
+      );
   }
 
   // ==========================================================
   // UTILIDADES
   // ==========================================================
   
-  /**
-   * ACTUALIZACIÓN CLAVE: Inyecta el objeto User actualizado en el stream reactivo.
-   * Este método es llamado por el componente 'EditarPerfil' después de un PATCH exitoso.
-   * @param user El objeto User retornado por el backend (UsuarioController::updateMe).
-   */
   public updateUserInState(user: User): void {
       console.log('🔄 Estado del usuario actualizado por el componente de Edición de Perfil.');
       this._setCurrentUser(user);
   }
 
   public isLoggedIn(): boolean {
-    return this.hasToken();
+    return this.isAuthenticatedSubject.value;
   }
 
   public getRole(): string | null {
@@ -255,12 +321,19 @@ export class AuthService {
     return this.currentUser$.pipe(map(user => user?.rol === 'viajero'));
   }
 
-  // Se hace privado y se renombra para que solo sea llamado internamente o por el nuevo método público.
+  public getCurrentUserId(): number | null {
+    const user = this.currentUserSubject.value;
+    return user?.id || null;
+  }
+
+  public isAuthenticated(): boolean {
+    return this.isAuthenticatedSubject.value;
+  }
+
   private _setCurrentUser(user: User | null): void {
     this.currentUserSubject.next(user);
     
     // Guardar en localStorage SOLO para UX rápida en próximo refresh
-    // El backend sigue siendo la única fuente de verdad
     if (isPlatformBrowser(this.platformId)) {
       if (user) {
         localStorage.setItem(this.USER_KEY, JSON.stringify(user));
@@ -271,28 +344,24 @@ export class AuthService {
     }
   }
 
+  
+
   public cleanSession(): void {
     console.log('🔴 Limpiando sesión completa...');
     if (isPlatformBrowser(this.platformId)) {
-      localStorage.removeItem(this.TOKEN_KEY);
+      // SOLO eliminamos datos locales, NO el token (es HttpOnly)
       localStorage.removeItem(this.ROLE_KEY);
-      localStorage.removeItem(this.USER_KEY); // Limpia datos del usuario
+      localStorage.removeItem(this.USER_KEY); 
     }
     this.isAuthenticatedSubject.next(false);
     this.currentUserSubject.next(null);
     console.log('✅ Sesión limpiada completamente');
   }
 
-  getToken(): string | null {
-    if (isPlatformBrowser(this.platformId)) {
-      return localStorage.getItem(this.TOKEN_KEY);
-    }
-    return null;
-  }
-
-  private hasToken(): boolean {
+  // Reemplazamos hasToken() por hasLocalUser()
+  private hasLocalUser(): boolean {
     if (!isPlatformBrowser(this.platformId)) return false;
-    return !!localStorage.getItem(this.TOKEN_KEY);
+    return !!localStorage.getItem(this.USER_KEY);
   }
 
   private handleError(error: HttpErrorResponse, context: string) {

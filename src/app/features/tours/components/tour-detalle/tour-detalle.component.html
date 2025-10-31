@@ -205,6 +205,15 @@
       </div>
     </div>
 
+    <!-- ======================= -->
+    <!-- SECCIÓN DE RESEÑAS -->
+    <!-- ======================= -->
+    <app-reviews-section
+      *ngIf="tour"
+      [servicioId]="tour.id"
+      [servicioTipo]="'tour'"
+    ></app-reviews-section>
+
     <!-- Botón de reserva flotante -->
     <div class="final-reserve-section" *ngIf="salidaSeleccionada && totalPersonas > 0">
       <button class="final-reserve-button" (click)="reservarTour()">

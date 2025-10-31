@@ -5,6 +5,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { HotelService, HotelData, Habitacion } from '../../services/hoteles.service';
 import { ServicioDetalleHeaderComponent, ServicioDetalleData } from '../../../../shared/components/servicio-detalle-header/servicio-detalle-header.component';
+import { ReviewsSectionComponent } from '../../../../shared/components/reviews-section/reviews-section.component';
 import { DateUtils } from '../../../../shared/utils/date.utils';
 import { ImageUtils } from '../../../../shared/utils/image.utils';
 
@@ -13,7 +14,7 @@ import { ImageUtils } from '../../../../shared/utils/image.utils';
   templateUrl: './detalles-hotel.component.html',
   styleUrls: ['./detalles-hotel.component.css'],
   standalone: true,
-  imports: [CommonModule, HttpClientModule, RouterModule, FormsModule, ServicioDetalleHeaderComponent]
+  imports: [CommonModule, HttpClientModule, RouterModule, FormsModule, ServicioDetalleHeaderComponent, ReviewsSectionComponent]
 })
 export class DetallesHotelComponent implements OnInit {
 

@@ -49,7 +49,6 @@ export class LoginComponent implements OnInit {
 
     this.isSubmitting = true;
     
-    // Al obtener los valores, Angular incluirá 'rememberMe', aunque tu API probablemente lo ignore.
     const formValue = this.loginForm.getRawValue();
   
     const data: LoginCredentials = {
@@ -59,17 +58,21 @@ export class LoginComponent implements OnInit {
 
     this.authService.login(data).subscribe({
       next: (res) => {
+        // --- CAMBIOS AQUÍ ---
+        // 1. Obtener el usuario desde 'res.data.user' (nuevo formato de AuthResponse)
+        const user = res.data.user; 
+        
         this.message = res.message || '✅ Sesión iniciada exitosamente.';
         this.isSubmitting = false;
 
-        console.log('Login exitoso. Usuario:', res.user.email, 'Rol:', res.user.rol);
+        console.log('Login exitoso. Usuario:', user.email, 'Rol:', user.rol);
 
         // ==========================================================
         // ✅ LÓGICA DE REDIRECCIÓN SEGÚN EL ROL
         // ==========================================================
-        const userRole = res.user.rol;
+        const userRole = user.rol; // Usamos la variable 'user' local
 
-        // 🧠 Guardamos el rol explícitamente (por si el AuthService no lo hizo aún)
+        // El AuthService ya maneja el almacenamiento del rol, pero lo mantenemos como fallback
         if (userRole) {
           localStorage.setItem('user_role', userRole);
         }
@@ -92,6 +95,7 @@ export class LoginComponent implements OnInit {
       error: (err) => {
         console.error('Error de login:', err);
         this.isSubmitting = false;
+        // El handleError en AuthService garantiza que 'err' tiene una propiedad 'message'
         this.error = err.message || '❌ Error desconocido al iniciar sesión.'; 
       }
     });

@@ -1,13 +1,14 @@
 // src/app/componentes/paginas/tour/services/tours.service.ts
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+// 🚨 CAMBIO: HttpHeaders ya no es necesario para la autorización
+import { HttpClient, HttpHeaders } from '@angular/common/http'; 
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../core/services/auth.service';
 
 // ==========================================================
-// MODELOS IMPORTADOS DESDE SHARED
+// MODELOS IMPORTADOS DESDE SHARED (Se mantienen)
 // ==========================================================
 import { 
   TourData, 
@@ -42,14 +43,16 @@ export class TourService {
   private readonly API_URL = environment.apiUrl;
 
   /**
-   * ✅ Obtiene headers dinámicamente (usa el token actual del usuario)
+   * 🚨 CAMBIO CLAVE: Simplificamos getHeaders(). 
+   * ELIMINAMOS la lógica del token Bearer.
    */
   private getHeaders(): HttpHeaders {
-    const token = this.auth.getToken();
+    // 🚨 ELIMINAMOS la llamada a this.auth.getToken()
+    // 🚨 ELIMINAMOS la condición del token en el objeto HttpHeaders
     return new HttpHeaders({
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` })
+      // Se ELIMINA: ...(token && { 'Authorization': `Bearer ${token}` })
     });
   }
 
@@ -57,6 +60,7 @@ export class TourService {
    * Obtener todos los tours
    */
   getTours(): Observable<TourData[]> {
+    // 🚨 Se mantiene el uso de getHeaders()
     return this.http.get<TourListApiResponse>(`${this.API_URL}/tours`, {
       headers: this.getHeaders()
     }).pipe(
@@ -66,9 +70,9 @@ export class TourService {
 
   /**
    * Obtener un tour por ID
-   * La API retorna: { servicio: {..., tour: {...}, imagenes: [], actividades: [], salidas: [] } }
    */
   getTourById(id: number): Observable<TourDetalles> {
+    // 🚨 Se mantiene el uso de getHeaders()
     return this.http.get<TourDetalleApiResponse>(`${this.API_URL}/tours/${id}`, {
       headers: this.getHeaders()
     }).pipe(
@@ -80,6 +84,7 @@ export class TourService {
    * Crear un nuevo tour (requiere autenticación)
    */
   createTour(tour: TourData): Observable<TourData> {
+    // 🚨 Se mantiene el uso de getHeaders()
     return this.http.post<TourData>(`${this.API_URL}/tours`, tour, {
       headers: this.getHeaders()
     });
@@ -89,6 +94,7 @@ export class TourService {
    * Actualizar un tour existente (requiere autenticación)
    */
   updateTour(id: number, tour: TourData): Observable<TourData> {
+    // 🚨 Se mantiene el uso de getHeaders()
     return this.http.put<TourData>(`${this.API_URL}/tours/${id}`, tour, {
       headers: this.getHeaders()
     });
@@ -98,6 +104,7 @@ export class TourService {
    * Eliminar un tour (requiere autenticación)
    */
   deleteTour(id: number): Observable<void> {
+    // 🚨 Se mantiene el uso de getHeaders()
     return this.http.delete<void>(`${this.API_URL}/tours/${id}`, {
       headers: this.getHeaders()
     });
@@ -107,6 +114,7 @@ export class TourService {
    * Buscar tours por categoría
    */
   getToursByCategoria(categoria: string): Observable<TourData[]> {
+    // 🚨 Se mantiene el uso de getHeaders()
     return this.http.get<TourListApiResponse>(`${this.API_URL}/tours`, {
       headers: this.getHeaders(),
       params: { categoria }
