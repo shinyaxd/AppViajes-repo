@@ -5,6 +5,10 @@ import { Router, RouterLink } from '@angular/router';
 // Asumiendo que has actualizado LoginCredentials en auth.service.ts para ser opcional
 import { AuthService, LoginCredentials } from '../../../../core/services/auth.service'; 
 
+
+const EMAIL_STORAGE_KEY = 'remembered_email';
+
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -12,6 +16,8 @@ import { AuthService, LoginCredentials } from '../../../../core/services/auth.se
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
+
+
 export class LoginComponent implements OnInit {
   message = '';
   error = '';
@@ -26,10 +32,15 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // 1. Intenta recuperar el email guardado
+    const rememberedEmail = localStorage.getItem(EMAIL_STORAGE_KEY);
+
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      // 2. Carga el email guardado si existe, sino usa un string vacío.
+      email: [rememberedEmail || '', [Validators.required, Validators.email]],
       password: ['', Validators.required],
-      rememberMe: [false] 
+      // 3. Marca 'rememberMe' si se encontró un email guardado.
+      rememberMe: [!!rememberedEmail]
     });
   }
 
@@ -66,6 +77,17 @@ export class LoginComponent implements OnInit {
         this.isSubmitting = false;
 
         console.log('Login exitoso. Usuario:', user.email, 'Rol:', user.rol);
+
+        // ==========================================================
+        // ✅ LÓGICA DE RECORDAR CORREO (LOCALSTORAGE)
+        // ==========================================================
+        if (formValue.rememberMe) {
+            // Guardar el email en localStorage
+            localStorage.setItem(EMAIL_STORAGE_KEY, formValue.email);
+        } else {
+            // Eliminar el email de localStorage si no se marcó "Recuérdame"
+            localStorage.removeItem(EMAIL_STORAGE_KEY);
+        }
 
         // ==========================================================
         // ✅ LÓGICA DE REDIRECCIÓN SEGÚN EL ROL

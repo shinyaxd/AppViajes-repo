@@ -4,22 +4,21 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { environment } from '../../../../environments/environment';
 
-// 🚨 CAMBIO CLAVE: Importamos HttpClient y HttpErrorResponse
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { AuthService, User } from '../../../../app/core/services/auth.service';
+import { AuthService, User } from '../../../core/services/auth.service';
 import { LoadingService } from '../../../core/services/loading.service';
-import { SpinnerComponent } from '../ui/spinner/spinner.component';
-
-// 🚨 CORRECCIÓN CLAVE: Importamos operadores de RxJS (AGREGAR concatMap y of)
+import { SpinnerComponent } from '../ui';
 import { catchError, map, finalize, switchMap, concatMap } from 'rxjs/operators'; 
-import { throwError, of } from 'rxjs'; // 🚨 AGREGAR of
+import { throwError, of } from 'rxjs'; 
 
-// 🚨 CORRECCIÓN DE RUTAS: Usando BASE_URL + /auth2/me (Asumimos que BASE_URL incluye /api)
 const BASE_URL = environment.apiUrl;
-const API_GET_PROFILE_URL = `${BASE_URL}/auth2/me`; // RUTA ACTUALIZADA
-const API_UPDATE_PROFILE_URL = `${BASE_URL}/usuarios/me`; // Se mantiene la ruta de recursos
-const API_DELETE_PROFILE_URL = `${BASE_URL}/usuarios/me`; // Se mantiene la ruta de recursos
+// Rutas de API
+// CORREGIDO: De '/auth2/me' a '/auth/me' según tu backend
+const API_GET_PROFILE_URL = `${BASE_URL}/auth/me`; 
+const API_UPDATE_PROFILE_URL = `${BASE_URL}/usuarios/me`; 
+const API_DELETE_PROFILE_URL = `${BASE_URL}/usuarios/me`; 
 
+/** Validador para asegurar que password y confirmarPassword coincidan, solo si al menos uno tiene valor. */
 function passwordMatchValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const password = control.get('password')?.value;
@@ -34,7 +33,6 @@ function passwordMatchValidator(): ValidatorFn {
 @Component({
   selector: 'app-editar-perfil',
   standalone: true,
-  // Asegúrate de que HttpClientModule esté provisto en tu app.config.ts
   imports: [CommonModule, ReactiveFormsModule, SpinnerComponent], 
   templateUrl: './editar-perfil.component.html',
   styleUrls: ['./editar-perfil.component.css']
@@ -58,7 +56,6 @@ export class EditarPerfilComponent implements OnInit {
 
   private authService = inject(AuthService);
   loadingService = inject(LoadingService);
-  // 🚨 CAMBIO CLAVE: Inyectamos HttpClient
   private http = inject(HttpClient); 
 
   constructor(private fb: FormBuilder, private router: Router) {}
@@ -67,31 +64,29 @@ export class EditarPerfilComponent implements OnInit {
     this.cargarPerfil();
   }
 
-  // 🚨 CAMBIO CLAVE: Refactorizado de async/await (fetch) a Observables (HttpClient)
+  /**
+   * Carga los datos del perfil del usuario autenticado.
+   */
   cargarPerfil(): void {
     this.loadingService.show('Cargando datos del perfil...');
     this.message.set('');
 
-    // Usamos HttpClient.get. El Interceptor agrega cookies.
     this.http.get<{ data: User }>(API_GET_PROFILE_URL).pipe(
-      // Mapeamos la respuesta para obtener solo el objeto User (res.data)
       map(response => response.data), 
-      // Manejamos errores (incluyendo el 401 que indica sesión expirada)
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401) {
           console.warn('Cargar Perfil: Sesión expirada (401). Redirigiendo...');
           this.authService.cleanSession();
           this.router.navigate(['/auth/login']);
         } else {
+          // Si el error 500 persiste, sigue siendo un problema del controlador en el backend
           console.error(`Cargar Perfil: ERROR ${error.status}:`, error);
           this.messageType.set('error');
           this.message.set(`Error al cargar el perfil. Código: ${error.status}.`);
         }
-        // Construimos un formulario vacío si hay error
         this.buildForm({});
         return throwError(() => new Error('Error al cargar el perfil.')); 
       }),
-      // Ocultamos el spinner al finalizar (éxito o error)
       finalize(() => this.loadingService.hide()) 
     ).subscribe({
       next: (userData) => {
@@ -108,17 +103,16 @@ export class EditarPerfilComponent implements OnInit {
         this.buildForm(userData);
       },
       error: (err) => {
-        // La lógica de error y UI ya se manejó en el pipe
         console.error('Error general cargando el perfil (Observable):', err);
       }
     });
   }
 
-  /** Construye el formulario con controles ya deshabilitados según rol (evita el warning de Angular). */
+  /** Construye el formulario con controles ya deshabilitados según rol. */
   private buildForm(userData: any): void {
     const role = userData?.rol ?? 'viajero';
     const isProveedor = role === 'proveedor';
-    const telefonoPattern = /^\+51\s?9\d{8}$/; // Patrón para validar teléfono
+    const telefonoPattern = /^\+51\s?9\d{8}$/;
 
     const emailCtrl = this.fb.control(
       { value: userData?.email ?? '', disabled: true },
@@ -145,9 +139,9 @@ export class EditarPerfilComponent implements OnInit {
       isProveedor ? [Validators.required, Validators.pattern(telefonoPattern)] : []
     );
 
-    // RUC en solo-lectura para proveedor
+    // RUC en solo-lectura: siempre deshabilitado para edición
     const rucCtrl = this.fb.control(
-      { value: userData?.ruc ?? '', disabled: !isProveedor || true },
+      { value: userData?.ruc ?? '', disabled: true }, 
       []
     );
 
@@ -177,7 +171,9 @@ export class EditarPerfilComponent implements OnInit {
     this.showConfirmPassword.update(state => !state);
   }
 
-  // 🚨 CAMBIO CLAVE: Ahora incluye REFRESH y CSRF antes del PATCH
+  /**
+   * Envía los cambios del perfil. Utiliza Refresh + CSRF + PATCH.
+   */
   guardarCambios(): void {
     this.message.set('');
 
@@ -202,12 +198,13 @@ export class EditarPerfilComponent implements OnInit {
     this.isSaving.set(true);
 
     const originalData = this.currentUser();
+    // Usamos getRawValue para obtener también los campos deshabilitados (como RUC, aunque no se envían)
     const raw = this.form.getRawValue();
 
     const payload: any = {};
     let changesMade = false;
 
-    // Lógica para construir y comparar el payload (se mantiene)
+    // Lógica para construir y comparar el payload
     for (const [key, value] of Object.entries(raw)) {
       if (key === 'confirmarPassword' || key === 'email' || key === 'ruc') continue;
 
@@ -223,6 +220,7 @@ export class EditarPerfilComponent implements OnInit {
       }
     }
 
+    // Asegurar que la contraseña se incluya si se llenó
     if (passwordControl?.value && !payload['password']) {
       const p = passwordControl.value.trim();
       if (p) {
@@ -245,7 +243,6 @@ export class EditarPerfilComponent implements OnInit {
     of(null).pipe(
       // 1. Refresh Token: Intentar renovar el JWT ANTES de la operación
       concatMap(() => this.authService.refresh().pipe(
-        // Si el refresh falla con 401, el token de refresh también expiró.
         catchError((error: HttpErrorResponse) => {
           if (error.status === 401) {
             console.warn('Refresh falló. Sesión completamente expirada.');
@@ -253,7 +250,6 @@ export class EditarPerfilComponent implements OnInit {
             this.router.navigate(['/auth/login']);
             return throwError(() => new Error('Sesión completamente expirada.'));
           }
-          // Si es otro error o si refresh no es necesario, continuamos.
           return of(null); 
         })
       )),
@@ -262,21 +258,18 @@ export class EditarPerfilComponent implements OnInit {
       
       // 3. Encadenar la petición PATCH
       switchMap(() => {
-        // Usamos HttpClient.patch(). El Interceptor adjuntará el X-XSRF-TOKEN
         return this.http.patch<{ data: User }>(API_UPDATE_PROFILE_URL, payload);
       }),
       // Manejo de errores
       catchError((error: HttpErrorResponse) => {
         let errorMessage = `Error al guardar: ${error.status}.`;
         
-        // Manejo específico del 401 que puede ocurrir si el token expiró después del refresh
         if (error.status === 401) {
             this.authService.cleanSession();
             this.router.navigate(['/auth/login']);
             errorMessage = 'Sesión expirada durante la operación de guardado. Reintente el login.';
         }
         
-        // Lógica de extracción de errores (se mantiene)
         if (error.error?.errors) {
             const firstErrorKey = Object.keys(error.error.errors)[0];
             if (firstErrorKey) {
@@ -301,7 +294,6 @@ export class EditarPerfilComponent implements OnInit {
       })
     ).subscribe({
       next: (res) => {
-        // 🚨 CAMBIO: Obtenemos el usuario actualizado de 'res.data'
         const updatedUser = res.data;
 
         this.messageType.set('success');
@@ -310,18 +302,19 @@ export class EditarPerfilComponent implements OnInit {
         this.authService.updateUserInState(updatedUser);
         this.currentUser.set(updatedUser);
         
-        // Lógica de redirección (se mantiene)
         const rolActualizado = updatedUser.rol || 'viajero';
         let rutaRedireccion = rolActualizado === 'proveedor' ? '/proveedor' : '/hoteles';
         setTimeout(() => this.router.navigate([rutaRedireccion]), 500);
       },
       error: () => {
-        // El error ya fue manejado en el catchError
+        // Error manejado en catchError
       }
     });
   }
 
-  // 🚨 CAMBIO CLAVE: Ahora incluye REFRESH y CSRF antes del DELETE
+  /**
+   * Elimina la cuenta de usuario. Utiliza Refresh + CSRF + DELETE.
+   */
   eliminarCuenta(): void {
     this.message.set('');
     this.loadingService.show('Eliminando cuenta...');
@@ -333,7 +326,6 @@ export class EditarPerfilComponent implements OnInit {
     of(null).pipe(
       // 1. Refresh Token: Intentar renovar el JWT ANTES de la operación
       concatMap(() => this.authService.refresh().pipe(
-        // Si el refresh falla con 401, el token de refresh también expiró.
         catchError((error: HttpErrorResponse) => {
           if (error.status === 401) {
             console.warn('Refresh falló. Sesión completamente expirada.');
@@ -341,7 +333,6 @@ export class EditarPerfilComponent implements OnInit {
             this.router.navigate(['/auth/login']);
             return throwError(() => new Error('Sesión completamente expirada.'));
           }
-          // Si es otro error, continuamos.
           return of(null); 
         })
       )),
@@ -350,7 +341,6 @@ export class EditarPerfilComponent implements OnInit {
       
       // 3. Encadenar la petición DELETE
       switchMap(() => {
-        // Usamos HttpClient.delete(). El Interceptor adjuntará el X-XSRF-TOKEN
         return this.http.delete(API_DELETE_PROFILE_URL);
       }),
       catchError((error: HttpErrorResponse) => {
@@ -359,7 +349,6 @@ export class EditarPerfilComponent implements OnInit {
         if (error.status === 401) {
           this.authService.cleanSession();
           errorMessage = 'Sesión expirada. Por favor, inicia sesión de nuevo.';
-          // Redirige
           setTimeout(() => this.router.navigate(['/auth/login']), 1500);
         } else if (error.error?.message) {
           errorMessage = error.error.message;

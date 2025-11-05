@@ -2,11 +2,11 @@ import {
   HttpInterceptorFn, 
   HttpRequest, 
   HttpHandlerFn,
-  HttpXsrfTokenExtractor, // <-- Importación CLAVE para CSRF
+  HttpXsrfTokenExtractor, // <-- Necesario para leer la cookie XSRF-TOKEN
 } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '../services/auth.service'; // Asegúrate de que la ruta sea correcta
 import { catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 
@@ -19,7 +19,8 @@ import { throwError } from 'rxjs';
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
-  const tokenExtractor = inject(HttpXsrfTokenExtractor); // Inyectamos el extractor CSRF
+  // HttpXsrfTokenExtractor de Angular lee automáticamente la cookie 'XSRF-TOKEN'
+  const tokenExtractor = inject(HttpXsrfTokenExtractor); 
 
   // --- PARTE 1: Configuración de Credenciales (Cookies) y CSRF ---
   
@@ -33,9 +34,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     }
   });
 
-  // 🔹 El token de acceso (JWT) YA NO se inyecta aquí desde JS.
-  // Lo inyecta el backend automáticamente desde la cookie HttpOnly (middleware jwt.cookie).
-
   // 🔹 Lógica CSRF: Adjuntar el header X-XSRF-TOKEN
   const isStateChangingMethod = 
     authReq.method === 'POST' || 
@@ -44,20 +42,20 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     authReq.method === 'DELETE';
 
   if (isStateChangingMethod) {
-    // HttpXsrfTokenExtractor lee automáticamente la cookie 'XSRF-TOKEN'
     const csrfToken = tokenExtractor.getToken(); 
 
     if (csrfToken) {
       // Si tenemos un token y es un método de cambio de estado, lo adjuntamos como header.
+      // Angular fusiona headers, por lo que el Accept se mantiene.
       authReq = authReq.clone({
         setHeaders: {
-          'X-XSRF-TOKEN': csrfToken,
+          'X-XSRF-TOKEN': csrfToken, // Header que Laravel/Lumen espera
         },
       });
       console.log(`🔒 CSRF Header adjuntado para ${authReq.method} ${authReq.url}`);
     } else {
-      // Este log es útil si intentas hacer login/logout sin haber llamado a /auth2/csrf antes.
-      console.warn(`⚠️ CSRF Token faltante para ${authReq.method} ${authReq.url}`);
+      // Este warning indica que /auth/csrf no fue llamado antes de una mutación (ej: login)
+      console.warn(`⚠️ CSRF Token faltante para ${authReq.method} ${authReq.url}. La petición podría fallar con 403.`);
     }
   }
 
@@ -73,8 +71,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         // Limpia datos locales (User, Role)
         authService.cleanSession(); 
         
-        // Redirige si NO estamos ya en la página de login
-        if (!router.url.includes('/auth/login') && !router.url.includes('/auth2/login')) {
+        // 🚨 CORRECCIÓN: Usar solo la ruta corregida /auth/login
+        if (!router.url.includes('/auth/login')) {
           router.navigate(['/auth/login']);
         }
       }
