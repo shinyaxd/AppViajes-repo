@@ -62,12 +62,18 @@ export class ResultadosTOURSComponent implements OnInit {
         this.personas = +params['personas'] || 1;
       }),
       switchMap(params => {
-        // Si hay categoría, filtrar por categoría
-        if (params['categoria']) {
-          return this.tourService.getToursByCategoria(params['categoria']);
+        // 1) Si solo hay categoría y no hay checkIn → búsqueda rápida por imagen
+        if (this.categoria && !this.checkInDate) {
+          return this.tourService.getToursByCategoria(this.categoria);
         }
-        // Si no, traer todos los tours
-        return this.tourService.getTours();
+        // 2) Si hay checkIn (obligatorio para la búsqueda avanzada) → usar getToursFiltrados
+        return this.tourService.getToursFiltrados({
+          destino: this.destino,
+          categoria: this.categoria,
+          checkIn: this.checkInDate,
+          checkOut: this.checkOutDate,
+          cupos:  this.personas
+        });
       }),
       tap(tours => {
         // Filtrar tours que tengan datos válidos
