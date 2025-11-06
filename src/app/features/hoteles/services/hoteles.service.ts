@@ -1,12 +1,12 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-// Importamos 'switchMap' para encadenar las llamadas de creación
+// 🚨 CAMBIO: HttpHeaders ya no es necesario para la autorización, solo para 'Accept'
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http'; 
 import { Observable, forkJoin, map, catchError, throwError, switchMap } from 'rxjs'; 
 import { environment } from '../../../../environments/environment';
-import { AuthService } from '../../../core/services/auth.service'; // 👈 Importa el AuthService dinámico
+import { AuthService } from '../../../core/services/auth.service'; 
 
 // ==========================================================
-// MODELOS IMPORTADOS DESDE SHARED
+// MODELOS IMPORTADOS DESDE SHARED (Se mantienen)
 // ==========================================================
 import {
   Habitacion,
@@ -39,47 +39,41 @@ export type {
 })
 export class HotelService {
   private http = inject(HttpClient);
-  private auth = inject(AuthService); // 👈 Servicio de autenticación
+  // Mantemos la inyección de AuthService por si se usa isLoggedIn() o datos de usuario
+  private auth = inject(AuthService); 
   private readonly API_URL = environment.apiUrl;
 
   /**
-   * ✅ Obtiene headers dinámicamente (usa el token actual del usuario)
+   * 🚨 CAMBIO CRÍTICO: Simplificamos getHeaders(). 
+   * Ya NO incluye 'Authorization: Bearer'. 
+   * El Interceptor se encarga de la autenticación vía Cookies/CSRF.
    */
   private getHeaders(): HttpHeaders {
-    const token = this.auth.getToken();
     return new HttpHeaders({
-      'Accept': 'application/json',
-      ...(token ? { 'Authorization': `Bearer ${token}` } : {}) // solo si hay token
+      'Accept': 'application/json' 
+      // Se ELIMINA: (token ? { 'Authorization': `Bearer ${token}` } : {})
     });
   }
-
+  
   // ==========================================================
   // 3. MÉTODOS
   // ==========================================================
   
   /**
    * NUEVO: Crea una o varias habitaciones para un servicio de hotel dado.
-   * [FIX CRÍTICO]: Envía una petición POST individual por cada habitación,
-   * y usa la ruta anidada correcta: /api/hoteles/{servicio_id}/habitaciones.
-   * * @param servicioId El ID del servicio/hotel al que pertenecen las habitaciones.
-   * @param habitaciones Un array de habitaciones, cada una con el servicio_id.
    */
   createHabitaciones(servicioId: number, habitaciones: HabitacionCreatePayload[]): Observable<any> {
     
-    // Mapeamos el array de habitaciones a un array de Observables de creación.
     const creationRequests = habitaciones.map(habitacion => {
-      // FIX: Usar la URL correcta que incluye el servicioId: /api/hoteles/{servicio_id}/habitaciones
       const endpoint = `${this.API_URL}/hoteles/${servicioId}/habitaciones`; 
       
-      // Enviamos CADA habitación individualmente (que ya incluye el servicio_id en el payload)
+      // 🚨 CAMBIO: getHeaders() ya no tiene token, pero lo enviamos por consistencia
       return this.http.post(endpoint, habitacion, { headers: this.getHeaders() });
     });
 
-    // Usamos forkJoin para esperar a que TODAS las peticiones se completen exitosamente.
     return forkJoin(creationRequests).pipe(
       catchError(error => {
         console.error('Error al crear una o más habitaciones (petición individual falló):', error);
-        // Devolvemos el error para que sea capturado en el switchMap superior.
         return throwError(() => new Error('Error al registrar las habitaciones. Revise la consola.'));
       })
     );
@@ -87,34 +81,30 @@ export class HotelService {
 
   /**
    * NUEVO: Crea el servicio (Hotel) y luego las habitaciones en una sola secuencia.
-   * Utiliza switchMap para encadenar las peticiones.
    */
   createHotelWithHabitaciones(payload: { 
     hotel: HotelCreatePayload, 
-    // Usamos Omit para indicar que el servicio_id no viene del formulario
     habitaciones: Array<Omit<HabitacionCreatePayload, 'servicio_id'>> 
   }): Observable<any> {
       
       // 1. Crear el Servicio y Hotel (POST /api/hoteles)
+      // 🚨 CAMBIO: getHeaders() ya no tiene token, pero lo enviamos
       return this.http.post<HotelCreateResponse>(`${this.API_URL}/hoteles`, payload.hotel, { headers: this.getHeaders() }).pipe(
           
           // 2. Usar switchMap para tomar el ID del hotel creado y crear las habitaciones
           switchMap(hotelResponse => {
-              // Verificación: Asegurarse de que el ID exista
               const servicioId = hotelResponse.data?.servicio?.id;
 
               if (!servicioId) {
                   return throwError(() => new Error('El servidor no retornó el ID del hotel creado.'));
               }
 
-              // Mapear las habitaciones para incluir el servicio_id
               const habitacionesPayload: HabitacionCreatePayload[] = payload.habitaciones.map(h => ({
                   ...h,
-                  servicio_id: servicioId, // Asignar el ID recién creado
+                  servicio_id: servicioId, 
               }));
 
               // 3. Devolver la Observable de la creación de habitaciones 
-              // FIX: Pasamos el servicioId como primer argumento para construir la URL correcta.
               return this.createHabitaciones(servicioId, habitacionesPayload);
           }),
           catchError(error => {
@@ -126,22 +116,19 @@ export class HotelService {
 
   /**
    * NUEVO: Obtiene la lista de hoteles Pertenecientes al proveedor autenticado.
-   * Asume un endpoint /api/proveedor/hoteles o similar que filtra por proveedor_id.
-   * @returns Observable<HotelData[]> con los campos necesarios para el dashboard.
    */
   getSupplierHotels(): Observable<HotelData[]> {
-    // ASUMIMOS este endpoint. Si no existe, pregúntale al backend si /api/hoteles
-    // acepta un parámetro para filtrar por el usuario logueado.
     const endpoint = `${this.API_URL}/proveedor/servicios`; 
 
     return this.http
       .get<SupplierHotelListApiRespuesta>(endpoint, {
-        headers: this.getHeaders(),
+        // 🚨 CAMBIO: getHeaders() ya no tiene token, pero lo enviamos
+        headers: this.getHeaders(), 
       })
       .pipe(
         map(res =>
           res.data.map(apiHotel => ({
-            id: apiHotel.servicio_id, // Usamos servicio_id como ID principal
+            id: apiHotel.servicio_id, 
             nombre: apiHotel.nombre,
             ciudad: apiHotel.ciudad,
             pais: apiHotel.pais,
@@ -151,12 +138,11 @@ export class HotelService {
             galeria_imagenes: apiHotel.galeria_imagenes ?? [],
             precio_por_noche: apiHotel.precio_por_noche ?? null,
             descripcion: apiHotel.descripcion ?? null,
-            reservations: apiHotel.reservas_pendientes ?? 0, // Campo para el dashboard
+            reservations: apiHotel.reservas_pendientes ?? 0, 
           }) as HotelData)
         ),
         catchError((error) => {
             console.error('Error al cargar hoteles del proveedor:', error);
-            // Si el error es 403/401, el AuthService ya debería manejar la limpieza.
             return throwError(() => new Error('No se pudieron cargar sus hoteles. Verifique su autenticación.'));
         })
       );
@@ -164,10 +150,10 @@ export class HotelService {
 
   /**
    * NUEVO: Método para eliminar un hotel por su ID de servicio.
-   * Llama a DELETE /api/hoteles/{servicio_id}
    */
   deleteHotel(servicioId: number): Observable<any> {
     return this.http.delete(`${this.API_URL}/hoteles/${servicioId}`, {
+        // 🚨 CAMBIO: getHeaders() ya no tiene token, pero lo enviamos
         headers: this.getHeaders()
     }).pipe(
         catchError(error => {
@@ -185,7 +171,8 @@ export class HotelService {
 
     return this.http
       .get<HotelListApiRespuesta>(`${this.API_URL}/hoteles`, {
-        headers: this.getHeaders(),
+        // 🚨 CAMBIO: getHeaders() ya no tiene token, pero lo enviamos
+        headers: this.getHeaders(), 
         params: httpParams
       })
       .pipe(
@@ -201,7 +188,7 @@ export class HotelService {
             galeria_imagenes: apiHotel.imagenUrl ?? [],
             precio_por_noche: apiHotel.precio_por_noche ?? null,
             descripcion: apiHotel.descripcion ?? null,
-            reservations: 0, // Por defecto 0
+            reservations: 0, 
           }))
         )
       );
@@ -213,6 +200,7 @@ export class HotelService {
   getHotelDetalles(id: number): Observable<HotelDetalles> {
     return this.http
       .get<any>(`${this.API_URL}/hoteles/${id}`, {
+        // 🚨 CAMBIO: getHeaders() ya no tiene token, pero lo enviamos
         headers: this.getHeaders()
       })
       .pipe(
@@ -230,7 +218,6 @@ export class HotelService {
             direccion: h.direccion,
             estrellas: h.estrellas,
             imagen_url: h.imagen_url || 'assets/images/placeholder-hotel.jpg',
-            // ✅ FIX: Backend retorna "imagenes[]" (array de objetos con url), no "galeria_imagenes"
             galeria_imagenes: (h.imagenes ?? []).map((img: any) => img.url).filter((url: string) => !!url),
             precio_por_noche: h.precio_por_noche ?? null,
             descripcion: h.descripcion ?? null,
@@ -266,7 +253,7 @@ export class HotelService {
         if (hotelLista) {
           detalle.hotel = {
             ...detalle.hotel,
-            ...hotelLista // fusiona ambos sin perder campos
+            ...hotelLista 
           };
         }
 

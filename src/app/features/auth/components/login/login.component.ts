@@ -5,6 +5,10 @@ import { Router, RouterLink } from '@angular/router';
 // Asumiendo que has actualizado LoginCredentials en auth.service.ts para ser opcional
 import { AuthService, LoginCredentials } from '../../../../core/services/auth.service'; 
 
+
+const EMAIL_STORAGE_KEY = 'remembered_email';
+
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -12,6 +16,8 @@ import { AuthService, LoginCredentials } from '../../../../core/services/auth.se
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
+
+
 export class LoginComponent implements OnInit {
   message = '';
   error = '';
@@ -26,10 +32,15 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // 1. Intenta recuperar el email guardado
+    const rememberedEmail = localStorage.getItem(EMAIL_STORAGE_KEY);
+
     this.loginForm = this.fb.group({
-      email: ['', [Validators.required, Validators.email]],
+      // 2. Carga el email guardado si existe, sino usa un string vacío.
+      email: [rememberedEmail || '', [Validators.required, Validators.email]],
       password: ['', Validators.required],
-      rememberMe: [false] 
+      // 3. Marca 'rememberMe' si se encontró un email guardado.
+      rememberMe: [!!rememberedEmail]
     });
   }
 
@@ -49,7 +60,6 @@ export class LoginComponent implements OnInit {
 
     this.isSubmitting = true;
     
-    // Al obtener los valores, Angular incluirá 'rememberMe', aunque tu API probablemente lo ignore.
     const formValue = this.loginForm.getRawValue();
   
     const data: LoginCredentials = {
@@ -59,17 +69,32 @@ export class LoginComponent implements OnInit {
 
     this.authService.login(data).subscribe({
       next: (res) => {
+        // --- CAMBIOS AQUÍ ---
+        // 1. Obtener el usuario desde 'res.data.user' (nuevo formato de AuthResponse)
+        const user = res.data.user; 
+        
         this.message = res.message || '✅ Sesión iniciada exitosamente.';
         this.isSubmitting = false;
 
-        console.log('Login exitoso. Usuario:', res.user.email, 'Rol:', res.user.rol);
+        console.log('Login exitoso. Usuario:', user.email, 'Rol:', user.rol);
+
+        // ==========================================================
+        // ✅ LÓGICA DE RECORDAR CORREO (LOCALSTORAGE)
+        // ==========================================================
+        if (formValue.rememberMe) {
+            // Guardar el email en localStorage
+            localStorage.setItem(EMAIL_STORAGE_KEY, formValue.email);
+        } else {
+            // Eliminar el email de localStorage si no se marcó "Recuérdame"
+            localStorage.removeItem(EMAIL_STORAGE_KEY);
+        }
 
         // ==========================================================
         // ✅ LÓGICA DE REDIRECCIÓN SEGÚN EL ROL
         // ==========================================================
-        const userRole = res.user.rol;
+        const userRole = user.rol; // Usamos la variable 'user' local
 
-        // 🧠 Guardamos el rol explícitamente (por si el AuthService no lo hizo aún)
+        // El AuthService ya maneja el almacenamiento del rol, pero lo mantenemos como fallback
         if (userRole) {
           localStorage.setItem('user_role', userRole);
         }
@@ -92,6 +117,7 @@ export class LoginComponent implements OnInit {
       error: (err) => {
         console.error('Error de login:', err);
         this.isSubmitting = false;
+        // El handleError en AuthService garantiza que 'err' tiene una propiedad 'message'
         this.error = err.message || '❌ Error desconocido al iniciar sesión.'; 
       }
     });

@@ -53,7 +53,7 @@
 
           <button
             (click)="actualizarSeleccion(habitacion, 1)"
-            [disabled]="(habitacion.seleccionada ?? 0) >= ($any(habitacion).unidades_disponibles ?? $any(habitacion).cantidad ?? 0)"
+              [disabled]="(habitacion.seleccionada ?? 0) >= ($any(habitacion).unidades_disponibles ?? $any(habitacion).cantidad ?? 0)"
           >+</button>
         </div>
       </div>

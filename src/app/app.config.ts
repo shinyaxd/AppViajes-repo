@@ -5,7 +5,7 @@ import { provideRouter, PreloadAllModules, withPreloading } from '@angular/route
 import { provideHttpClient, withInterceptors } from '@angular/common/http'; // Importa el cliente HTTP
 
 
-import { AuthInterceptor } from './core/interceptors/auth.interceptor';
+import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { routes } from './app.routes'; // Asume que tienes un archivo de rutas (app.routes.ts)
 
 export const appConfig: ApplicationConfig = {
@@ -18,6 +18,6 @@ export const appConfig: ApplicationConfig = {
     ), 
     
     // 2. Fundamental para hacer peticiones GET/POST/etc. a tu backend (Laravel)
-    provideHttpClient(withInterceptors([AuthInterceptor]))
+    provideHttpClient(withInterceptors([authInterceptor]))
   ]
 };

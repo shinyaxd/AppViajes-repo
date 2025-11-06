@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, PLATFORM_ID, inject } from '@angular/core';
 import { 
   FormBuilder, 
   Validators, 
@@ -7,11 +7,12 @@ import {
   AbstractControl, 
   ValidationErrors, 
   ValidatorFn,
-  FormControl 
+  FormControl, 
 } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService, RegisterData } from '../../../../core/services/auth.service';
+// Importamos RegisterResponse y User para manejar la respuesta del servidor (éxito/mensaje)
+import { AuthService, RegisterData, RegisterResponse, User } from '../../../../core/services/auth.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -22,6 +23,12 @@ import { Subscription } from 'rxjs';
   styleUrls: ['./registro.component.css']
 })
 export class RegistroComponent implements OnInit, OnDestroy {
+  // Se utiliza inyección moderna (inject) para ser consistente
+  private fb = inject(FormBuilder);
+  private authService = inject(AuthService);
+  private router = inject(Router);
+  private platformId = inject(PLATFORM_ID);
+  
   message = '';
   error = '';
   registerForm!: FormGroup;
@@ -30,11 +37,8 @@ export class RegistroComponent implements OnInit, OnDestroy {
   isSubmitting = false;
   private roleSubscription!: Subscription;
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  // Se eliminan los parámetros del constructor y se usa inject
+  constructor() {} 
 
   ngOnInit(): void {
     // Inicializar formulario con campos de viajero por defecto
@@ -128,10 +132,13 @@ export class RegistroComponent implements OnInit, OnDestroy {
     if (!password || !confirmPassword) return null;
 
     if (password.value !== confirmPassword.value) {
-      confirmPassword.setErrors({ ...confirmPassword.errors, passwordMismatch: true });
+      // Se corrige para no mutar el objeto de errores directamente, sino extenderlo
+      const errors = { ...(confirmPassword.errors || {}), passwordMismatch: true };
+      confirmPassword.setErrors(errors);
       return { passwordMismatch: true };
     }
 
+    // Si coinciden, limpia solo el error de passwordMismatch si está presente
     if (confirmPassword.errors && confirmPassword.errors['passwordMismatch']) {
       const errors = { ...confirmPassword.errors };
       delete errors['passwordMismatch'];
@@ -160,6 +167,8 @@ export class RegistroComponent implements OnInit, OnDestroy {
       this.error = this.registerForm.hasError('passwordMismatch')
         ? '❌ Las contraseñas no coinciden.'
         : '❌ Completa todos los campos correctamente.';
+      // Asegurar que se muestren los errores de validación en el template
+      this.registerForm.markAllAsTouched();
       return;
     }
 
@@ -169,11 +178,38 @@ export class RegistroComponent implements OnInit, OnDestroy {
     const data: RegisterData = formValue as RegisterData;
 
     this.authService.register(data).subscribe({
-      next: (res) => {
-        this.message = res.message || '✅ Cuenta creada exitosamente.';
+      next: (res: RegisterResponse) => { 
+        // 🚨 LÓGICA DE AUTOLOGIN CORREGIDA
+        // El AuthService ya guardó el usuario y la cookie JWT. 
+        // Solo necesitamos obtener el usuario para la redirección.
+        const user = res.data?.user;
+
+        if (user) {
+          this.message = '✅ Registro y sesión iniciada exitosamente.';
+          console.log('Registro exitoso. Autologin OK. Usuario:', user.email, 'Rol:', user.rol);
+          
+          const userRole = user.rol;
+          let redirectPath = '/';
+
+          // 1. Determinar ruta basada en el rol
+          if (userRole === 'proveedor') {
+            redirectPath = '/proveedor';
+          } else if (userRole === 'viajero') {
+            redirectPath = '/hoteles';
+          }
+          
+          // 2. Redirigir al usuario
+          setTimeout(() => this.router.navigate([redirectPath]), 400);
+
+        } else {
+          // Fallback: Si el backend no devuelve el usuario (estado no deseado)
+          this.message = res.message || '✅ Registro exitoso. Ahora puedes iniciar sesión.';
+          setTimeout(() => this.router.navigate(['/auth/login']), 1000);
+        }
+
         this.isSubmitting = false;
+        // Reiniciar el formulario, manteniendo el rol seleccionado
         this.registerForm.reset({ rol: data.rol });
-        setTimeout(() => this.router.navigate(['/hoteles']), 2000);
       },
       error: (err) => {
         this.isSubmitting = false;
@@ -184,6 +220,7 @@ export class RegistroComponent implements OnInit, OnDestroy {
 
   campoInvalido(campo: string): boolean {
     const control = this.registerForm.get(campo);
+    // Agregamos el chequeo de "dirty" para mejor UX
     return !!(control && control.invalid && (control.dirty || control.touched)); 
   }
 }
