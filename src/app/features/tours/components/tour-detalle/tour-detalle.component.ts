@@ -5,6 +5,7 @@ import { TourService, TourDetalles } from '../../services/tour.service';
 import { ServicioDetalleHeaderComponent, ServicioDetalleData } from '../../../../shared/components/servicio-detalle-header/servicio-detalle-header.component';
 import { ReviewsSectionComponent } from '../../../../shared/components/reviews-section/reviews-section.component';
 import { ImageUtils } from '../../../../shared/utils/image.utils';
+import { normalizarFecha } from './tour-detalle.utils';
 
 @Component({
   selector: 'app-tour-detalle',
@@ -100,7 +101,7 @@ export class TourDetalleComponent implements OnInit {
         this.usarFechaTourDirecta = true;
         const salidaVirtual = {
           id: this.tour.tour.servicio_id || this.tour.id, 
-          fecha_salida: this.tour.tour.fecha,
+          fecha_salida: normalizarFecha(this.tour.tour.fecha),
           cupos_disponibles: this.tour.tour.cupos
         };
         this.salidasFiltradas = [salidaVirtual];
@@ -151,7 +152,7 @@ export class TourDetalleComponent implements OnInit {
         // Transformar al formato esperado por el componente
         return {
           id: salida.id,
-          fecha_salida: salida.fecha,
+          fecha_salida: normalizarFecha(salida.fecha),
           cupos_disponibles: cuposDisponibles,
           hora: salida.hora,
           estado: salida.estado

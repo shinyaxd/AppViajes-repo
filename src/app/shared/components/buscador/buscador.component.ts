@@ -210,7 +210,7 @@ export class BuscadorComponent implements OnInit {
   // Método de Tours
   changeCountTour(tipo: 'total', cambio: number) {
     if (tipo === 'total') {
-      this.personas.total = Math.max(1, this.personas.total + cambio);
+      this.personas.total =  Math.min(15, Math.max(1, this.personas.total + cambio));
     }
   }
 

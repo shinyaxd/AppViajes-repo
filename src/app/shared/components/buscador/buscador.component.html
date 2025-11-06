@@ -109,7 +109,7 @@
       </div>
       
       <div class="input-group">
-        <label for="personas-tour">Personas</label>
+        <label for="personas-tour">Personas (máx: 15)</label>
         <div class="guests-selector" (click)="toggleGuestMenuTour()">
           {{ personas.total }} personas
         </div>
@@ -119,7 +119,7 @@
             <div class="counter">
               <button type="button" (click)="changeCountTour('total', -1)">-</button>
               <span>{{ personas.total }}</span>
-              <button type="button" (click)="changeCountTour('total', 1)">+</button>
+              <button type="button" (click)="changeCountTour('total', 1)" [disabled]="personas.total >= 15">+</button>
             </div>
           </div>
           <button class="save-button" (click)="toggleGuestMenuTour()">Listo</button>
