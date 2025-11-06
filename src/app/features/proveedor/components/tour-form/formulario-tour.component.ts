@@ -70,6 +70,8 @@ export class TourFormComponent implements OnInit {
         // Cosas para llevar dinámico
         cosasParaLlevar: this.fb.array<FormControl<string | null>>([]),
       }),
+      // FormArray para salidas dinámicas
+      salidas: this.fb.array([]),
     });
   }
 
@@ -86,6 +88,10 @@ export class TourFormComponent implements OnInit {
 
   get cosasParaLlevar(): FormArray<FormControl<string | null>> {
     return this.tourGroup.get('cosasParaLlevar') as FormArray<FormControl<string |null>>;
+  }
+
+  get salidas(): FormArray {
+    return this.tourForm.get('salidas') as FormArray;
   }
 
   // ================================================
@@ -129,6 +135,24 @@ export class TourFormComponent implements OnInit {
   }
 
   // ================================================
+  // 🗓️ Gestión de salidas dinámicas
+  // ================================================
+  agregarSalida(): void {
+    const salidaForm = this.fb.group({
+      fecha: ['', [Validators.required]],
+      hora: ['', [Validators.required]],
+      cupo_total: [1, [Validators.required, Validators.min(1)]],
+      cupo_reservado: [0, [Validators.required, Validators.min(0)]],
+      estado: ['disponible', [Validators.required]],
+    });
+    this.salidas.push(salidaForm);
+  }
+
+  eliminarSalida(index: number): void {
+    this.salidas.removeAt(index);
+  }
+
+  // ================================================
   // 📤 Envío del formulario
   // ================================================
   onSubmit(): void {
@@ -152,7 +176,16 @@ export class TourFormComponent implements OnInit {
     }
 
     this.enviando = true;
-    const payload = this.tourGroup.getRawValue() as TourData;
+    const tourData = this.tourGroup.getRawValue() as TourData;
+    const salidasData = this.salidas.getRawValue();
+    
+    // Combinar los datos del tour con las salidas
+    const payload = {
+      ...tourData,
+      salidas: salidasData,
+    };
+
+    console.log('Formulario tour:', payload);
 
     this.tourService.createTour(payload).subscribe({
       next: () => {

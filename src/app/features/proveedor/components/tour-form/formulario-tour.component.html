@@ -19,20 +19,14 @@
     <div formGroupName="tour" class="form-section">
       <h3>🏨 Datos del Tour</h3>
 
-      <label>
-        Nombre:
-        <input type="text" formControlName="nombre" placeholder="Nombre del tour" required />
-      </label>
+      <label for="nombre">Nombre:</label>
+      <input id="nombre" type="text" formControlName="nombre" placeholder="Nombre del tour" required />
 
-      <label>
-        Descripción:
-        <textarea formControlName="descripcion" placeholder="Describe tu tour" required></textarea>
-      </label>
+      <label for="descripcion">Descripción:</label>
+      <textarea id="descripcion" formControlName="descripcion" placeholder="Describe tu tour" required></textarea>
 
-      <label>
-        Dirección (Punto de llegada):
-        <input type="text" formControlName="direccion" placeholder="Dirección de inicio del tour" required />
-      </label>
+      <label for="direccion">Dirección (Punto de encuentro):</label>
+      <input id="direccion" type="text" formControlName="direccion" placeholder="Dirección del tour" required />
       
       <!-- 🔄 CORRECCIÓN: Se añaden ciudad y país para que el formulario sea válido con el TS -->
       <div class="inline-group">
@@ -52,18 +46,20 @@
         <label> Cosas para llevar</label> 
         <div formArrayName="cosasParaLlevar"> 
           <div *ngFor="let item of cosasParaLlevar.controls; let i = index"> 
-            <input 
-              [formControlName]="i" 
-              type="text" 
-              placeholder="Ej: Cámara, protector solar..." 
-            /> 
-            <button  
-              type="button"  
-              class="btn-remove"  
-              (click)="quitarCosa(i)" 
-            > 
-              ❌ Eliminar 
-            </button> 
+            <div class="inline-group">
+              <input 
+                [formControlName]="i" 
+                type="text" 
+                placeholder="Ej: Cámara, protector solar..." 
+              /> 
+              <button  
+                type="button"  
+                class="btn-remove"  
+                (click)="quitarCosa(i)" 
+              > 
+                ❌ Eliminar 
+              </button> 
+            </div>
           </div> 
         </div> 
 
@@ -79,10 +75,8 @@
         </div> 
       </div> 
 
-      <label> 
-        Precio: 
-        <input type="number" formControlName="precio" min="0" required /> 
-      </label> 
+      <label for="precio" >Precio: </label> 
+      <input id="precio" type="number" formControlName="precio" min="0" required /> 
 
       <div class="inline-group categorias-group"> 
         <label> 
@@ -97,10 +91,8 @@
         </label> 
       </div> 
         
-      <label> 
-        Duración (Minutos): 
-        <input type="number" formControlName="duracion" required /> 
-      </label> 
+      <label for="duracion"> Duración (Minutos): </label> 
+      <input id="duracion" type="number" formControlName="duracion" required /> 
         
       <div class="inline-group"> 
         <label> 
@@ -126,8 +118,10 @@
         <h4>Galería de imágenes (Máx. 5)</h4> 
 
         <div *ngFor="let imgCtrl of galeriaImagenes?.controls; let i = index"> 
-          <input [formControl]="imgCtrl" placeholder="https://imagen.jpg" /> 
-          <button type="button" class="btn-remove" (click)="eliminarImagen(i)">❌ Eliminar</button> 
+          <div class="inline-group">
+            <input [formControl]="imgCtrl" placeholder="https://imagen.jpg" /> 
+            <button type="button" class="btn-remove" (click)="eliminarImagen(i)">❌ Eliminar</button> 
+          </div>
         </div> 
 
         <div *ngIf="galeriaImagenes.controls.length < 5"> 
@@ -144,6 +138,74 @@
         </p> 
       </div> 
     </div> 
+
+    <!-- ========================= -->
+    <!-- SALIDAS DE TOURS DINÁMICAS -->
+    <!-- ========================= -->
+    <div formArrayName="salidas" class="form-section">
+      <h3>🗓️ Salidas del Tour</h3>
+
+      <!-- ✅ Usa el getter 'salidas' -->
+      <div
+        *ngFor="let salida of salidas?.controls; let i = index"
+        [formGroupName]="i"
+        class="salida-card"
+      >
+        <h4>Salida {{ i + 1 }}</h4>
+
+        <div class="inline-group">
+          <label>
+            Fecha:
+            <input type="date" formControlName="fecha" />
+          </label>
+
+          <label>
+            Hora:
+            <input type="time" formControlName="hora" />
+          </label>
+        </div>
+
+        <div class="inline-group">
+          <label>
+            Cupo total:
+            <input
+              type="number"
+              formControlName="cupo_total"
+              min="1"
+              placeholder="Ej. 20"
+            />
+          </label>
+
+          <label>
+            Cupo reservado:
+            <input
+              type="number"
+              formControlName="cupo_reservado"
+              min="0"
+              placeholder="Ej. 5"
+            />
+          </label>
+        </div>
+
+        <label>
+          Estado:
+          <select formControlName="estado">
+            <option value="">Seleccione...</option>
+            <option value="disponible">Disponible</option>
+            <option value="completo">Completo</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </label>
+
+        <button type="button" class="btn-remove" (click)="eliminarSalida(i)">
+          ❌ Eliminar salida
+        </button>
+      </div>
+
+      <button type="button" class="btn-add" (click)="agregarSalida()">
+        ➕ Agregar salida
+      </button>
+    </div>
 
     <!-- ========================= --> 
     <!-- BOTÓN DE ENVÍO --> 

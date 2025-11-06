@@ -17,6 +17,13 @@ export interface TourData {
   imagen_url: string;
   galeria_imagenes: string[];
   cosasParaLlevar: string[];
+  salidas?: Array<{
+    fecha: string;
+    hora: string;
+    cupo_total: number;
+    cupo_reservado: number;
+    estado: string;
+  }>;
 }
 
 /**
