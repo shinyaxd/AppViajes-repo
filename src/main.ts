@@ -4,6 +4,7 @@ import { appConfig } from './app/app.config';
 
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
+import 'emoji-picker-element';
 registerLocaleData(localeEs); // 👈 importante
 
 bootstrapApplication(AppComponent, appConfig)

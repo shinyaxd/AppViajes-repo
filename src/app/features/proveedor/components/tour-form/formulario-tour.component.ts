@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ElementRef, ViewChild} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
@@ -11,6 +11,7 @@ import {
 import { Router } from '@angular/router';
 import { TourService, TourData } from '../../../tours/services/tour.service'; 
 import { AuthService } from '../../../../core/services/auth.service';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 /**
  * Componente dedicado a la creación/edición de Tours.
@@ -21,6 +22,7 @@ import { AuthService } from '../../../../core/services/auth.service';
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './formulario-tour.component.html',
   styleUrls: ['./formulario-tour.component.css'],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class TourFormComponent implements OnInit {
   tourForm!: FormGroup;
@@ -121,6 +123,41 @@ export class TourFormComponent implements OnInit {
   // ================================================
   // ➕/❌ Items (cosas para llevar)
   // ================================================
+  // Manejo del desplegable para elegir icono
+  mostrarEmojiPicker: boolean[] = []; // arreglo para manejar visibilidad por cada item
+  toggleEmojiPicker(index: number): void {
+    this.mostrarEmojiPicker[index] = !this.mostrarEmojiPicker[index];
+  }
+  seleccionarEmoji(event: any, index: number): void {
+    const emoji = event.detail.unicode;
+    const items = this.tourForm.get('tour.items') as FormArray;
+    const item = items.at(index);
+    item.get('icono')?.setValue(emoji);
+    this.mostrarEmojiPicker[index] = false; // cerrar después de seleccionar
+  }
+
+  // Manejar el emoji nuevo (fijo)
+  @ViewChild('nuevoIcono', { read: ElementRef }) nuevoIconoEl!: ElementRef<HTMLInputElement>;
+  mostrarEmojiNuevo = false;
+
+  toggleEmojiNuevo(): void {
+    this.mostrarEmojiNuevo = !this.mostrarEmojiNuevo;
+  }
+
+  seleccionarEmojiNuevo(event: any):void {
+    const emoji = event?.detail?.unicode ?? event?.detail?.unified ?? null;
+    const input = document.querySelector<HTMLInputElement>('#nuevoIcono');
+    if (!emoji) {
+      console.warn('Emoji picker event sin unicode:', event);
+      return;
+    }
+    // Escribir en el input directamente
+    if (this.nuevoIconoEl?.nativeElement) {
+      this.nuevoIconoEl.nativeElement.value = emoji;
+    }
+    this.mostrarEmojiNuevo = false;
+  }
+
   agregarItem(nombre = '', icono = ''): void {
     const MAX_ITEMS = 5; // ✅ Límite máximo de items
     const items = this.tourForm.get('tour.items') as FormArray;

@@ -47,17 +47,24 @@
         <div formArrayName="items"> 
           <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i"> 
             <div class="inline-group">
-              <input 
-                formControlName="nombre" 
-                type="text" 
-                placeholder="Ej: Cámara, protector solar..." 
-              /> 
-              <input 
-                formControlName="icono" 
-                type="text"
-                maxlength="10" 
-                placeholder="Ej: 🎒"
-              />
+              <input formControlName="nombre" type="text" placeholder="Ej: Cámara, protector solar..." /> 
+              <div class="icono-container">
+                <input formControlName="icono" type="text" maxlength="10" placeholder="Ej: 🌞"/>
+                <button
+                  type="button"
+                  class="btn-emoji"
+                  (click)="toggleEmojiPicker(i)"
+                  title="Elegir emoji"
+                >😄</button>
+
+                <!-- Emoji Picker desplegable -->
+                <emoji-picker
+                  *ngIf="mostrarEmojiPicker[i]"
+                  class="emoji-picker"
+                  (emoji-click)="seleccionarEmoji($event, i)"
+                ></emoji-picker>
+              </div>
+    
               <button  
                 type="button"  
                 class="btn-remove"  
@@ -71,7 +78,21 @@
         <div> 
           <div class="inline-group"  *ngIf="items.length < 5">
             <input #nuevoItem placeholder="Ej: Protector solar" /> 
-            <input #nuevoIcono placeholder="🌞"/>
+            <div class="icono-container">
+              <input #nuevoIcono id="nuevoIcono" placeholder="Ej 2: 🌞"/>
+              <button
+                type="button"
+                class="btn-emoji"
+                (click)="toggleEmojiNuevo()"
+                title="Elegir emoji"
+              >😄</button>
+              <!-- Emoji Picker para el nuevo ítem -->
+              <emoji-picker
+                *ngIf="mostrarEmojiNuevo"
+                class="emoji-picker"
+                (emoji-click)="seleccionarEmojiNuevo($event)"
+              ></emoji-picker>
+            </div>
             <button  
               type="button"  
               class="btn-add"  

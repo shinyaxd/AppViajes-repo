@@ -255,3 +255,26 @@ button:not(.btn-submit):disabled {
     align-self: center;
     margin-top: 1.5rem; /* Asegura que no tenga el margin-top de 0.5rem por defecto */
 }
+.icono-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.btn-emoji {
+  margin-left: 8px;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  border-radius: 0.75rem;
+  background: #43b6fe68;
+  font-size: 20px;
+  padding: 0.4rem; 
+  transition: transform 0.2s ease;
+}
+
+.emoji-picker {
+  position: absolute;
+  top: 40px;
+  z-index: 100;
+  max-width: 320px;
+}
