@@ -43,36 +43,48 @@
 
       <!-- ✅ Sección "Cosas para llevar" (funciona correctamente) --> 
       <div class="inline-group cosas-group"> 
-        <label> Cosas para llevar</label> 
-        <div formArrayName="cosasParaLlevar"> 
-          <div *ngFor="let item of cosasParaLlevar.controls; let i = index"> 
+        <label> Cosas para llevar (Máx. 5)</label> 
+        <div formArrayName="items"> 
+          <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i"> 
             <div class="inline-group">
               <input 
-                [formControlName]="i" 
+                formControlName="nombre" 
                 type="text" 
                 placeholder="Ej: Cámara, protector solar..." 
               /> 
+              <input 
+                formControlName="icono" 
+                type="text"
+                maxlength="10" 
+                placeholder="Ej: 🎒"
+              />
               <button  
                 type="button"  
                 class="btn-remove"  
-                (click)="quitarCosa(i)" 
-              > 
-                ❌ Eliminar 
+                (click)="quitarItem(i)" 
+              > ❌ Eliminar 
               </button> 
             </div>
           </div> 
         </div> 
 
         <div> 
-          <input #nuevaCosa placeholder="Ej: Protector solar" /> 
-          <button  
-            type="button"  
-            class="btn-add"  
-            (click)="agregarCosa(nuevaCosa.value); nuevaCosa.value=''" 
-          > 
-            ➕ Agregar objeto 
-          </button> 
+          <div class="inline-group"  *ngIf="items.length < 5">
+            <input #nuevoItem placeholder="Ej: Protector solar" /> 
+            <input #nuevoIcono placeholder="🌞"/>
+            <button  
+              type="button"  
+              class="btn-add"  
+              (click)="agregarItem(nuevoItem.value, nuevoIcono.value); nuevoItem.value=''; nuevoIcono.value=''" 
+              [disabled]="items.length >= 5"
+            > 
+              ➕ Agregar item 
+            </button> 
+          </div>
         </div> 
+        <p *ngIf="items.controls.length >= 5" class="limit-message"> 
+            Límite de 5 items alcanzado. 
+        </p> 
       </div> 
 
       <label for="precio" >Precio: </label> 

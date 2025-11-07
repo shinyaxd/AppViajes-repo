@@ -64,8 +64,8 @@ export class TourFormComponent implements OnInit {
         imagen_url: ['', [Validators.required]],
         // Galería de imágenes dinámica
         imagenes: this.fb.array<FormGroup>([]),
-        // Cosas para llevar dinámico
-        cosasParaLlevar: this.fb.array<FormControl<string | null>>([]),
+        // Items dinámicos (cosas para llevar)
+        items: this.fb.array<FormGroup>([]),
       }),
       // FormArray para salidas dinámicas
       salidas: this.fb.array([]),
@@ -83,8 +83,8 @@ export class TourFormComponent implements OnInit {
     return this.tourGroup.get('imagenes') as FormArray<FormGroup>;
   }
 
-  get cosasParaLlevar(): FormArray<FormControl<string | null>> {
-    return this.tourGroup.get('cosasParaLlevar') as FormArray<FormControl<string |null>>;
+  get items(): FormArray<FormGroup> {
+    return this.tourGroup.get('items') as FormArray<FormGroup>;
   }
 
   get salidas(): FormArray {
@@ -119,17 +119,31 @@ export class TourFormComponent implements OnInit {
   }
 
   // ================================================
-  // ➕/❌ Cosas para llevar (ahora idéntica a la galería)
+  // ➕/❌ Items (cosas para llevar)
   // ================================================
-  agregarCosa(item: string): void {
-    // ✅ Se valida y agrega solo si el texto no está vacío.
-    if (item && item.trim().length > 0) {
-      this.cosasParaLlevar.push(this.fb.control(item, { validators: [Validators.required], nonNullable: true }));
+  agregarItem(nombre = '', icono = ''): void {
+    const MAX_ITEMS = 5; // ✅ Límite máximo de items
+    const items = this.tourForm.get('tour.items') as FormArray;
+    // ✅ Verificar límite máximo
+    if (items.length >= MAX_ITEMS) {
+      console.warn(`[ITEMS] Límite de ${MAX_ITEMS} items alcanzado. No se agregará más.`);
+      return;
+    }
+    // ✅ Validar que el nombre no esté vacío
+    if (nombre && nombre.trim().length > 0) {
+      const itemGroup = this.fb.group({
+        nombre: [nombre, Validators.required],
+        icono: [icono],
+      });
+      items.push(itemGroup);
+      console.log(`[ITEMS] Item agregado (${items.length}/${MAX_ITEMS})`);
+    } else {
+      console.warn('[ITEMS] Nombre vacío — no se agregó item.');
     }
   }
   
-  quitarCosa(index: number): void {
-    this.cosasParaLlevar.removeAt(index);
+  quitarItem(index: number): void {
+    this.items.removeAt(index);
   }
 
   // ================================================
@@ -196,6 +210,10 @@ export class TourFormComponent implements OnInit {
       imagenes: (tourData.imagenes??[]).map(img => ({
         url: img.url,
         alt: img.alt ?? undefined,
+      })),
+      items: (tourData.items ?? []).map(item => ({
+        nombre: item.nombre,
+        icono: item.icono ?? undefined,
       })),
       salidas: salidasData,
     };

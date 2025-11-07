@@ -16,11 +16,17 @@ export interface TourData {
   cupos: number;
   imagen_url: string;
   imagenes?: Array<{
+    id?: number;
     url?: string;
     alt?: string;
   }>;
-  cosasParaLlevar: string[];
+  items?: Array<{
+    id?: number;   
+    nombre: string;
+    icono?: string;
+  }>;
   salidas?: Array<{
+    id?:number;
     fecha: string;
     hora: string;
     cupo_total: number;
