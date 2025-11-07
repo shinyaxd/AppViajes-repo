@@ -59,14 +59,11 @@ export class TourFormComponent implements OnInit {
         ciudad: ['', [Validators.required]], // ✅ Campo 1 para ubicación
         pais: ['', [Validators.required]],   // ✅ Campo 2 para ubicación
         precio: [0, [Validators.required, Validators.min(0)]],
-        // ❌ ELIMINADO: 'ubicacion' era redundante si ya tenemos ciudad y país
         categoria: ['', [Validators.required]],
         duracion: [1, [Validators.required, Validators.min(1)]],
-        fecha: ['', [Validators.required]], 
-        cupos: [1, [Validators.required, Validators.min(1)]],
         imagen_url: ['', [Validators.required]],
         // Galería de imágenes dinámica
-        galeria_imagenes: this.fb.array<FormControl<string | null>>([]),
+        imagenes: this.fb.array<FormGroup>([]),
         // Cosas para llevar dinámico
         cosasParaLlevar: this.fb.array<FormControl<string | null>>([]),
       }),
@@ -82,8 +79,8 @@ export class TourFormComponent implements OnInit {
     return this.tourForm.get('tour') as FormGroup;
   }
 
-  get galeriaImagenes(): FormArray<FormControl<string | null>> {
-    return this.tourGroup.get('galeria_imagenes') as FormArray<FormControl<string | null>>;
+  get galeriaImagenes(): FormArray<FormGroup> {
+    return this.tourGroup.get('imagenes') as FormArray<FormGroup>;
   }
 
   get cosasParaLlevar(): FormArray<FormControl<string | null>> {
@@ -97,7 +94,7 @@ export class TourFormComponent implements OnInit {
   // ================================================
   // 🖼️ Galería de imágenes
   // ================================================
-  agregarImagen(url: string): void {
+  agregarImagen(url: string, alt:string=''): void {
      const MAX_IMAGES = 5; // Definimos el límite máximo de imágenes
   
     // 1. Verificación de límite máximo
@@ -108,10 +105,11 @@ export class TourFormComponent implements OnInit {
     
     // Solo agrega el control si la URL no está vacía.
     if (url && url.trim().length > 0) {
-      this.galeriaImagenes.push(this.fb.control(url, { 
-        validators: [Validators.required],
-        nonNullable: true
-      }) as FormControl<string>);
+      const imagenGroup = this.fb.group({
+        url: [url, [Validators.required]],
+        alt: [alt], // opcional
+      });
+      this.galeriaImagenes.push(imagenGroup);
       console.log(`[GALERIA] Imagen agregada. Total: ${this.galeriaImagenes.length}/${MAX_IMAGES}`);
     }
   }
@@ -182,6 +180,10 @@ export class TourFormComponent implements OnInit {
     // Combinar los datos del tour con las salidas
     const payload = {
       ...tourData,
+      imagenes: (tourData.imagenes??[]).map(img => ({
+        url: img.url,
+        alt: img.alt ?? undefined,
+      })),
       salidas: salidasData,
     };
 

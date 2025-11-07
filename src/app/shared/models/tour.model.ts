@@ -15,7 +15,10 @@ export interface TourData {
   fecha: string;
   cupos: number;
   imagen_url: string;
-  galeria_imagenes: string[];
+  imagenes?: Array<{
+    url?: string;
+    alt?: string;
+  }>;
   cosasParaLlevar: string[];
   salidas?: Array<{
     fecha: string;

@@ -90,22 +90,10 @@
           </select> 
         </label> 
       </div> 
-        
-      <label for="duracion"> Duración (Minutos): </label> 
-      <input id="duracion" type="number" formControlName="duracion" required /> 
-        
-      <div class="inline-group"> 
-        <label> 
-          Fecha: 
-          <!-- 🔄 CORRECCIÓN: Se añade [min]="minDate" para aplicar la lógica del constructor TS -->
-          <input type="date" formControlName="fecha" [min]="minDate" required /> 
-        </label> 
-
-        <label> 
-          Cupos disponibles 
-          <input type="number" formControlName="cupos" placeholder="Cupos disponibles" required /> 
-        </label> 
-      </div> 
+      
+      <label for="duracion"> Duración (Minutos): 
+          <input id="duracion" type="number" formControlName="duracion" required /> 
+      </label> 
 
       <label> 
         Imagen principal (URL): 
@@ -117,18 +105,20 @@
       <div class="galeria"> 
         <h4>Galería de imágenes (Máx. 5)</h4> 
 
-        <div *ngFor="let imgCtrl of galeriaImagenes?.controls; let i = index"> 
+        <div *ngFor="let imgCtrl of galeriaImagenes?.controls; let i = index" [formGroup]="imgCtrl"> 
           <div class="inline-group">
-            <input [formControl]="imgCtrl" placeholder="https://imagen.jpg" /> 
+            <input formControlName="url" placeholder="https://imagen.jpg" /> 
+            <input formControlName="alt" placeholder="Texto alternativo (opcional)" />
             <button type="button" class="btn-remove" (click)="eliminarImagen(i)">❌ Eliminar</button> 
           </div>
         </div> 
 
         <div *ngIf="galeriaImagenes.controls.length < 5"> 
-          <input #nuevaImagen placeholder="URL de nueva imagen" /> 
+          <input #nuevaUrl placeholder="URL de nueva imagen" /> 
+          <input #nuevoAlt placeholder="Alt (opcional)" /> 
           <button 
             type="button" class="btn-add" 
-            (click)="agregarImagen(nuevaImagen.value); nuevaImagen.value=''" 
+            (click)="agregarImagen(nuevaUrl.value, nuevoAlt.value); nuevaUrl.value=''; nuevoAlt.value='';" 
           > 
             ➕ Agregar imagen 
           </button> 
@@ -191,9 +181,9 @@
           Estado:
           <select formControlName="estado">
             <option value="">Seleccione...</option>
-            <option value="disponible">Disponible</option>
-            <option value="completo">Completo</option>
-            <option value="cancelado">Cancelado</option>
+            <option value="programada">Programada</option>
+            <option value="cerrada">Cerrada</option>
+            <option value="cancelada">Cancelada</option>
           </select>
         </label>
 
