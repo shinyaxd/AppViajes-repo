@@ -141,7 +141,7 @@ export class TourFormComponent implements OnInit {
       hora: ['', [Validators.required]],
       cupo_total: [1, [Validators.required, Validators.min(1)]],
       cupo_reservado: [0, [Validators.required, Validators.min(0)]],
-      estado: ['disponible', [Validators.required]],
+      estado: ['programada', [Validators.required]],
     });
     this.salidas.push(salidaForm);
   }
@@ -163,7 +163,20 @@ export class TourFormComponent implements OnInit {
       // 'ciudad' y 'pais' eran requeridos pero no tenían input en el HTML.
       this.mensajeError = '❌ Por favor, completa todos los campos requeridos correctamente.';
       this.tourForm.markAllAsTouched();
+      // Scroll al mensaje
+      const el = document.getElementById('mensajeError');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
       return;
+    }
+
+    // Validar que al menos exista una salida
+    if (this.salidas.length === 0) {
+      this.mensajeError = '⚠️ Debes registrar al menos una salida para el tour.';
+      // Scroll al mensaje
+      const el = document.getElementById('mensajeError');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return; // detener submit
     }
 
     const userRole = this.authService.getRole();
