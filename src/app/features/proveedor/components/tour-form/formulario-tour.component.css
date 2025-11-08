@@ -255,10 +255,34 @@ button:not(.btn-submit):disabled {
     align-self: center;
     margin-top: 1.5rem; /* Asegura que no tenga el margin-top de 0.5rem por defecto */
 }
+/* Estilos para el selector de iconos*/
 .icono-container {
   position: relative;
   display: flex;
   align-items: center;
+}
+.icon-input-field {
+  padding-left: 30px; /* espacio para el icono */
+  color: transparent;  /* texto invisible */
+}
+.icono-overlay {
+  position: absolute;
+  left: 8px;
+  pointer-events: none; /* deja pasar clicks al input */
+  font-size: 20px;
+  color: #000; /* color del icono */
+}
+.icon-preview {
+  position: absolute;
+  left: 8px; /* Ajusta según padding del input */
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  pointer-events: none; /* No interfiere al escribir o click */
+  color: #555;
+}
+.icon-container input {
+  padding-left: 30px; /* deja espacio para el ícono */
 }
 
 .btn-emoji {
@@ -271,10 +295,39 @@ button:not(.btn-submit):disabled {
   padding: 0.4rem; 
   transition: transform 0.2s ease;
 }
-
-.emoji-picker {
+/* Estilos del desplegable de íconos */
+.icon-picker {
   position: absolute;
-  top: 40px;
-  z-index: 100;
-  max-width: 320px;
+  top: 110%; /* justo debajo del botón */
+  left: 0;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr); /* ✅ 6 columnas fijas */
+  gap: 6px;
+  width: 230px; /* ancho total del grid */
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 6px;
+  z-index: 1000;
+  animation: fadeIn 0.15s ease-in-out;
+}
+.icon-option {
+  cursor: pointer;
+  text-align: center;
+  padding: 4px;
+  transition: background 0.2s;
+}
+
+.icon-option:hover {
+  background-color: #e8e8e8;
+  border-radius: 6px;
+}
+
+.icon-option i {
+  font-size: 20px;
+}
+/* Animación suave */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
 }

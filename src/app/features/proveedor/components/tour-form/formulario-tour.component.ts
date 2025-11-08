@@ -26,6 +26,7 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 })
 export class TourFormComponent implements OnInit {
   tourForm!: FormGroup;
+  nuevoItemForm!: FormGroup;
   enviado = false;
   enviando = false;
   mensajeExito = '';
@@ -43,10 +44,16 @@ export class TourFormComponent implements OnInit {
     const today = new Date();
     // Usamos toISOString().split('T')[0] para asegurar el formato YYYY-MM-DD
     this.minDate = today.toISOString().split('T')[0]; 
+
+    this.nuevoItemForm = this.fb.group({
+      nombre: ['', Validators.required],
+      icono: [''],
+    });
   }
 
   ngOnInit(): void {
     this.crearFormulario();
+
   }
 
   // ================================================
@@ -123,60 +130,87 @@ export class TourFormComponent implements OnInit {
   // ================================================
   // ➕/❌ Items (cosas para llevar)
   // ================================================
+  // ✅ Lista de íconos Font Awesome a mostrar
+  iconosFontAwesome: string[] = [
+    'fa-solid fa-suitcase',          // Maleta
+    'fa-solid fa-glasses',           // Gafas de sol
+    'fa-solid fa-passport',          // Pasaporte
+    'fa-solid fa-camera',            // Cámara
+    'fa-solid fa-charging-station',  // Cargador / batería
+    'fa-solid fa-headphones',        // Audífonos
+    'fa-solid fa-tshirt',            // Ropa
+    'fa-solid fa-umbrella-beach',    // Sombrilla / playa
+    'fa-solid fa-bottle-droplet',    // Botella de agua
+    'fa-solid fa-sun',               // Protector solar
+    'fa-solid fa-shoe-prints',       // Zapatillas
+    'fa-solid fa-map',               // Mapa
+    'fa-solid fa-plane',             // Avión
+    'fa-solid fa-ticket',            // Ticket / boleto
+    'fa-solid fa-bed',               // Dormir / descanso
+    'fa-solid fa-hat-cowboy',        // Sombrero
+    'fa-solid fa-person-hiking',     // Excursionismo
+    'fa-solid fa-compass',           // Brújula
+    'fa-solid fa-binoculars',        // Binoculares
+    'fa-solid fa-mountain',          // Montaña / aventura
+    'fa-solid fa-swimmer',           // Ropa de baño
+    'fa-solid fa-first-aid',         // Botiquín
+    'fa-solid fa-book',              // Libro
+    'fa-solid fa-wallet',            // Billetera
+    'fa-solid fa-mobile-screen',     // Celular
+    'fa-solid fa-laptop',            // Laptop
+    'fa-solid fa-bottle-water',      // Hidratación
+    'fa-solid fa-cookie-bite',       // Snacks
+    'fa-solid fa-cloud-sun',         // Clima / abrigo
+    'fa-solid fa-car',            // Cepillo (aseo)
+  ];
   // Manejo del desplegable para elegir icono
-  mostrarEmojiPicker: boolean[] = []; // arreglo para manejar visibilidad por cada item
+  // 🔁 Reutilizamos los toggles
+  mostrarEmojiPicker: boolean[] = [];  
+  mostrarEmojiNuevo = false;
+
   toggleEmojiPicker(index: number): void {
     this.mostrarEmojiPicker[index] = !this.mostrarEmojiPicker[index];
   }
-  seleccionarEmoji(event: any, index: number): void {
-    const emoji = event.detail.unicode;
-    const items = this.tourForm.get('tour.items') as FormArray;
-    const item = items.at(index);
-    item.get('icono')?.setValue(emoji);
-    this.mostrarEmojiPicker[index] = false; // cerrar después de seleccionar
-  }
-
-  // Manejar el emoji nuevo (fijo)
-  @ViewChild('nuevoIcono', { read: ElementRef }) nuevoIconoEl!: ElementRef<HTMLInputElement>;
-  mostrarEmojiNuevo = false;
-
   toggleEmojiNuevo(): void {
     this.mostrarEmojiNuevo = !this.mostrarEmojiNuevo;
   }
+  // ✅ Seleccionar ícono existente
+  seleccionarIcono(icon: string, index: number): void {
+    const items = this.tourForm.get('tour.items') as FormArray;
+    const item = items.at(index);
+    item.get('icono')?.setValue(icon);
+    this.mostrarEmojiPicker[index] = false;
+  }
 
-  seleccionarEmojiNuevo(event: any):void {
-    const emoji = event?.detail?.unicode ?? event?.detail?.unified ?? null;
-    const input = document.querySelector<HTMLInputElement>('#nuevoIcono');
-    if (!emoji) {
-      console.warn('Emoji picker event sin unicode:', event);
-      return;
-    }
-    // Escribir en el input directamente
-    if (this.nuevoIconoEl?.nativeElement) {
-      this.nuevoIconoEl.nativeElement.value = emoji;
-    }
+  // ✅ Seleccionar ícono nuevo
+  seleccionarIconoNuevo(icon: string): void {
+    this.nuevoItemForm.get('icono')?.setValue(icon);
     this.mostrarEmojiNuevo = false;
   }
 
-  agregarItem(nombre = '', icono = ''): void {
+  agregarItem(): void {
     const MAX_ITEMS = 5; // ✅ Límite máximo de items
-    const items = this.tourForm.get('tour.items') as FormArray;
+
+    if (this.nuevoItemForm.invalid) {
+      return; // No hacer nada si el formulario del nuevo ítem es inválido
+    }
+
     // ✅ Verificar límite máximo
-    if (items.length >= MAX_ITEMS) {
+    if (this.items.length >= MAX_ITEMS) {
       console.warn(`[ITEMS] Límite de ${MAX_ITEMS} items alcanzado. No se agregará más.`);
       return;
     }
-    // ✅ Validar que el nombre no esté vacío
-    if (nombre && nombre.trim().length > 0) {
-      const itemGroup = this.fb.group({
-        nombre: [nombre, Validators.required],
-        icono: [icono],
-      });
-      items.push(itemGroup);
-      console.log(`[ITEMS] Item agregado (${items.length}/${MAX_ITEMS})`);
-    } else {
-      console.warn('[ITEMS] Nombre vacío — no se agregó item.');
-    }
+
+    const { nombre, icono } = this.nuevoItemForm.value;
+
+    // Creamos un nuevo FormGroup para el FormArray, asegurándonos de que tenga sus propios validadores.
+    const itemGroup = this.fb.group({
+      nombre: [nombre, [Validators.required]],
+      icono: [icono]
+    });
+
+    this.items.push(itemGroup);
+    this.nuevoItemForm.reset({ nombre: '', icono: '' }); // Limpiar el formulario del nuevo ítem
   }
   
   quitarItem(index: number): void {
@@ -208,6 +242,20 @@ export class TourFormComponent implements OnInit {
     this.enviado = true;
     this.mensajeError = '';
     this.mensajeExito = '';
+
+    console.log('✅ Estado general:', this.tourForm.valid);
+    console.log('🧱 Formulario completo:', this.tourForm.value);
+
+    Object.keys(this.tourGroup.controls).forEach((key) => {
+      const control = this.tourGroup.get(key);
+      if (control?.invalid) {
+        console.warn(`❌ Campo inválido: ${key}`, control.errors);
+      }
+    });
+
+    console.log('📸 Imágenes:', this.galeriaImagenes.length);
+    console.log('🎒 Items:', this.items.length);
+    console.log('📅 Salidas:', this.salidas.length);
 
     if (this.tourForm.invalid) {
       // ⚠️ Si la aplicación seguía fallando, este era el punto de error:

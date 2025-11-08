@@ -47,24 +47,30 @@
         <div formArrayName="items"> 
           <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i"> 
             <div class="inline-group">
-              <input formControlName="nombre" type="text" placeholder="Ej: Cámara, protector solar..." /> 
+              <input formControlName="nombre" type="text" maxlength="30" placeholder="Ej: Cámara, protector solar..." required /> 
               <div class="icono-container">
-                <input formControlName="icono" type="text" maxlength="10" placeholder="Ej: 🌞"/>
+                <input formControlName="icono" type="hidden" readonly/>
+                <!-- Ícono visual flotante dentro del input -->
+                <!--i *ngIf="item.get('icono')?.value" [class]="item.get('icono')?.value" class="icon-preview"></i--->
+
                 <button
                   type="button"
                   class="btn-emoji"
                   (click)="toggleEmojiPicker(i)"
-                  title="Elegir emoji"
+                  title="Elegir icono"
                 >😄</button>
 
-                <!-- Emoji Picker desplegable -->
-                <emoji-picker
-                  *ngIf="mostrarEmojiPicker[i]"
-                  class="emoji-picker"
-                  (emoji-click)="seleccionarEmoji($event, i)"
-                ></emoji-picker>
+                <!-- ✅ Icon Picker desplegable -->
+                <div *ngIf="mostrarEmojiPicker[i]" class="icon-picker">
+                  <div
+                    *ngFor="let icon of iconosFontAwesome"
+                    class="icon-option"
+                    (click)="seleccionarIcono(icon, i)"
+                  >
+                    <i [class]="icon"></i>
+                  </div>
+                </div>
               </div>
-    
               <button  
                 type="button"  
                 class="btn-remove"  
@@ -73,31 +79,35 @@
               </button> 
             </div>
           </div> 
-        </div> 
-
-        <div> 
-          <div class="inline-group"  *ngIf="items.length < 5">
-            <input #nuevoItem placeholder="Ej: Protector solar" /> 
+          <div [formGroup]="nuevoItemForm" class="inline-group" *ngIf="items.length < 5">
+            <div class="input-with-icon">
+              <input formControlName="nombre" placeholder="Ej: Protector solar" />
+              <i *ngIf="nuevoItemForm.get('icono')?.value" [class]="nuevoItemForm.get('icono')?.value + ' icono-derecha'"></i>
+            </div>
             <div class="icono-container">
-              <input #nuevoIcono id="nuevoIcono" placeholder="Ej 2: 🌞"/>
+              <input formControlName="icono" type="hidden" readonly/>
               <button
                 type="button"
                 class="btn-emoji"
                 (click)="toggleEmojiNuevo()"
-                title="Elegir emoji"
+                title="Elegir icono"
               >😄</button>
-              <!-- Emoji Picker para el nuevo ítem -->
-              <emoji-picker
-                *ngIf="mostrarEmojiNuevo"
-                class="emoji-picker"
-                (emoji-click)="seleccionarEmojiNuevo($event)"
-              ></emoji-picker>
+              <!-- ✅ Icon Picker para el nuevo ítem -->
+              <div *ngIf="mostrarEmojiNuevo" class="icon-picker">
+                <div
+                  *ngFor="let icon of iconosFontAwesome"
+                  class="icon-option"
+                  (click)="seleccionarIconoNuevo(icon)"
+                >
+                  <i [class]="icon"></i>
+                </div>
+              </div>
             </div>
             <button  
               type="button"  
               class="btn-add"  
-              (click)="agregarItem(nuevoItem.value, nuevoIcono.value); nuevoItem.value=''; nuevoIcono.value=''" 
-              [disabled]="items.length >= 5"
+              (click)="agregarItem()"
+              [disabled]="nuevoItemForm.invalid || items.length >= 5"
             > 
               ➕ Agregar item 
             </button> 
@@ -240,5 +250,6 @@
     > 
       {{ enviando ? 'Enviando...' : 'Publicar tour' }} 
     </button> 
+    <!--tourForm.invalid ||  {{ enviando ? 'Enviando...' : 'Publicar tour' }}  -->
   </form> 
 </div>
