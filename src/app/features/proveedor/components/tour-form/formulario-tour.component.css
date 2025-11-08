@@ -294,6 +294,7 @@ button:not(.btn-submit):disabled {
   font-size: 20px;
   padding: 0.4rem; 
   transition: transform 0.2s ease;
+  width: 40px;
 }
 /* Estilos del desplegable de íconos */
 .icon-picker {

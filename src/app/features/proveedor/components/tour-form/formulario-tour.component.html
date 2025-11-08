@@ -58,7 +58,10 @@
                   class="btn-emoji"
                   (click)="toggleEmojiPicker(i)"
                   title="Elegir icono"
-                >😄</button>
+                ><i *ngIf="item.get('icono')?.value; else emojiDefault"
+                  [class]="item.get('icono')?.value"></i>
+                  <ng-template #emojiDefault>😄</ng-template>
+                </button>
 
                 <!-- ✅ Icon Picker desplegable -->
                 <div *ngIf="mostrarEmojiPicker[i]" class="icon-picker">
@@ -82,7 +85,7 @@
           <div [formGroup]="nuevoItemForm" class="inline-group" *ngIf="items.length < 5">
             <div class="input-with-icon">
               <input formControlName="nombre" placeholder="Ej: Protector solar" />
-              <i *ngIf="nuevoItemForm.get('icono')?.value" [class]="nuevoItemForm.get('icono')?.value + ' icono-derecha'"></i>
+              <!---i *ngIf="nuevoItemForm.get('icono')?.value" [class]="nuevoItemForm.get('icono')?.value + ' icono-derecha'"><i/---->
             </div>
             <div class="icono-container">
               <input formControlName="icono" type="hidden" readonly/>
@@ -91,7 +94,10 @@
                 class="btn-emoji"
                 (click)="toggleEmojiNuevo()"
                 title="Elegir icono"
-              >😄</button>
+              ><i *ngIf="nuevoItemForm.get('icono')?.value; else emojiNuevoDefault"
+                  [class]="nuevoItemForm.get('icono')?.value"></i>
+              <ng-template #emojiNuevoDefault>😄</ng-template>
+              </button>
               <!-- ✅ Icon Picker para el nuevo ítem -->
               <div *ngIf="mostrarEmojiNuevo" class="icon-picker">
                 <div
