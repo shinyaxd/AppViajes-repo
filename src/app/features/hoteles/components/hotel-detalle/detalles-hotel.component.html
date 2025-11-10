@@ -61,21 +61,6 @@
 
   </div>
 
-  <!-- ======================= -->
-  <!-- SECCIÓN DE RESEÑAS -->
-  <!-- ======================= -->
-  <app-reviews-section
-    *ngIf="hotel"
-    [servicioId]="hotel.id"
-    [servicioTipo]="'hotel'"
-  ></app-reviews-section>
-
-  <!-- BOTÓN FINAL DE RESERVA (multi selección) -->
-  <div *ngIf="mostrarBotonReservar" class="final-reserve-section">
-    <button class="final-reserve-button" (click)="reservarHotelFinal()">Reservar</button>
-  </div>
-</div>
-
 <!-- ======================= -->
 <!-- MENSAJE DE CARGA -->
 <!-- ======================= -->
@@ -109,6 +94,21 @@
       <button (click)="cancelarFormularioFechas()">Cancelar</button>
     </div>
   </div>
+</div>
+
+  <!-- BOTÓN FINAL DE RESERVA (multi selección) -->
+  <div *ngIf="mostrarBotonReservar" class="final-reserve-section">
+    <button class="final-reserve-button" (click)="reservarHotelFinal()">Reservar</button>
+  </div>
+  
+  <!-- ======================= -->
+  <!-- SECCIÓN DE RESEÑAS -->
+  <!-- ======================= -->
+  <app-reviews-section
+    *ngIf="hotel"
+    [servicioId]="hotel.id"
+    [servicioTipo]="'hotel'"
+  ></app-reviews-section>
 </div>
 
 <!-- ======================= -->
