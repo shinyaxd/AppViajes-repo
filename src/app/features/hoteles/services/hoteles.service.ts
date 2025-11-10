@@ -128,7 +128,7 @@ export class HotelService {
       .pipe(
         map(res =>
           res.data.map(apiHotel => ({
-            id: apiHotel.servicio_id, 
+            id: apiHotel.id, 
             nombre: apiHotel.nombre,
             ciudad: apiHotel.ciudad,
             pais: apiHotel.pais,
@@ -152,13 +152,13 @@ export class HotelService {
    * NUEVO: Método para eliminar un hotel por su ID de servicio.
    */
   deleteHotel(servicioId: number): Observable<any> {
-    return this.http.delete(`${this.API_URL}/hoteles/${servicioId}`, {
+    return this.http.delete(`${this.API_URL}/servicios/${servicioId}`, {
         // 🚨 CAMBIO: getHeaders() ya no tiene token, pero lo enviamos
         headers: this.getHeaders()
     }).pipe(
         catchError(error => {
-            console.error(`Error al eliminar hotel ${servicioId}:`, error);
-            return throwError(() => new Error(`Fallo al eliminar el hotel.`));
+            console.error(`Error al eliminar servicio ${servicioId}:`, error);
+            return throwError(() => new Error(`Fallo al eliminar el servicio.`));
         })
     );
   }

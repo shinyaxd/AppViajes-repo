@@ -48,7 +48,7 @@ export interface HotelListApiRespuesta {
  */
 export interface SupplierHotelListApiRespuesta {
   data: Array<{
-    servicio_id: number;
+    id: number;
     direccion: string;
     estrellas: number;
     nombre: string;

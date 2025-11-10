@@ -140,6 +140,7 @@ export class ProveedorComponent implements OnInit, OnDestroy {
             this.publications.set(hotelsWithReservations);
             this.isLoading.set(false);
             console.log(`✅ ${hotelsWithReservations.length} hoteles cargados desde el backend.`);
+            console.log(hotelsWithReservations);
         })
     );
   }
@@ -156,7 +157,7 @@ export class ProveedorComponent implements OnInit, OnDestroy {
    * Elimina un hotel usando el endpoint DELETE /api/hoteles/{servicio_id}.
    */
   deletePublication(id: number, title: string): void {
-    if (!confirm(`¿Estás seguro de que quieres eliminar el hotel "${title}" (ID: ${id})? Esta acción es irreversible.`)) {
+    if (!confirm(`¿Estás seguro de que quieres eliminar el servicio "${title}" (ID: ${id})? Esta acción es irreversible.`)) {
       return;
     }
 
@@ -165,14 +166,14 @@ export class ProveedorComponent implements OnInit, OnDestroy {
     this.subscriptions.add(
         this.hotelService.deleteHotel(id).subscribe({
             next: () => {
-                console.log(`✅ Hotel con ID ${id} eliminado correctamente.`);
+                console.log(`✅ Servicio con ID ${id} eliminado correctamente.`);
                 // Recargar la lista para reflejar el cambio (llama a fetchPublications)
                 this.fetchPublications(); 
             },
             error: (error) => {
-                console.error("Error al eliminar el hotel:", error);
+                console.error("Error al eliminar el servicio:", error);
                 // Mostrar un mensaje de error no intrusivo
-                confirm("Error al eliminar el hotel. Revisa la consola y tu conexión.");
+                confirm("Error al eliminar el servicio. Revisa la consola y tu conexión.");
                 this.isLoading.set(false);
             }
         })
