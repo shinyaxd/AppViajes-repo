@@ -1,21 +1,17 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { map, Observable } from 'rxjs';
-// Ruta ajustada. Si esto falla, por favor verifica la estructura de carpetas
-// donde está el archivo header.component.ts y la carpeta 'core'.
 import { AuthService, User } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-header',
   standalone: true,
   imports: [RouterModule, CommonModule],
-  // Mantenemos las referencias a archivos externos
-  templateUrl: './header.component.html', 
-  styleUrls: ['./header.component.css'] 
+  templateUrl: './header.component.html',
+  styleUrls: ['./header.component.css']
 })
-// Eliminamos OnInit y OnDestroy, ya que no son necesarios con el 'async' pipe.
-export class HeaderComponent {
+export class HeaderComponent implements OnInit {
   // ======================================================
   // 🧱 Inyección de dependencias
   // ======================================================
@@ -67,11 +63,15 @@ export class HeaderComponent {
         this.router.navigate(['/hoteles']);
       },
       error: (err) => {
-        console.error('Logout error:', err);
+        console.error('Error en logout:', err);
         // En caso de error de red durante el logout, la sesión local ya se limpió,
         // así que igualmente redirigimos al usuario.
         this.router.navigate(['/hoteles']);
       }
     });
+  }
+
+  ngOnInit(): void {
+    // Aquí puedes colocar la lógica que necesites al inicializar el componente
   }
 }

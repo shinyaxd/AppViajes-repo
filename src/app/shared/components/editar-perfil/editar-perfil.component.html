@@ -1,178 +1,178 @@
-<div class="profile-container">
-  <h1>Editar Perfil</h1>
-
-  <!-- Spinner Global -->
-  <app-spinner></app-spinner>
-
-  <!-- Formulario principal (se muestra solo cuando el form está inicializado) -->
-  <ng-container *ngIf="form">
-
-    <!-- Mensajes de estado (Éxito/Error) -->
-    <div *ngIf="message()"
-         [ngClass]="{
-            'bg-green-100': messageType() === 'success',
-            'bg-red-100': messageType() === 'error'
-         }"
-         role="alert">
-      <span class="block sm:inline">{{ message() }}</span>
+<div class="perfil-container">
+    <!-- Portada -->
+    <div class="portada-section" [style.background-image]="'url(' + (coverImage() || 'img/imagen.jpg') + ')'">
+      <div class="portada-overlay">
+        <button type="button" class="btn-cambiar-portada" (click)="triggerFileInput('coverInput')">
+          <i class="fa-solid fa-camera"></i> Cambiar portada
+        </button>
+        <input type="file" id="coverInput" accept="image/*" (change)="onCoverImageSelected($event)" style="display:none;">
+        <button type="button" class="btn-eliminar-portada" *ngIf="coverImage()" (click)="removeCoverImage()">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
     </div>
 
-    <form [formGroup]="form" (ngSubmit)="guardarCambios()">
-
-      <!-- Rol actual (Ahora usa la clase .role-display) -->
-      <div class="role-display">
-        Rol actual: {{ currentRole() | uppercase }}
-      </div>
-
-      <!-- Campos Comunes para Viajero -->
-      <ng-container *ngIf="currentRole() === 'viajero'">
-        <!-- field-group-container para la cuadrícula de Nombre y Apellido -->
-        <div class="field-group field-group-container">
-          <!-- Nombre -->
-          <div class="field-card">
-            <label for="nombre">Nombre</label>
-            <input id="nombre" formControlName="nombre" type="text">
-            <div *ngIf="form.get('nombre')?.invalid && (form.get('nombre')?.dirty || form.get('nombre')?.touched)">
-              <p *ngIf="form.get('nombre')?.errors?.['required']">El nombre es obligatorio.</p>
-            </div>
-          </div>
-
-          <!-- Apellido -->
-          <div class="field-card">
-            <label for="apellido">Apellido</label>
-            <input id="apellido" formControlName="apellido" type="text">
-            <div *ngIf="form.get('apellido')?.invalid && (form.get('apellido')?.dirty || form.get('apellido')?.touched)">
-              <p *ngIf="form.get('apellido')?.errors?.['required']">El apellido es obligatorio.</p>
-            </div>
-          </div>
-        </div>
-      </ng-container>
-
-      <!-- Campos de Proveedor -->
-      <ng-container *ngIf="currentRole() === 'proveedor'">
-        <!-- field-group-container para la cuadrícula de Empresa, Teléfono y RUC -->
-        <div class="field-group field-group-container">
-          <!-- Nombre Empresa -->
-          <div class="field-card">
-            <label for="empresa_nombre">Nombre de la Empresa</label>
-            <input id="empresa_nombre" formControlName="empresa_nombre" type="text">
-            <p *ngIf="form.get('empresa_nombre')?.errors?.['required'] && (form.get('empresa_nombre')?.dirty || form.get('empresa_nombre')?.touched)">El nombre de la empresa es obligatorio.</p>
-          </div>
-
-          <!-- Teléfono (Celular) - Ahora usa la clase .field-card -->
-          <div class="field-card">
-            <label for="telefono">Celular</label>
-            <input id="telefono" formControlName="telefono" type="text">
-            <p *ngIf="form.get('telefono')?.errors?.['required'] && (form.get('telefono')?.dirty || form.get('telefono')?.touched)">El teléfono es obligatorio.</p>
-            <p *ngIf="form.get('telefono')?.errors?.['pattern'] && (form.get('telefono')?.dirty || form.get('telefono')?.touched)">
-              Formato esperado: +51 9########
-            </p>
-          </div>
-
-          <!-- RUC - Ahora usa la clase .field-card -->
-          <div class="field-card">
-            <label for="ruc">RUC</label>
-            <input id="ruc" formControlName="ruc" type="text">
-            <p>Este campo no puede ser modificado.</p>
-          </div>
-        </div>
-      </ng-container>
-
-      <!-- Email - Ahora usa la clase .field-card -->
-      <div class="field-group field-card">
-        <label for="email">Correo Electrónico</label>
-        <input id="email" formControlName="email" type="email">
-        <p>El email no puede ser modificado.</p>
-      </div>
-
-      <!-- Título para Contraseña -->
-      <div class="field-group">
-        <h2>Actualizar Contraseña (Opcional)</h2>
-      </div>
-
-      <!-- Grupo de Contraseña - field-group-container para la cuadrícula de campos -->
-      <div class="field-group field-group-container">
-        <!-- Contraseña -->
-        <div class="field-card password-field-container">
-          <label for="password">Nueva Contraseña</label>
-          <!-- Se usa binding para el tipo de input basado en showPassword() -->
-          <input id="password" formControlName="password" [type]="showPassword() ? 'text' : 'password'">
-          <!-- Botón de toggle con ícono. Necesitarás tener Font Awesome o íconos similares configurados en tu proyecto. -->
-          <button type="button" class="toggle-password-btn" (click)="togglePassword()">
-            <i [class]="showPassword() ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'"></i>
+    <!-- Foto de perfil -->
+    <div class="foto-perfil-container">
+      <div class="foto-perfil" [style.background-image]="'url(' + (profileImage() || 'img/tour.png') + ')'">
+        <div class="foto-perfil-overlay">
+          <button type="button" class="btn-cambiar-foto" (click)="triggerFileInput('profileInput')">
+            <i class="fa-solid fa-camera"></i>
           </button>
-        </div>
-
-        <!-- Confirmar Contraseña - Ahora usa la clase .field-card -->
-        <div class="field-card password-field-container">
-          <label for="confirmarPassword">Confirmar Nueva Contraseña</label>
-          <!-- Se usa binding para el tipo de input basado en showConfirmPassword() -->
-          <input id="confirmarPassword" formControlName="confirmarPassword" [type]="showConfirmPassword() ? 'text' : 'password'">
-          <!-- Botón de toggle con ícono -->
-          <button type="button" class="toggle-password-btn" (click)="toggleConfirmPassword()">
-            <i [class]="showConfirmPassword() ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'"></i>
+          <input type="file" id="profileInput" accept="image/*" (change)="onProfileImageSelected($event)" style="display:none;">
+          <button type="button" class="btn-eliminar-foto" *ngIf="profileImage()" (click)="removeProfileImage()">
+            <i class="fa-solid fa-times"></i>
           </button>
         </div>
       </div>
+    </div>
 
-      <!-- Error de Coincidencia de Contraseña (Validación de grupo) -->
-      <div class="field-group" *ngIf="form.hasError('passwordMismatch') && (form.get('password')?.dirty || form.get('confirmarPassword')?.dirty)">
-        Las contraseñas no coinciden.
-      </div>
+    <!-- Información del usuario -->
+    <div class="info-usuario">
+      <h1>{{ form.get('nombre')?.value }} {{ form.get('apellido')?.value }}</h1>
+      <p class="correo">{{ form.get('email')?.value }}</p>
+      <p class="role-display">Rol: {{ currentRole() | titlecase }}</p>
+    </div>
 
-      <!-- Botón de Guardar -->
-      <button type="submit"
-              [disabled]="isSaving() || form.pristine || form.invalid">
-        <span *ngIf="!isSaving()">Guardar Cambios</span>
-        <span *ngIf="isSaving()">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline w-4 h-4 mr-2 animate-spin text-white">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25"></circle>
-            <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          Guardando...
-        </span>
+    <!-- Barra de Navegación -->
+    <div class="perfil-nav">
+      <button [class.active]="activeTab() === 'cuenta'" (click)="activeTab.set('cuenta')">
+        <i class="fa-solid fa-user-gear"></i> Cuenta
       </button>
-    </form>
-
-    <!-- Sección de Eliminación de Cuenta - Ahora usa la clase .delete-section -->
-    <div class="delete-section">
-      <h3>Eliminar Cuenta</h3>
-      <p>Esta acción es irreversible y eliminará permanentemente todos tus datos.</p>
-      <button (click)="showDeleteConfirmation.set(true)"
-              [disabled]="isSaving()">
-        Eliminar Mi Cuenta
+      <button [class.active]="activeTab() === 'historial'" (click)="activeTab.set('historial')">
+        <i class="fa-solid fa-history"></i> Historial
+      </button>
+      <button [class.active]="activeTab() === 'metodos_pago'" (click)="activeTab.set('metodos_pago')">
+        <i class="fa-solid fa-credit-card"></i> Métodos de pago
       </button>
     </div>
-  </ng-container>
 
-  <!-- 3. Modal de Confirmación de Eliminación -->
-  <div *ngIf="showDeleteConfirmation()" class="delete-modal-backdrop">
-    <!-- Overlay/Background -->
-    <div class="delete-modal-content">
-      <!-- Contenido del Modal -->
-      <div class="modal-card">
-        <h3>Confirmar Eliminación</h3>
-        <p>¿Estás absolutamente seguro/a de que deseas eliminar tu cuenta? Esta acción no se puede deshacer.</p>
+    <!-- Mensajes de éxito/error -->
+    <div *ngIf="message()" [ngClass]="messageType() === 'success' ? 'bg-green-100' : 'bg-red-100'">
+      {{ message() }}
+    </div>
 
-        <div class="modal-actions">
-          <button (click)="eliminarCuenta()"
-                  [disabled]="isSaving()" class="delete-confirm-btn">
-            <span *ngIf="!isSaving()">Sí, Eliminar Permanentemente</span>
-            <span *ngIf="isSaving()">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline w-4 h-4 mr-2 animate-spin text-white">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity="0.25"></circle>
-                <path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Eliminando...
-            </span>
+    <!-- Contenido de la Pestaña Activa -->
+    <div class="perfil-content-wrapper">
+      <div [ngSwitch]="activeTab()">
+        <!-- Pestaña Cuenta -->
+        <div *ngSwitchCase="'cuenta'">
+          <div class="perfil-form">
+            <form [formGroup]="form" (ngSubmit)="guardarCambios()" novalidate>
+              <h2>Cuenta</h2>
+              <div class="field-group">
+                <label for="nombre">Nombre</label>
+                <input type="text" id="nombre" formControlName="nombre" placeholder="Tu nombre">
+                <div class="error-message" *ngIf="form.get('nombre')?.errors?.['required'] && form.get('nombre')?.touched">
+                  El nombre es requerido.
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label for="apellido">Apellido</label>
+                <input type="text" id="apellido" formControlName="apellido" placeholder="Tu apellido">
+                <div class="error-message" *ngIf="form.get('apellido')?.errors?.['required'] && form.get('apellido')?.touched">
+                  El apellido es requerido.
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label for="celular">Celular</label>
+                <input type="text" id="celular" formControlName="celular" placeholder="Tu celular">
+              </div>
+
+              <div class="field-group">
+                <label for="direccion">Dirección</label>
+                <input type="text" id="direccion" formControlName="direccion" placeholder="Tu dirección">
+              </div>
+
+              <div class="field-group">
+                <label for="fecha_cumpleanos">Fecha de Cumpleaños</label>
+                <input type="date" id="fecha_cumpleanos" formControlName="fecha_cumpleanos">
+              </div>
+
+              <!-- Contraseña -->
+              <h2>Cambiar Contraseña</h2>
+              <div class="field-card">
+                <div class="field-group">
+                  <label for="password">Nueva Contraseña</label>
+                  <div class="input-group">
+                    <input [type]="showPassword() ? 'text' : 'password'" id="password" formControlName="password" placeholder="Nueva contraseña">
+                    <button type="button" (click)="togglePassword()">{{ showPassword() ? 'Ocultar' : 'Mostrar' }}</button>
+                  </div>
+                </div>
+
+                <div class="field-group">
+                  <label for="confirmarPassword">Confirmar Nueva Contraseña</label>
+                  <div class="input-group">
+                    <input [type]="showConfirmPassword() ? 'text' : 'password'" id="confirmarPassword" formControlName="confirmarPassword" placeholder="Confirma la nueva contraseña">
+                    <button type="button" (click)="toggleConfirmPassword()">{{ showConfirmPassword() ? 'Ocultar' : 'Mostrar' }}</button>
+                  </div>
+                  <div class="error-message" *ngIf="form.errors?.['passwordMismatch'] && (form.get('confirmarPassword')?.touched || form.get('password')?.touched)">
+                    Las contraseñas no coinciden.
+                  </div>
+                </div>
+              </div>
+
+              <button type="submit" [disabled]="form.invalid || isSaving()" class="btn-guardar">
+                <span *ngIf="!isSaving()">Guardar Cambios</span>
+                <svg *ngIf="isSaving()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-25"></circle>
+                  <path fill="currentColor" class="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span *ngIf="isSaving()">Guardando...</span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Sección Eliminar Cuenta -->
+          <div class="delete-section">
+            <h3>Eliminar Cuenta</h3>
+            <p>Esta acción es irreversible. Se eliminarán todos tus datos.</p>
+            <button type="button" (click)="showDeleteConfirmation.set(true)" [disabled]="isSaving()">
+              Eliminar Cuenta
+            </button>
+          </div>
+        </div>
+
+        <!-- Pestaña Historial -->
+        <div *ngSwitchCase="'historial'">
+          <div class="perfil-form">
+            <h2>Historial de Viajes</h2>
+            <p>Aquí se mostrará tu historial de viajes.</p>
+            <!-- Contenido del historial -->
+          </div>
+        </div>
+
+        <!-- Pestaña Métodos de pago -->
+        <div *ngSwitchCase="'metodos_pago'">
+          <div class="perfil-form">
+            <h2>Métodos de Pago</h2>
+            <p>Aquí podrás gestionar tus métodos de pago.</p>
+            <!-- Contenido de métodos de pago -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Confirmación de Eliminación -->
+    <div *ngIf="showDeleteConfirmation()" class="delete-modal-backdrop">
+      <div>
+        <h3>¿Estás seguro?</h3>
+        <p>Esta acción eliminará permanentemente tu cuenta y todos los datos asociados. No se puede deshacer.</p>
+        <div>
+          <button type="button" (click)="eliminarCuenta()" [disabled]="isSaving()">
+            <svg *ngIf="isSaving()" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" class="opacity-25"></circle>
+              <path fill="currentColor" class="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span *ngIf="isSaving()">Eliminando...</span>
+            <span *ngIf="!isSaving()">Sí, eliminar cuenta</span>
           </button>
-
-          <button (click)="showDeleteConfirmation.set(false)"
-                  [disabled]="isSaving()" class="delete-cancel-btn">
+          <button type="button" (click)="showDeleteConfirmation.set(false)" [disabled]="isSaving()">
             Cancelar
           </button>
         </div>
       </div>
     </div>
-  </div>
 </div>
