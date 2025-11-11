@@ -31,6 +31,7 @@ export class ServicioDetalleHeaderComponent {
   @Input() servicio!: ServicioDetalleData;
   @Input() breadcrumb: string[] = []; // Ej: ['Lima', 'Perú', 'Hotel B']
   @Output() onReservar = new EventEmitter<void>();
+  @Output() onBack = new EventEmitter<void>();
 
   /**
    * Obtiene el set completo de 5 imágenes para el grid
@@ -101,5 +102,10 @@ export class ServicioDetalleHeaderComponent {
 
   repetirEstrellas(cantidad: number): string {
     return '⭐'.repeat(cantidad || 0);
+  }
+
+  volverClicked(): void {
+    // Emitir el evento para que el componente padre controle la navegación.
+    this.onBack.emit();
   }
 }

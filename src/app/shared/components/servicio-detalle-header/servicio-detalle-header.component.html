@@ -1,11 +1,14 @@
 <!-- ======================= -->
-<!-- BREADCRUMB -->
+<!-- BREADCRUMB: Volver > País > Nombre -->
 <!-- ======================= -->
-<div class="breadcrumb" *ngIf="breadcrumb && breadcrumb.length > 0">
-  <span *ngFor="let item of breadcrumb; let last = last">
-    {{ item }}
-    <span *ngIf="!last" class="breadcrumb-separator"> > </span>
-  </span>
+<div class="breadcrumb" *ngIf="servicio">
+  <a class="back-link" (click)="volverClicked()" role="button">Volver</a>
+  <span class="breadcrumb-separator"> &nbsp;&gt;&nbsp; </span>
+  <span class="breadcrumb-item" *ngIf="servicio.pais">{{ servicio.pais }}</span>
+  <span class="breadcrumb-separator" *ngIf="servicio.pais && servicio.ciudad"> &nbsp;&gt;&nbsp; </span>
+  <span class="breadcrumb-item" *ngIf="servicio.ciudad">{{ servicio.ciudad }}</span>
+  <span class="breadcrumb-separator"> &nbsp;&gt;&nbsp; </span>
+  <span class="breadcrumb-current">{{ servicio.nombre }}</span>
 </div>
 
 <!-- ======================= -->
