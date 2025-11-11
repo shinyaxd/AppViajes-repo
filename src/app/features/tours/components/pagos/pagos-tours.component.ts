@@ -107,7 +107,34 @@ export class PagosToursComponent implements OnInit {
   }
 
   volverAtras(): void {
-    this.router.navigate(['/tours']);
+    // Intentar volver en el historial del navegador primero (mantiene estado si venías del detalle)
+    try {
+      window.history.back();
+
+      // Si después de un corto delay seguimos en la página de pagos, navegar al detalle del tour con los query params necesarios
+      setTimeout(() => {
+        const path = window.location.pathname || '';
+        const stillOnPagos = path.includes('/pagos') || path.includes('/tour/pagos');
+        if (stillOnPagos) {
+          // Fallback: navegar al detalle del tour
+          const id = this.tourId || 0;
+          if (id) {
+            this.router.navigate(['/tour/detalle', id], { queryParams: { categoria: this.categoria || '' } });
+          } else {
+            // Si no tenemos id, navegar a lista de tours
+            this.router.navigate(['/tours']);
+          }
+        }
+      }, 250);
+    } catch (e) {
+      console.error('[PAGOS TOURS] Error al intentar volver atrás:', e);
+      // Fallback directo
+      if (this.tourId) {
+        this.router.navigate(['/tour/detalle', this.tourId], { queryParams: { categoria: this.categoria || '' } });
+      } else {
+        this.router.navigate(['/tours']);
+      }
+    }
   }
 
   procesarPago = async (): Promise<void> => {

@@ -227,13 +227,26 @@ export class TourDetalleComponent implements OnInit {
   }
 
   volverAResultados(): void {
-    // 🆕 Incluir las fechas de búsqueda al volver
-    this.router.navigate(['/tour/resultados'], {
-        queryParams: {
-            checkIn: this.checkInDate,
-            checkOut: this.checkOutDate,
+    // Intentar volver en el historial del navegador (si existe). Si no cambia la ruta, navegar al fallback
+    try {
+      const currentParams = { ...this.route.snapshot.queryParams } as Record<string, any>;
+
+      // Intento principal: history.back() (mantiene estado si venías de la página de resultados)
+      window.history.back();
+
+      // Después de un pequeño delay, si seguimos en una ruta de detalle, hacer fallback a la ruta de resultados con los query params
+      setTimeout(() => {
+        const path = window.location.pathname || '';
+        const isStillDetail = path.includes('/detalle') || path.includes('/tour/detalle');
+        if (isStillDetail) {
+          this.router.navigate(['/tour/resultados'], { queryParams: currentParams });
         }
-    });
+      }, 300);
+    } catch (e) {
+      console.error('[NAV] Excepción en volverAResultados (tour):', e);
+      const qs = new URLSearchParams((this.route.snapshot.queryParams as Record<string, string>) || {}).toString();
+      window.location.href = `/tour/resultados${qs ? '?' + qs : ''}`;
+    }
   }
 
   /**
@@ -346,13 +359,13 @@ export class TourDetalleComponent implements OnInit {
 
     console.log('[NAV] Navegando a pagos de tours:', queryParams);
     this.router.navigate(['/tour/pagos'], { queryParams })
-      .then(success => {
+      .then((success: boolean) => {
         console.log('[NAV] Navegación exitosa:', success);
         if (!success) {
           console.error('[NAV] ❌ La navegación fue bloqueada o falló');
         }
       })
-      .catch(error => {
+      .catch((error: unknown) => {
         console.error('[NAV] ❌ Error en navegación:', error);
       });
   }

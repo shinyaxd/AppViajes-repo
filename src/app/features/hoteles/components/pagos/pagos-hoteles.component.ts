@@ -35,6 +35,7 @@ export class PagosHotelesComponent implements OnInit {
   // Datos visibles
   nombreHotel = '';
   ubicacion = '';
+  hotelId = 0;
   checkIn: Date | null = null;
   checkOut: Date | null = null;
 
@@ -65,8 +66,9 @@ export class PagosHotelesComponent implements OnInit {
     console.log(`${tag} params:`, params);
 
     // Seguridad: si no vienen cosas clave, lo vas a ver aquí.
-    const hotelNombre = params['hotelNombre'];
+  const hotelNombre = params['hotelNombre'];
     const ubicacion = params['ubicacion'];
+  this.hotelId = +params['hotelId'] || 0;
     const checkInStr = params['checkIn'];
     const checkOutStr = params['checkOut'];
 
@@ -165,7 +167,51 @@ export class PagosHotelesComponent implements OnInit {
   }
 
   volverAtras(): void {
-    this.router.navigate(['/hoteles']);
+    // Intentar volver en el historial del navegador primero (mantiene estado si venías del detalle)
+    try {
+      window.history.back();
+
+      // Si después de un corto delay seguimos en la página de pagos, navegar al detalle del hotel con los query params necesarios
+      setTimeout(() => {
+        const path = window.location.pathname || '';
+        const stillOnPagos = path.includes('/pagos') || path.includes('/hoteles/pagos');
+        if (stillOnPagos) {
+          // Fallback: si tenemos hotelId, ir al detalle; si no, ir a resultados con filtros
+          const ciudadFromUbicacion = (this.ubicacion || '').split(',').pop()?.trim() || '';
+          const qp: Record<string, any> = {
+            ciudad: ciudadFromUbicacion,
+            checkIn: this.checkIn ? this.toISODate(this.checkIn) : '',
+            checkOut: this.checkOut ? this.toISODate(this.checkOut) : '',
+            adultos: this.adultosReservados || 1,
+            ninos: this.ninosReservados || 0,
+            habitaciones: this.habitacionesSolicitadas || 1
+          };
+
+          if (this.hotelId) {
+            this.router.navigate(['/hoteles/detalle', this.hotelId], { queryParams: qp });
+          } else {
+            this.router.navigate(['/hoteles/resultados'], { queryParams: qp });
+          }
+        }
+      }, 250);
+    } catch (e) {
+      console.error('[PAGOS HOTELES] Error al intentar volver atrás:', e);
+      // Fallback directo
+      const ciudadFromUbicacion = (this.ubicacion || '').split(',').pop()?.trim() || '';
+      const qp: Record<string, any> = {
+        ciudad: ciudadFromUbicacion,
+        checkIn: this.checkIn ? this.toISODate(this.checkIn) : '',
+        checkOut: this.checkOut ? this.toISODate(this.checkOut) : '',
+        adultos: this.adultosReservados || 1,
+        ninos: this.ninosReservados || 0,
+        habitaciones: this.habitacionesSolicitadas || 1
+      };
+      if (this.hotelId) {
+        this.router.navigate(['/hoteles/detalle', this.hotelId], { queryParams: qp });
+      } else {
+        this.router.navigate(['/hoteles/resultados'], { queryParams: qp });
+      }
+    }
   }
 
   procesarPago = async (): Promise<void> => {

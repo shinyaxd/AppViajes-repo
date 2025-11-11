@@ -263,18 +263,41 @@ verificarDisponibilidad(): void {
   // 🔙 Volver a resultados
   // ==========================================================
   volverAResultados(): void {
-    if (!this.hotel) return;
-    console.log('[NAV] volver a resultados con queryParams');
-    this.router.navigate(['/resultadosHoteles'], {
-      queryParams: {
-        ciudad: this.hotel.ciudad,
-        checkIn: this.checkInDate,
-        checkOut: this.checkOutDate,
-        adultos: this.adultos,
-        ninos: this.ninos,
-        habitaciones: this.habitaciones
-      }
-    });
+    // Intentar volver en el historial del navegador (si existe). Si no cambia la ruta, navegar al fallback
+    try {
+      const queryParams = {
+        ciudad: this.hotel?.ciudad || '',
+        checkIn: this.checkInDate || '',
+        checkOut: this.checkOutDate || '',
+        adultos: this.adultos || 1,
+        ninos: this.ninos || 0,
+        habitaciones: this.habitaciones || 1
+      } as Record<string, any>;
+
+      // Intento principal: history.back() (mantiene estado si venías de la página de resultados)
+      window.history.back();
+
+      // Después de un pequeño delay, si seguimos en una ruta de detalle, hacer fallback a la ruta de resultados con los query params
+      setTimeout(() => {
+        const path = window.location.pathname || '';
+        const isStillDetail = path.includes('/detalle') || path.includes('/hoteles/detalle');
+        if (isStillDetail) {
+          this.router.navigate(['/hoteles/resultados'], { queryParams });
+        }
+      }, 300);
+    } catch (e) {
+      console.error('[NAV] Excepción en volverAResultados (hotel):', e);
+      this.router.navigate(['/hoteles/resultados'], {
+        queryParams: {
+          ciudad: this.hotel?.ciudad || '',
+          checkIn: this.checkInDate || '',
+          checkOut: this.checkOutDate || '',
+          adultos: this.adultos || 1,
+          ninos: this.ninos || 0,
+          habitaciones: this.habitaciones || 1
+        }
+      });
+    }
   }
 
   // ==========================================================
@@ -353,6 +376,6 @@ verificarDisponibilidad(): void {
     console.log('[NAV] ruta destino:', '/hoteles/pagos');
     console.log('[NAV] queryParams:', queryParams);
     this.router.navigate(['/hoteles/pagos'], { queryParams })
-      .then(ok => console.log('[NAV] navigate() result:', ok));
+      .then((ok: boolean) => console.log('[NAV] navigate() result:', ok));
   }
 }
