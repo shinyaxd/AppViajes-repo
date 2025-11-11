@@ -9,7 +9,8 @@ import { catchError, filter } from 'rxjs/operators';
 // IMPORTACIÓN DE SERVICIOS DE LARAVEL (BACKEND)
 // *******************************************************************
 import { AuthService, User } from '../../../../core/services/auth.service';
-import { HotelService, HotelData } from '../../../hoteles/services/hoteles.service';
+import { HotelService, HotelData, ServiceData } from '../../../hoteles/services/hoteles.service';
+import { ReviewsService } from '../../../../shared/services/reviews.service';
 
 // ==========================================================
 // INTERFACES Y UTILS
@@ -22,17 +23,40 @@ import { HotelService, HotelData } from '../../../hoteles/services/hoteles.servi
 interface DashboardHotel extends HotelData {
   reservas_pendientes: number; // Campo clave que refleja el nombre del backend
 }
+// Mostrar al proveedor el promedio de calificación de sus servicios
+interface ServiceProveedorData extends ServiceData {
+  /** Promedio de calificación calculado en el front */
+  promedio_calificacion?: number;
+}
 
 
 // PIPE UTILITARIO para renderizar estrellas
 @Pipe({
   name: 'starArray',
   standalone: true
-})
+}) 
 export class StarArrayPipe implements PipeTransform {
-  /** Transforma un número (ej: 4) en un array de ese tamaño ([0, 0, 0, 0]) para usar con @for. */
-  transform(value: number): number[] {
-    return Array(value).fill(0);
+  transform(rating: number | null | undefined): ('full' | 'half' | 'empty')[] {
+    if (!rating || rating <= 0) return [];
+
+    const stars: ('full' | 'half' | 'empty')[] = [];
+    const rounded = Math.floor(rating);
+    const hasHalf = rating - rounded >= 0.25 && rating - rounded < 0.75; // umbral medio
+
+    // Estrellas llenas
+    for (let i = 0; i < rounded; i++) {
+      stars.push('full');
+    }
+
+    // Media estrella
+    if (hasHalf) stars.push('half');
+
+    // Estrellas vacías
+    while (stars.length < 5) {
+      stars.push('empty');
+    }
+
+    return stars;
   }
 }
 
@@ -58,6 +82,7 @@ export class ProveedorComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private authService = inject(AuthService);
   private hotelService = inject(HotelService);
+  private reviewsService = inject(ReviewsService);
   private subscriptions = new Subscription(); // Para limpiar Observables
 
   // *******************************************************************
@@ -67,7 +92,7 @@ export class ProveedorComponent implements OnInit, OnDestroy {
   user = signal<User | null>(null);
   isAuthenticated = signal(false);
   isLoading = signal(true);
-  publications = signal<DashboardHotel[]>([]); // Solo contendrá hoteles
+  publications = signal<ServiceProveedorData[]>([]); // Todos los servicios sin restringir a hoteles
 
   // Clase CSS dinámica para la tarjeta de hotel
   getPublicationCardClass() {
@@ -119,38 +144,52 @@ export class ProveedorComponent implements OnInit, OnDestroy {
     this.isLoading.set(true);
 
     this.subscriptions.add(
-        this.hotelService.getSupplierHotels().pipe(
+        this.hotelService.getSupplierServices().pipe(
             catchError((error) => {
-                console.error("Error al cargar hoteles:", error);
+                console.error("Error al cargar servicios del proveedor:", error);
                 // Si el error es 500, indica que la ruta no existe o falla el backend.
                 // En este punto, como corregimos el backend, solo mostramos el error.
                 this.publications.set([]);
                 this.isLoading.set(false);
                 return []; 
             })
-        ).subscribe(hotels => {
-            // ALINEACIÓN: Mapeamos los datos para asegurar que tienen el campo que espera DashboardHotel.
-            // La interfaz DashboardHotel espera 'reservas_pendientes', que es lo que devuelve el backend.
-            const hotelsWithReservations: DashboardHotel[] = hotels.map(h => ({
-                ...h,
-                // Si el backend no devuelve el campo (lo cual no debería pasar ahora), usamos 0.
-                reservas_pendientes: (h as any).reservas_pendientes ?? 0,
-            }));
-
-            this.publications.set(hotelsWithReservations);
-            this.isLoading.set(false);
-            console.log(`✅ ${hotelsWithReservations.length} hoteles cargados desde el backend.`);
-            console.log(hotelsWithReservations);
+        ).subscribe((services:ServiceData[]) => {
+          const servicesExtendidos: ServiceProveedorData[] = services.map(s => ({
+            ...s,
+            promedio_calificacion: undefined // se llenará después
+          }));
+          
+          this.publications.set(servicesExtendidos);
+          this.isLoading.set(false);
+          // Cargar promedios de reseñas
+          servicesExtendidos.forEach(service => {
+            this.reviewsService.getReviewsDataByServicio(service.id).subscribe({
+              next: (reviews) => {
+                const promedio = this.reviewsService.calcularPromedio(reviews);
+                service.promedio_calificacion = promedio;
+                this.publications.set([...this.publications()]);
+              },
+              error: (err) => {
+                console.warn(`No se pudieron cargar reseñas para servicio ${service.id}:`, err);
+                service.promedio_calificacion = 0;
+              }
+            });
+          });  
+          console.log(`✅ ${services.length} servicios cargados desde el backend.`);
+          console.log(services);
         })
     );
-  }
+  }         
   
   /**
    * Redirecciona a la vista de edición del hotel.
    */
-  editPublication(id: number, type: string): void {
+  editPublication(id: number, type: string ): void {
     // Redirección al formulario de edición usando el servicio_id como parámetro de ruta
-    this.router.navigate(['/proveedor/editar-hotel', id]);
+    if (!confirm(`¿Estás seguro de que quieres editar el "${type}" (ID: ${id})? Esta acción es irreversible.`)) {
+      return;
+    }
+    //this.router.navigate(['/proveedor/editar-hotel', id]);
   }
 
   /**

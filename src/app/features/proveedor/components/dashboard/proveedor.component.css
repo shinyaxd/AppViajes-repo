@@ -242,6 +242,13 @@
 .card-star {
     margin-right: 0.1rem;
 }
+.card-star.empty {
+  color: #ccc;
+}
+
+.card-star.half {
+  color: #000000;
+}
 
 .card-location {
     font-size: 0.875rem; /* text-sm */

@@ -12,6 +12,7 @@ import {
   Habitacion,
   HabitacionCreatePayload,
   HotelData,
+  ServiceData,
   HotelDetalles,
   HotelListApiRespuesta,
   SupplierHotelListApiRespuesta,
@@ -24,6 +25,7 @@ export type {
   Habitacion,
   HabitacionCreatePayload,
   HotelData,
+  ServiceData,
   HotelDetalles,
   HotelListApiRespuesta,
   SupplierHotelListApiRespuesta,
@@ -146,6 +148,33 @@ export class HotelService {
             return throwError(() => new Error('No se pudieron cargar sus hoteles. Verifique su autenticación.'));
         })
       );
+  }
+  /**
+   * NUEVO: Obtiene la lista de servicios Pertenecientes al proveedor autenticado.
+   */
+  getSupplierServices(): Observable<ServiceData[]> {
+    const endpoint = `${this.API_URL}/proveedor/servicios`;
+
+    return this.http.get<{ data: any[] }>(endpoint, {
+      headers: this.getHeaders(),
+    }).pipe(
+      map(res => res.data.map(item => ({
+        id: item.id,
+        tipo: item.tipo,
+        nombre: item.nombre,
+        descripcion: item.descripcion,
+        ciudad: item.ciudad,
+        pais: item.pais,
+        imagen_url: item.imagen_url || 'assets/images/placeholder.jpg',
+        activo: item.activo,
+        created_at: item.created_at,
+        meta_tipo: item.meta_tipo
+      }) as ServiceData)),
+      catchError((error) => {
+        console.error('Error al cargar servicios del proveedor:', error);
+        return throwError(() => new Error('No se pudieron cargar los servicios.'));
+      })
+    );
   }
 
   /**
