@@ -93,6 +93,9 @@ export class ProveedorComponent implements OnInit, OnDestroy {
   isAuthenticated = signal(false);
   isLoading = signal(true);
   publications = signal<ServiceProveedorData[]>([]); // Todos los servicios sin restringir a hoteles
+  promedioGeneral: number | null = null;
+  totalReservas:number |null = null;
+  lugarMasPopular: string | null = null;
 
   // Clase CSS dinámica para la tarjeta de hotel
   getPublicationCardClass() {
@@ -154,6 +157,30 @@ export class ProveedorComponent implements OnInit, OnDestroy {
                 return []; 
             })
         ).subscribe((services:ServiceData[]) => {
+          // 1. Calcular el total de reservas confirmadas
+          this.totalReservas = services.reduce((total, service) => {
+            // Aseguramos que la estructura exista y sumamos el valor.
+            const confirmadas = service.reservas_totales?.confirmadas ?? 0;
+            return total + confirmadas;
+          }, 0);
+          // 2. Servicio con más reservas lugarMasPopular
+          let maxReservas = -1;
+          let servicioMasReservado: ServiceData | null = null;
+          services.forEach(service => {
+            const confirmadas = service.reservas_totales?.confirmadas ?? 0;
+                
+            // Si este servicio tiene más reservas que el máximo actual
+            if (confirmadas > maxReservas) {
+              maxReservas = confirmadas;
+              servicioMasReservado = service;
+            }
+          });
+          if (servicioMasReservado) {
+            this.lugarMasPopular =(servicioMasReservado as ServiceData)?.ciudad ?? 'N/A';
+          } else {
+            this.lugarMasPopular = 'N/A';
+          }
+
           const servicesExtendidos: ServiceProveedorData[] = services.map(s => ({
             ...s,
             promedio_calificacion: undefined // se llenará después
@@ -161,13 +188,25 @@ export class ProveedorComponent implements OnInit, OnDestroy {
           
           this.publications.set(servicesExtendidos);
           this.isLoading.set(false);
-          // Cargar promedios de reseñas
+          // Cargar promedios de reseñas para cada servicio
+          let totalPromedios = 0;
+          let serviciosConCalificacion = 0;
+
           servicesExtendidos.forEach(service => {
             this.reviewsService.getReviewsDataByServicio(service.id).subscribe({
               next: (reviews) => {
                 const promedio = this.reviewsService.calcularPromedio(reviews);
                 service.promedio_calificacion = promedio;
                 this.publications.set([...this.publications()]);
+                // Acumular para el promedio general
+                if (promedio > 0) {
+                  totalPromedios += promedio;
+                  serviciosConCalificacion++;
+                }
+                // Recalcular promedio general
+                this.promedioGeneral = serviciosConCalificacion > 0
+                  ? parseFloat((totalPromedios / serviciosConCalificacion).toFixed(2))
+                  : null;
               },
               error: (err) => {
                 console.warn(`No se pudieron cargar reseñas para servicio ${service.id}:`, err);

@@ -33,6 +33,43 @@
 
     <!-- 2. Listado de servicios (Hay publicaciones) -->
     <div *ngIf="publications().length > 0" class="publications-grid">
+      <!-- Métricas generales -->
+      <div class="metrics-container">
+        <div class="metric-card">
+          <div class="metric-icon-wrapper">
+            <i class="fa-solid fa-calendar-check"></i>
+          </div>
+          <div class="metric-info">
+            <h4 class="metric-title">Cantidad de reservas</h4>
+            <p class="general-metric-value">{{ totalReservas || 0 }}</p>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon-wrapper">
+            <i class="fa-solid fa-star"></i>
+          </div>
+          <div class="metric-info">
+            <h4 class="metric-title">Calificación promedio</h4>
+            <p class="general-metric-value">
+              <ng-container *ngIf="promedioGeneral !== null; else noRating">
+                {{ promedioGeneral }} estrellas
+              </ng-container>
+              <ng-template #noRating>N/A</ng-template>
+            </p>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon-wrapper">
+            <i class="fa-solid fa-location-dot"></i>
+          </div>
+          <div class="metric-info">
+            <h4 class="metric-title">Lugar más popular</h4>
+            <p class="general-metric-value">{{ lugarMasPopular || 'Sin datos' }}</p>
+          </div>
+        </div>
+      </div>
 
       <div *ngFor="let pub of publications()" [class]="getPublicationCardClass()">
         
@@ -59,7 +96,6 @@
                     <i *ngIf="star === 'half'" class="fa-solid fa-star-half-stroke card-star half"></i>
                     <i *ngIf="star === 'empty'" class="fa-regular fa-star card-star empty"></i>
                   </ng-container>
-                  <!--i *ngFor="let i of (pub.promedio_calificacion | starArray)" class="fa-solid fa-star card-star"></i--->
                 </ng-container>
 
                 <ng-template #noReviews>
@@ -87,11 +123,11 @@
                 Precio base:
                 <span class="metric-value metric-value-price">${{ pub.meta_tipo.precio | number:'1.2-2' }}</span>
               </div>
-              <!--div class="metric-item">
+              <div class="metric-item">
                 <i class="fa-solid fa-users metric-icon-reserva"></i>
-                Reservas (Pendientes): 
-                <span class="metric-value metric-value-reserva">{{ pub.reservations }}</span>
-              </div------>
+                Reservas (Confirmadas): 
+                <span class="metric-value metric-value-reserva">{{ pub.reservas_totales.confirmadas ?? '0'}}</span>
+              </div>
               <div class="metric-item">
                 <i class="fa-solid fa-chart-line metric-icon-star"></i>
                 Calificación promedio: 

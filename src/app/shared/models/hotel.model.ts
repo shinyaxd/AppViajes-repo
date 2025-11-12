@@ -72,6 +72,10 @@ export interface ServiceData {
     salidas_count?: number | null;
     proximas_salidas?: number | null;
   };
+  reservas_totales:{
+    confirmadas?: number;
+    canceladas?: number;
+  };
 }
 
 /**

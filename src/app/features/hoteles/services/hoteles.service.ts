@@ -168,7 +168,8 @@ export class HotelService {
         imagen_url: item.imagen_url || 'assets/images/placeholder.jpg',
         activo: item.activo,
         created_at: item.created_at,
-        meta_tipo: item.meta_tipo
+        meta_tipo: item.meta_tipo,
+        reservas_totales: item.reservas_totales,
       }) as ServiceData)),
       catchError((error) => {
         console.error('Error al cargar servicios del proveedor:', error);
