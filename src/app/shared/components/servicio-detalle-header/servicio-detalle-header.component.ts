@@ -17,6 +17,7 @@ export interface ServicioDetalleData {
   descripcion: string;
   duracion?: string; // Solo para tours: "10 Horas"
   galeria_imagenes: string[];
+  galeria_alts?: string[]; // textos 'alt' alineados por índice con `galeria_imagenes`
 }
 
 @Component({
@@ -90,6 +91,20 @@ export class ServicioDetalleHeaderComponent {
 
   get currentImage(): string {
     return this.imagenesParaGrid[this.currentIndex];
+  }
+
+  /** Devuelve el texto alt asociado a un índice de imagen (si existe) */
+  get currentAlt(): string {
+    const alts = this.servicio?.galeria_alts || [];
+    return alts[this.currentIndex] || (this.servicio?.nombre || 'Imagen');
+  }
+
+  getAltForIndex(index: number): string {
+    const alts = this.servicio?.galeria_alts || [];
+    const alt = alts[index];
+    if (alt && alt.trim().length > 0) return alt;
+    // Fallback legible
+    return `${this.servicio?.nombre || 'Imagen'} - ${index + 1}`;
   }
 
   @HostListener('window:keydown', ['$event'])
