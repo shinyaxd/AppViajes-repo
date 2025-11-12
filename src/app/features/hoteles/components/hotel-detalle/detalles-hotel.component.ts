@@ -46,6 +46,19 @@ export class DetallesHotelComponent implements OnInit {
     const galeria = ImageUtils.getAllImages(this.hotel.imagen_url, this.hotel.galeria_imagenes);
     const galeriaFinal = galeria.length > 0 ? galeria : [ImageUtils.getPlaceholder('hotel')];
 
+    // Intentar extraer textos 'alt' si el backend provee objetos con metadata
+    const imagenesApiObjects = (this.hotel as any).imagenes?.map((img: any) => {
+      const url = img.url || img.imagen_url || '';
+      const alt = img.alt || img.descripcion || img.caption || img.titulo || img.alt_text || '';
+      return { url, alt };
+    }) || [];
+
+    const altsFinal: string[] = galeriaFinal.map(url => {
+      const found = imagenesApiObjects.find((o: any) => o.url === url);
+      if (found && found.alt && found.alt.trim().length > 0) return found.alt;
+      return this.hotel?.nombre || '';
+    });
+
     return {
       nombre: this.hotel.nombre,
       ciudad: this.hotel.ciudad,
@@ -54,7 +67,8 @@ export class DetallesHotelComponent implements OnInit {
       estrellas: this.hotel.estrellas,
       precio: this.precioHotelMostrado,
       descripcion: this.hotel.descripcion || '',
-      galeria_imagenes: galeriaFinal
+      galeria_imagenes: galeriaFinal,
+      galeria_alts: altsFinal
     };
   }
 
@@ -67,7 +81,7 @@ export class DetallesHotelComponent implements OnInit {
   // 🔸 Ciclo de vida
   // ==========================================================
   ngOnInit(): void {
-    this.route.queryParams.subscribe(qParams => {
+    this.route.queryParams.subscribe((qParams: Record<string, any>) => {
       this.checkInDate = qParams['checkIn'] || '';
       this.checkOutDate = qParams['checkOut'] || '';
       this.adultos = +qParams['adultos'] || 1;
@@ -79,7 +93,7 @@ export class DetallesHotelComponent implements OnInit {
       });
     });
 
-    this.route.paramMap.subscribe(params => {
+    this.route.paramMap.subscribe((params: import('@angular/router').ParamMap) => {
       const idParam = params.get('id');
       this.hotelId = idParam;
       const hotelId = idParam ? parseInt(idParam, 10) : undefined;
@@ -96,14 +110,14 @@ export class DetallesHotelComponent implements OnInit {
   getHotelDetails(id: number): void {
     console.log(`[API] getHotelCompleto(${id})`);
     this.hotelService.getHotelCompleto(id).subscribe({
-      next: (detalle) => {
+      next: (detalle: any) => {
         this.hotel = detalle.hotel;
-        this.habitacionesFiltradas = detalle.habitaciones.map(h => ({ ...h, seleccionada: 0 }));
+        this.habitacionesFiltradas = (detalle.habitaciones as any[]).map((h: any) => ({ ...h, seleccionada: 0 }));
         console.log('[DATA] hotel cargado', { hotel: this.hotel?.nombre, habitaciones: this.habitacionesFiltradas.length });
         this.verificarDisponibilidad();
         this.verificarSeleccion();
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error(`❌ Error al cargar el hotel ID ${id}:`, error);
         this.hotel = undefined;
         this.habitacionesFiltradas = [];

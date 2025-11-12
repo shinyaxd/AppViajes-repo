@@ -37,13 +37,13 @@ export class TourDetalleComponent implements OnInit {
 
   ngOnInit(): void {
     // 🆕 1. Obtener fechas de los QueryParams (como en el detalle-hotel)
-    this.route.queryParams.subscribe(qParams => {
+    this.route.queryParams.subscribe((qParams: Record<string, any>) => {
       this.checkInDate = qParams['checkIn'] || null;
       this.checkOutDate = qParams['checkOut'] || null;
       console.log('[INIT] Fechas de búsqueda:', { checkIn: this.checkInDate, checkOut: this.checkOutDate });
     });
 
-    this.route.paramMap.subscribe(params => {
+    this.route.paramMap.subscribe((params: import('@angular/router').ParamMap) => {
       const idParam = params.get('id');
       const tourId = idParam ? parseInt(idParam, 10) : undefined;
 
@@ -60,13 +60,13 @@ export class TourDetalleComponent implements OnInit {
   getTourDetails(id: number): void {
     console.log(`Cargando detalles para tour ID: ${id}`);
     this.tourService.getTourById(id).subscribe({
-      next: (data) => {
+      next: (data: TourDetalles) => {
         this.tour = data;
         this.loading = false;
         console.log('✅ Tour cargado:', this.tour);
         this.procesarSalidas(); 
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error(`❌ Error al cargar el tour ID ${id}:`, error);
         this.error = true;
         this.loading = false;
@@ -195,14 +195,31 @@ export class TourDetalleComponent implements OnInit {
     // Obtener datos del tour con tipado correcto
     const tourData = this.tour.tour;
     
-    // Usar ImageUtils para obtener y procesar imágenes
-    const imagenesFromApi = this.tour.imagenes?.map((img) => img.url || img.imagen_url).filter((url): url is string => !!url) || [];
-    const todasImagenes = ImageUtils.getAllImages(this.tour.imagen_url, imagenesFromApi);
+  // Usar ImageUtils para obtener y procesar imágenes
+  // Mantener también los textos 'alt' asociados a cada URL si la API los provee
+  // Aceptar varios nombres de propiedad posibles para la descripción (alt, descripcion, caption, titulo, alt_text)
+  const imagenesApiObjects = this.tour.imagenes?.map((img) => {
+    const anyImg = img as any;
+    const url = anyImg.url || anyImg.imagen_url || '';
+    const alt = anyImg.alt || anyImg.descripcion || anyImg.caption || anyImg.titulo || anyImg.alt_text || '';
+    return { url, alt };
+  }) || [];
+  const imagenesFromApi = imagenesApiObjects.map(x => x.url).filter((url): url is string => !!url);
+  const todasImagenes = ImageUtils.getAllImages(this.tour.imagen_url, imagenesFromApi);
     
     // Asegurar que siempre haya al menos una imagen
-    const imagenesFinal = todasImagenes.length > 0 
-      ? todasImagenes 
+    const imagenesFinal = todasImagenes.length > 0
+      ? todasImagenes
       : [ImageUtils.getPlaceholder('tour')];
+
+    // Construir array de 'alt' alineado con imagenesFinal
+    const altsFinal: string[] = imagenesFinal.map(url => {
+      // Buscar el primer objeto de la API que coincida con la URL
+      const found = imagenesApiObjects.find(o => o.url === url);
+      if (found && found.alt && found.alt.trim().length > 0) return found.alt;
+      // Fallback: usar el nombre del tour
+      return this.tour?.nombre || '';
+    });
 
     // Convertir duración de minutos a formato legible
     const duracionHoras = tourData?.duracion 
@@ -217,7 +234,8 @@ export class TourDetalleComponent implements OnInit {
       precio: tourData?.precio ? parseFloat(tourData.precio as any) : null,
       descripcion: this.tour.descripcion || '',
       duracion: duracionHoras,
-      galeria_imagenes: imagenesFinal
+      galeria_imagenes: imagenesFinal,
+      galeria_alts: altsFinal
     };
   }
 
