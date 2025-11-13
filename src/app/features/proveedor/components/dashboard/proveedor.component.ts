@@ -228,7 +228,11 @@ export class ProveedorComponent implements OnInit, OnDestroy {
     if (!confirm(`¿Estás seguro de que quieres editar el "${type}" (ID: ${id})? Esta acción es irreversible.`)) {
       return;
     }
-    //this.router.navigate(['/proveedor/editar-hotel', id]);
+    if (type === 'hotel') {
+      this.router.navigate(['/proveedor/editar-hotel', id]);
+    } else if (type === 'tour') {
+      this.router.navigate(['/proveedor/editar-tour', id]);
+    }
   }
 
   /**

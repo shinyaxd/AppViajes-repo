@@ -6,7 +6,7 @@ export interface TourData {
   id?: number;
   nombre: string;
   descripcion: string;
-  direccion: string;
+  //direccion?: string;
   ciudad: string;
   pais: string;
   precio: number;
@@ -56,7 +56,11 @@ export interface TourDetalles {
     categoria: TourCategoria;
     duracion: number; // en minutos
     precio: string | number;
-    cosas_para_llevar: string[];
+    items?: Array<{
+    id?: number;   
+      nombre: string;
+      icono?: string;
+    }>;
     fecha?: string; // Fecha del tour si no tiene salidas múltiples
     cupos?: number; // Cupos disponibles si no tiene salidas múltiples
   } | null;

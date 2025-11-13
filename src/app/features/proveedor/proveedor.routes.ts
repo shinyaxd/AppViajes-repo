@@ -29,5 +29,19 @@ export const PROVEEDOR_ROUTES: Routes = [
       import('./components/tour-form/formulario-tour.component').then(m => m.TourFormComponent),
     canActivate: [authGuard],
     title: 'Crear Tour - Panel Proveedor'
+  },
+  {
+    path: 'editar-hotel/:id',
+    loadComponent: () => 
+      import('./components/hotel-form/formulario.component').then(m => m.HotelFormComponent),
+    canActivate: [authGuard],
+    title: 'Editar Hotel - Panel Proveedor'
+  },
+  {
+    path: 'editar-tour/:id',
+    loadComponent: () => 
+      import('./components/editar-tour/editar-tour.component').then(m => m.EditarTourComponent),
+    canActivate: [authGuard],
+    title: 'Editar Tour - Panel Proveedor'
   }
 ];
