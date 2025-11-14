@@ -17,7 +17,7 @@ export interface TourData {
   imagen_url: string;
   imagenes?: Array<{
     id?: number;
-    url?: string;
+    url: string;
     alt?: string;
   }>;
   items?: Array<{
@@ -66,12 +66,12 @@ export interface TourDetalles {
   } | null;
   imagenes?: Array<{
     id: number;
-    url?: string;
-    imagen_url?: string;
+    url: string;
+    alt?: string;
   }>;
   actividades?: Array<{
     id: number;
-    nombre?: string;
+    titulo?: string;
     descripcion: string;
   }>;
   salidas?: Array<{

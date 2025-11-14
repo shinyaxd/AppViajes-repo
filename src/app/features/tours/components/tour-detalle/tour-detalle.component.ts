@@ -196,8 +196,8 @@ export class TourDetalleComponent implements OnInit {
     const tourData = this.tour.tour;
     
     // Usar ImageUtils para obtener y procesar imágenes
-    const imagenesFromApi = this.tour.imagenes?.map((img) => img.url || img.imagen_url).filter((url): url is string => !!url) || [];
-    const todasImagenes = ImageUtils.getAllImages(this.tour.imagen_url, imagenesFromApi);
+    const imagenesFromApi:string[] = this.tour.imagenes?.map((img) => img.url).filter((url): url is string => !!url) || [];
+    const todasImagenes = ImageUtils.getAllImages(this.tour.imagen_url, this.tour.imagenes);
     
     // Asegurar que siempre haya al menos una imagen
     const imagenesFinal = todasImagenes.length > 0 
@@ -370,8 +370,8 @@ export class TourDetalleComponent implements OnInit {
   /**
    * Obtiene el ícono de FontAwesome correspondiente al item
    */
-  getIconForItem(item: string): string {
-    const itemLower = item.toLowerCase();
+  getIconForItem(nombreItem: string): string {
+    const itemLower = nombreItem.toLowerCase();
     
     // Mapeo de palabras clave a íconos
     const iconMap: { [key: string]: string } = {

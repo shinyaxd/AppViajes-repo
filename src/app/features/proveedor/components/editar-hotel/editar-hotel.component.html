@@ -1,5 +1,5 @@
 <div class="formulario-container">
-  <h2>🛎️ Publicar nuevo hotel</h2>
+  <h2>🛎️ Editar hotel  (ID: {{ hotelId || 'Cargando...' }})</h2>
 
   <!-- ⚠️ Mensajes de éxito o error -->
   <div *ngIf="mensajeExito" class="alert alert-success">
@@ -13,11 +13,15 @@
   <!-- ========================= -->
   <!-- FORMULARIO PRINCIPAL -->
   <!-- ========================= -->
-  <form [formGroup]="hotelForm" (ngSubmit)="onSubmit()" class="hotel-form">
+   <div *ngIf="cargandoDatosHotel" class="loading-message">
+    <h2>Cargando datos del hotel... ⏳</h2>
+    <p>Por favor, espere.</p>
+  </div>
+  <form *ngIf="!cargandoDatosHotel" [formGroup]="hotelForm" (ngSubmit)="onSubmit()" class="hotel-form">
 
     <!-- ✅ Agrupamos los campos del hotel -->
     <div formGroupName="hotel" class="form-section">
-      <h3>🏨 Datos del Hotel</h3>
+      <h3>🏨 Datos del Hotel </h3>
 
       <label>
         Nombre:
@@ -52,7 +56,7 @@
       </label>
 
       <label>
-        Imagen principal (URL):
+        Imagen principal (URL) askjaskd:
         <input type="text" formControlName="imagen_url" placeholder="https://ejemplo.com/hotel.jpg" />
       </label>
 
@@ -61,10 +65,10 @@
 
         <div *ngFor="let imgCtrl of galeriaImagenes?.controls; let i = index" [formGroup]="imgCtrl">
           <div class="inline-group">
-            <input formControlName="url" placeholder="https://imagen.jpg"/>
+            <input formControlName="url" placeholder="https://imagen.jpg" />
             <input formControlName="alt" placeholder="Texto alternativo (opcional)"/>
             <button type="button" class= "btn-remove" (click)="eliminarImagen(i)">❌ Eliminar</button>
-          </div>    
+          </div>
         </div>
 
         <div *ngIf="galeriaImagenes.controls.length < 5">
@@ -153,7 +157,7 @@
       class="btn-submit"
       [disabled]="hotelForm.invalid || enviando"
     >
-      {{ enviando ? 'Enviando...' : 'Publicar hotel' }}
+      {{ enviando ? 'Guardando...' : 'Guardar cambios' }}
     </button>
   </form>
 </div>

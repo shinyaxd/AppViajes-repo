@@ -306,7 +306,7 @@ export class EditarTourComponent implements OnInit {
         // 5. Precargar FormArray: Galería de Imágenes
         data.imagenes?.forEach((img) => { 
           this.galeriaImagenes.push(this.fb.group({
-            url: [img.url || img.imagen_url, Validators.required], // Usar 'url' o 'imagen_url'
+            url: [img.url, Validators.required], // Usar 'url'
             alt: [''] // No hay campo 'alt' en tu interfaz, se deja vacío.
           }));
         });

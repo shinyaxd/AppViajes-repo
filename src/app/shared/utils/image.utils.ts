@@ -2,6 +2,13 @@
  * Utilidades para manejo de imágenes
  * Centraliza la lógica de obtención de imágenes con fallbacks
  */
+
+// Interfaz para el nuevo formato de objeto de imagen
+export interface ImageObject {
+  url: string;
+  alt?: string | null;
+}
+
 export class ImageUtils {
   /**
    * Obtiene la URL de imagen principal con fallback
@@ -11,19 +18,22 @@ export class ImageUtils {
    */
   static getImageUrl(
     primary: string | undefined | null,
-    gallery: string[] | undefined | null,
+    gallery: ImageObject[] | undefined | null,
     tipo: 'hotel' | 'tour' | 'generic' = 'generic'
   ): string {
     // 1. Intentar usar imagen principal
-    if (primary && primary.trim().length > 0) {
+    if (this.isValidImageUrl(primary)) {
       return primary;
     }
 
     // 2. Intentar usar primera imagen de galería
     if (gallery && Array.isArray(gallery) && gallery.length > 0) {
-      const firstImage = gallery[0];
-      if (firstImage && firstImage.trim().length > 0) {
-        return firstImage;
+      // Filtrar el primer objeto con una URL válida
+      const firstImageObject = gallery.find(
+        img => img && this.isValidImageUrl(img.url)
+      );
+      if (firstImageObject && firstImageObject.url) {
+        return firstImageObject.url;
       }
     }
 
@@ -38,22 +48,25 @@ export class ImageUtils {
    */
   static getAllImages(
     primary: string | undefined | null,
-    gallery: string[] | undefined | null
+    gallery: ImageObject[] | undefined | null
   ): string[] {
     const images: string[] = [];
 
-    // Agregar imagen principal si existe
-    if (primary && primary.trim().length > 0) {
+    // 1. Agregar imagen principal si existe
+    if (this.isValidImageUrl(primary)) {
       images.push(primary);
     }
 
-    // Agregar galería si existe
+    // 2. Agregar URLs de galería si existen
     if (gallery && Array.isArray(gallery)) {
-      const validGallery = gallery.filter(img => img && img.trim().length > 0);
-      images.push(...validGallery);
+      const galleryUrls = gallery
+        .map(img => img.url) // Extraer solo la URL
+        .filter(this.isValidImageUrl); // Filtrar URLs válidas
+
+      images.push(...galleryUrls);
     }
 
-    // Remover duplicados manteniendo orden
+    // 3. Remover duplicados manteniendo orden
     return [...new Set(images)];
   }
 
@@ -70,17 +83,14 @@ export class ImageUtils {
   ): string[] {
     const result = [...images];
 
-    // Si no hay imágenes, agregar al menos un placeholder
-    if (result.length === 0) {
-      result.push(this.getPlaceholder(tipo));
-    }
+    // Determinar la URL de relleno a usar: la primera imagen real si existe, o null.
+    const fillerUrl = images.length > 0 ? images[0] : null;
 
-    // Completar hasta el objetivo reutilizando la primera imagen o placeholders
+    // Completar hasta el objetivo
     while (result.length < targetCount) {
-      if (images.length > 0) {
-        // Reutilizar la primera imagen real
-        result.push(images[0]);
-      } else {
+      if(fillerUrl){
+        result.push(fillerUrl);
+      }else{
         // Agregar placeholder con índice
         const index = result.length + 1;
         result.push(`${this.getPlaceholder(tipo)}?index=${index}`);
@@ -97,9 +107,9 @@ export class ImageUtils {
    */
   static getPlaceholder(tipo: 'hotel' | 'tour' | 'generic'): string {
     const placeholders = {
-      hotel: 'assets/images/placeholder-hotel.jpg',
-      tour: 'assets/images/placeholder-tour.jpg',
-      generic: 'assets/images/placeholder.jpg'
+      hotel: 'https://img.freepik.com/premium-photo/abstract-blur-hotel-interior_1124848-65384.jpg?semt=ais_hybrid&w=740&q=80',
+      tour: 'https://www.shutterstock.com/image-photo/defocused-background-serene-sunset-airport-600nw-2615336361.jpg',
+      generic: 'https://vmc.vet.osu.edu/sites/default/files/styles/hero/public/images/placeholder-1000x600.png.webp?itok=vGGEnlHh'
     };
 
     return placeholders[tipo] || placeholders.generic;
@@ -109,7 +119,7 @@ export class ImageUtils {
    * Valida si una URL de imagen es válida
    * @param url URL a validar
    */
-  static isValidImageUrl(url: string | undefined | null): boolean {
+  static isValidImageUrl(url: string | undefined | null): url is string {
     if (!url || typeof url !== 'string') {
       return false;
     }
