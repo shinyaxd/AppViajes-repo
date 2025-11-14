@@ -12,6 +12,7 @@ import {
   Habitacion,
   HabitacionCreatePayload,
   HotelData,
+  ServiceData,
   HotelDetalles,
   HotelListApiRespuesta,
   SupplierHotelListApiRespuesta,
@@ -24,6 +25,7 @@ export type {
   Habitacion,
   HabitacionCreatePayload,
   HotelData,
+  ServiceData,
   HotelDetalles,
   HotelListApiRespuesta,
   SupplierHotelListApiRespuesta,
@@ -128,7 +130,7 @@ export class HotelService {
       .pipe(
         map(res =>
           res.data.map(apiHotel => ({
-            id: apiHotel.servicio_id, 
+            id: apiHotel.id, 
             nombre: apiHotel.nombre,
             ciudad: apiHotel.ciudad,
             pais: apiHotel.pais,
@@ -147,18 +149,46 @@ export class HotelService {
         })
       );
   }
+  /**
+   * NUEVO: Obtiene la lista de servicios Pertenecientes al proveedor autenticado.
+   */
+  getSupplierServices(): Observable<ServiceData[]> {
+    const endpoint = `${this.API_URL}/proveedor/servicios`;
+
+    return this.http.get<{ data: any[] }>(endpoint, {
+      headers: this.getHeaders(),
+    }).pipe(
+      map(res => res.data.map(item => ({
+        id: item.id,
+        tipo: item.tipo,
+        nombre: item.nombre,
+        descripcion: item.descripcion,
+        ciudad: item.ciudad,
+        pais: item.pais,
+        imagen_url: item.imagen_url || 'assets/images/placeholder.jpg',
+        activo: item.activo,
+        created_at: item.created_at,
+        meta_tipo: item.meta_tipo,
+        reservas_totales: item.reservas_totales,
+      }) as ServiceData)),
+      catchError((error) => {
+        console.error('Error al cargar servicios del proveedor:', error);
+        return throwError(() => new Error('No se pudieron cargar los servicios.'));
+      })
+    );
+  }
 
   /**
    * NUEVO: Método para eliminar un hotel por su ID de servicio.
    */
   deleteHotel(servicioId: number): Observable<any> {
-    return this.http.delete(`${this.API_URL}/hoteles/${servicioId}`, {
+    return this.http.delete(`${this.API_URL}/servicios/${servicioId}`, {
         // 🚨 CAMBIO: getHeaders() ya no tiene token, pero lo enviamos
         headers: this.getHeaders()
     }).pipe(
         catchError(error => {
-            console.error(`Error al eliminar hotel ${servicioId}:`, error);
-            return throwError(() => new Error(`Fallo al eliminar el hotel.`));
+            console.error(`Error al eliminar servicio ${servicioId}:`, error);
+            return throwError(() => new Error(`Fallo al eliminar el servicio.`));
         })
     );
   }

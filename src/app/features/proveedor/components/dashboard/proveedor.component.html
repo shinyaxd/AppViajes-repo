@@ -31,8 +31,45 @@
       <!-- Se mantiene el enlace de navegación, pero sin el estilo de botón grande, ya que la acción principal está en el header. -->
     </div>
 
-    <!-- 2. Listado de Hoteles (Hay publicaciones) -->
+    <!-- 2. Listado de servicios (Hay publicaciones) -->
     <div *ngIf="publications().length > 0" class="publications-grid">
+      <!-- Métricas generales -->
+      <div class="metrics-container">
+        <div class="metric-card">
+          <div class="metric-icon-wrapper">
+            <i class="fa-solid fa-calendar-check"></i>
+          </div>
+          <div class="metric-info">
+            <h4 class="metric-title">Cantidad de reservas</h4>
+            <p class="general-metric-value">{{ totalReservas || 0 }}</p>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon-wrapper">
+            <i class="fa-solid fa-star"></i>
+          </div>
+          <div class="metric-info">
+            <h4 class="metric-title">Calificación promedio</h4>
+            <p class="general-metric-value">
+              <ng-container *ngIf="promedioGeneral !== null; else noRating">
+                {{ promedioGeneral }} estrellas
+              </ng-container>
+              <ng-template #noRating>N/A</ng-template>
+            </p>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon-wrapper">
+            <i class="fa-solid fa-location-dot"></i>
+          </div>
+          <div class="metric-info">
+            <h4 class="metric-title">Lugar más popular</h4>
+            <p class="general-metric-value">{{ lugarMasPopular || 'Sin datos' }}</p>
+          </div>
+        </div>
+      </div>
 
       <div *ngFor="let pub of publications()" [class]="getPublicationCardClass()">
         
@@ -47,13 +84,23 @@
                  onerror="this.onerror=null;this.src='https://placehold.co/600x400/0891b2/ffffff?text=Hotel+Preview'">
           </div>
 
-          <!-- Detalles del Hotel -->
+          <!-- Detalles -->
           <div class="card-details">
             <!-- Nombre y Estrellas -->
             <h3 class="card-title-main">
               {{ pub.nombre }}
               <div class="card-stars-wrapper">
-                <i *ngFor="let i of (pub.estrellas | starArray)" class="fa-solid fa-star card-star"></i>
+                <ng-container *ngIf="(pub.promedio_calificacion ?? 0) > 0; else noReviews">
+                  <ng-container *ngFor="let star of (pub.promedio_calificacion | starArray)">
+                    <i *ngIf="star === 'full'" class="fa-solid fa-star card-star full"></i>
+                    <i *ngIf="star === 'half'" class="fa-solid fa-star-half-stroke card-star half"></i>
+                    <i *ngIf="star === 'empty'" class="fa-regular fa-star card-star empty"></i>
+                  </ng-container>
+                </ng-container>
+
+                <ng-template #noReviews>
+                  <span class="no-reviews">(Sin reseñas)</span>
+                </ng-template>
               </div>
             </h3>
             
@@ -64,27 +111,34 @@
 
             <!-- Métricas clave -->
             <div class="card-metrics">
-              <div class="metric-item">
+              <!--solo para hotel--->
+              <div class="metric-item" *ngIf="pub.tipo==='hotel'">
                 <i class="fa-solid fa-tag metric-icon-price"></i>
                 Precio Base: 
-                <span class="metric-value metric-value-price">${{ pub.precio_por_noche | number:'1.2-2' }}</span> / noche
+                <span class="metric-value metric-value-price">${{ pub.meta_tipo.tarifa_min_desde | number:'1.2-2' }}</span> / noche
+              </div>
+              <!--solo para tour--->
+              <div class="metric-item" *ngIf="pub.tipo === 'tour'">
+                <i class="fa-solid fa-ticket metric-icon-price"></i>
+                Precio base:
+                <span class="metric-value metric-value-price">${{ pub.meta_tipo.precio | number:'1.2-2' }}</span>
               </div>
               <div class="metric-item">
                 <i class="fa-solid fa-users metric-icon-reserva"></i>
-                Reservas (Pendientes): 
-                <span class="metric-value metric-value-reserva">{{ pub.reservations }}</span>
+                Reservas (Confirmadas): 
+                <span class="metric-value metric-value-reserva">{{ pub.reservas_totales.confirmadas ?? '0'}}</span>
               </div>
               <div class="metric-item">
                 <i class="fa-solid fa-chart-line metric-icon-star"></i>
-                Estrellas: 
-                <span class="metric-value">{{ pub.estrellas }}</span>
+                Calificación promedio: 
+                <span class="metric-value">{{ pub.promedio_calificacion ?? 'Sin reseñas'}}</span>
               </div>
             </div>
           </div>
           
           <!-- Botones de Acción (Derecha) -->
           <div class="card-acciones">
-            <button (click)="editPublication(pub.id, 'hotel')" 
+            <button (click)="editPublication(pub.id, pub.tipo)" 
                     class="btn btn-secondary">
               <i class="fa-solid fa-pen-to-square btn-icon-sm"></i> Editar
             </button>

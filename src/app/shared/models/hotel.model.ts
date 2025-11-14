@@ -44,11 +44,46 @@ export interface HotelListApiRespuesta {
 }
 
 /**
+ * Respuesta de la API al listar todos los servicios del proveedor
+ */
+export interface ServiceData {
+  id: number;
+  tipo: 'hotel' | 'tour';
+  nombre: string;
+  descripcion: string | null;
+  ciudad: string;
+  pais: string;
+  imagen_url: string;
+  activo: boolean;
+  created_at: string;
+
+  // Campos específicos según tipo
+  meta_tipo: {
+    // Para hoteles
+    direccion?: string;
+    estrellas?: number;
+    habitaciones_count?: number;
+    tarifa_min_desde?: number;
+
+    // Para tours
+    categoria?: string;
+    duracion?: number;
+    precio?: number;
+    salidas_count?: number | null;
+    proximas_salidas?: number | null;
+  };
+  reservas_totales:{
+    confirmadas?: number;
+    canceladas?: number;
+  };
+}
+
+/**
  * Respuesta de la API al listar hoteles del proveedor
  */
 export interface SupplierHotelListApiRespuesta {
   data: Array<{
-    servicio_id: number;
+    id: number;
     direccion: string;
     estrellas: number;
     nombre: string;

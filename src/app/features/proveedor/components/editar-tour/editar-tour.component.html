@@ -1,0 +1,265 @@
+<div class="formulario-container">
+  <h2>🛎️ Editar tour (ID: {{ tourId || 'Cargando...' }})</h2>
+
+  <!-- ⚠️ Mensajes de éxito o error -->
+  <div *ngIf="mensajeExito" class="alert alert-success">
+    {{ mensajeExito }}
+  </div>
+
+  <div id="mensajeError" *ngIf="mensajeError" class="alert alert-danger">
+    {{ mensajeError }}
+  </div>
+
+  <!-- ========================= -->
+  <!-- FORMULARIO PRINCIPAL -->
+  <!-- ========================= -->
+  <div *ngIf="cargandoDatos" class="loading-message">
+    <h2>Cargando datos del tour... ⏳</h2>
+    <p>Por favor, espere.</p>
+  </div>
+  <form *ngIf="!cargandoDatos" [formGroup]="tourForm" (ngSubmit)="onSubmit()" class="tour-form">
+
+    <!-- ✅ Agrupamos los campos del tour -->
+    <div formGroupName="tour" class="form-section">
+      <h3>🏨 Datos del Tour</h3>
+
+      <label for="nombre">Nombre:</label>
+      <input id="nombre" type="text" formControlName="nombre" placeholder="Nombre del tour" required />
+
+      <label for="descripcion">Descripción:</label>
+      <textarea id="descripcion" formControlName="descripcion" placeholder="Describe tu tour" required></textarea>
+
+      <!--label for="direccion">Dirección (Punto de encuentro):</label---->
+      <!---input id="direccion" type="text" formControlName="direccion" placeholder="Dirección del tour" required /---->
+      
+      <!-- 🔄 CORRECCIÓN: Se añaden ciudad y país para que el formulario sea válido con el TS -->
+      <div class="inline-group">
+        <label>
+          Ciudad:
+          <input type="text" formControlName="ciudad" placeholder="Ej: Cusco" required >
+        </label>
+        <label>
+          País:
+          <input type="text" formControlName="pais" placeholder="Ej: Perú" required >
+        </label>
+      </div>
+      <!-- FIN DE CORRECCIÓN DE UBICACIÓN -->
+
+      <!-- ✅ Sección "Cosas para llevar" (funciona correctamente) --> 
+      <div class="inline-group cosas-group"> 
+        <label> Cosas para llevar (Máx. 5)</label> 
+        <div formArrayName="items"> 
+          <div *ngFor="let item of items.controls; let i = index" [formGroupName]="i"> 
+            <div class="inline-group">
+              <input formControlName="nombre" type="text" maxlength="30" placeholder="Ej: Cámara, protector solar..." required /> 
+              <div class="icono-container">
+                <input formControlName="icono" type="hidden" readonly/>
+                <!-- Ícono visual flotante dentro del input -->
+                <!--i *ngIf="item.get('icono')?.value" [class]="item.get('icono')?.value" class="icon-preview"></i--->
+
+                <button
+                  type="button"
+                  class="btn-emoji"
+                  (click)="toggleEmojiPicker(i)"
+                  title="Elegir icono"
+                ><i *ngIf="item.get('icono')?.value; else emojiDefault"
+                  [class]="item.get('icono')?.value"></i>
+                  <ng-template #emojiDefault>😄</ng-template>
+                </button>
+
+                <!-- ✅ Icon Picker desplegable -->
+                <div *ngIf="mostrarEmojiPicker[i]" class="icon-picker">
+                  <div
+                    *ngFor="let icon of iconosFontAwesome"
+                    class="icon-option"
+                    (click)="seleccionarIcono(icon, i)"
+                  >
+                    <i [class]="icon"></i>
+                  </div>
+                </div>
+              </div>
+              <button  
+                type="button"  
+                class="btn-remove"  
+                (click)="quitarItem(i)" 
+              > ❌ Eliminar 
+              </button> 
+            </div>
+          </div> 
+          <div [formGroup]="nuevoItemForm" class="inline-group" *ngIf="items.length < 5">
+            <div class="input-with-icon">
+              <input formControlName="nombre" placeholder="Ej: Protector solar" />
+              <!---i *ngIf="nuevoItemForm.get('icono')?.value" [class]="nuevoItemForm.get('icono')?.value + ' icono-derecha'"><i/---->
+            </div>
+            <div class="icono-container">
+              <input formControlName="icono" type="hidden" readonly/>
+              <button
+                type="button"
+                class="btn-emoji"
+                (click)="toggleEmojiNuevo()"
+                title="Elegir icono"
+              ><i *ngIf="nuevoItemForm.get('icono')?.value; else emojiNuevoDefault"
+                  [class]="nuevoItemForm.get('icono')?.value"></i>
+              <ng-template #emojiNuevoDefault>😄</ng-template>
+              </button>
+              <!-- ✅ Icon Picker para el nuevo ítem -->
+              <div *ngIf="mostrarEmojiNuevo" class="icon-picker">
+                <div
+                  *ngFor="let icon of iconosFontAwesome"
+                  class="icon-option"
+                  (click)="seleccionarIconoNuevo(icon)"
+                >
+                  <i [class]="icon"></i>
+                </div>
+              </div>
+            </div>
+            <button  
+              type="button"  
+              class="btn-add"  
+              (click)="agregarItem()"
+              [disabled]="nuevoItemForm.invalid || items.length >= 5"
+            > 
+              ➕ Agregar item 
+            </button> 
+          </div>
+        </div> 
+        <p *ngIf="items.controls.length >= 5" class="limit-message"> 
+            Límite de 5 items alcanzado. 
+        </p> 
+      </div> 
+
+      <label for="precio" >Precio: </label> 
+      <input id="precio" type="number" formControlName="precio" min="0" required /> 
+
+      <div class="inline-group categorias-group"> 
+        <label> 
+          Categoría: 
+          <select formControlName="categoria" required> 
+            <option value="" disabled selected>Selecciona una categoría</option> 
+            <option value="Aventura">Aventura</option> 
+            <option value="Gastronomía">Gastronomía</option> 
+            <option value="Cultura">Cultura</option> 
+            <option value="Relajación">Relajación</option> 
+          </select> 
+        </label> 
+      </div> 
+      
+      <label for="duracion"> Duración (Minutos): 
+          <input id="duracion" type="number" formControlName="duracion" required /> 
+      </label> 
+
+      <label> 
+        Imagen principal (URL): 
+        <input type="text" formControlName="imagen_url" 
+        placeholder="https://denomades.imgix.net/destinos/cusco/336/plaza-city-tour-cusco.jpg"
+        /> 
+      </label> 
+
+      <div class="galeria"> 
+        <h4>Galería de imágenes (Máx. 5)</h4> 
+
+        <div *ngFor="let imgCtrl of galeriaImagenes?.controls; let i = index" [formGroup]="imgCtrl"> 
+          <div class="inline-group">
+            <input formControlName="url" placeholder="https://imagen.jpg" /> 
+            <input formControlName="alt" placeholder="Texto alternativo (opcional)" />
+            <button type="button" class="btn-remove" (click)="eliminarImagen(i)">❌ Eliminar</button> 
+          </div>
+        </div> 
+
+        <div *ngIf="galeriaImagenes.controls.length < 5"> 
+          <input #nuevaUrl placeholder="URL de nueva imagen" /> 
+          <input #nuevoAlt placeholder="Alt (opcional)" /> 
+          <button 
+            type="button" class="btn-add" 
+            (click)="agregarImagen(nuevaUrl.value, nuevoAlt.value); nuevaUrl.value=''; nuevoAlt.value='';" 
+          > 
+            ➕ Agregar imagen 
+          </button> 
+        </div> 
+        <p *ngIf="galeriaImagenes.controls.length >= 5" class="limit-message"> 
+            Límite de 5 imágenes alcanzado. 
+        </p> 
+      </div> 
+    </div> 
+
+    <!-- ========================= -->
+    <!-- SALIDAS DE TOURS DINÁMICAS -->
+    <!-- ========================= -->
+    <div formArrayName="salidas" class="form-section">
+      <h3>🗓️ Salidas del Tour</h3>
+
+      <!-- ✅ Usa el getter 'salidas' -->
+      <div
+        *ngFor="let salida of salidas?.controls; let i = index"
+        [formGroupName]="i"
+        class="salida-card"
+      >
+        <h4>Salida {{ i + 1 }}</h4>
+
+        <div class="inline-group">
+          <label>
+            Fecha:
+            <input type="date" formControlName="fecha" />
+          </label>
+
+          <label>
+            Hora:
+            <input type="time" formControlName="hora" />
+          </label>
+        </div>
+
+        <div class="inline-group">
+          <label>
+            Cupo total:
+            <input
+              type="number"
+              formControlName="cupo_total"
+              min="1"
+              placeholder="Ej. 20"
+            />
+          </label>
+
+          <label>
+            Cupo reservado:
+            <input
+              type="number"
+              formControlName="cupo_reservado"
+              min="0"
+              placeholder="Ej. 5"
+            />
+          </label>
+        </div>
+
+        <label>
+          Estado:
+          <select formControlName="estado">
+            <option value="">Seleccione...</option>
+            <option value="programada">Programada</option>
+            <option value="cerrada">Cerrada</option>
+            <option value="cancelada">Cancelada</option>
+          </select>
+        </label>
+
+        <button type="button" class="btn-remove" (click)="eliminarSalida(i)">
+          ❌ Eliminar salida
+        </button>
+      </div>
+
+      <button type="button" class="btn-add" (click)="agregarSalida()">
+        ➕ Agregar salida
+      </button>
+    </div>
+
+    <!-- ========================= --> 
+    <!-- BOTÓN DE ENVÍO --> 
+    <!-- ========================= --> 
+    <button 
+      type="submit" 
+      class="btn-submit" 
+      [disabled]="tourForm.invalid || enviando" 
+    > 
+      {{ enviando ? 'Guardando...' : 'Guardar cambios' }} 
+    </button> 
+    <!--tourForm.invalid ||  {{ enviando ? 'Enviando...' : 'Publicar tour' }}  -->
+  </form> 
+</div>
