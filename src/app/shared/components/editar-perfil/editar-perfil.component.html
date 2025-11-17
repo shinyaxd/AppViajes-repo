@@ -85,6 +85,65 @@
         <p>El email no puede ser modificado.</p>
       </div>
 
+      <!-- Buscador de imagen de perfil (Unsplash) -->
+      <div class="field-group">
+        <h2>Imagen de Perfil</h2>
+
+        <!-- Campo opcional para mostrar la URL elegida -->
+        <div class="field-card">
+          <label>URL seleccionada</label>
+          <input
+            type="text"
+            [value]="selectedImageUrl() || ''"
+            readonly
+          />
+        </div>
+
+        <label class="text-muted">
+          <small>Busca una imagen en Unsplash:</small>
+        </label>
+
+        <div class="field-card">
+          <div class="input-group">
+            <input
+              #searchBox
+              type="text"
+              class="form-control"
+              placeholder="Ej: playa, montaña, viajes..."
+              (keyup.enter)="searchForImage(searchBox.value)"
+            />
+            <button
+              type="button"
+              class="btn btn-outline-primary"
+              [disabled]="isSearchingImages()"
+              (click)="searchForImage(searchBox.value)"
+            >
+              Buscar
+            </button>
+          </div>
+
+          <div *ngIf="imageSearchError()" class="text-red-600 mt-1">
+            {{ imageSearchError() }}
+          </div>
+
+          <div *ngIf="isSearchingImages()" class="mt-2">
+            Buscando imágenes...
+          </div>
+
+          <div *ngIf="imageSearchResults.length > 0" class="image-results-grid mt-3">
+            <img
+              *ngFor="let img of imageSearchResults"
+              [src]="img.url_small"
+              [alt]="img.alt"
+              class="img-thumbnail"
+              (click)="selectImage(img.url_regular)"
+              style="cursor: pointer; width: 80px; height: 80px; object-fit: cover; margin: 4px;"
+              [title]="'Foto por ' + img.user_name"
+            />
+          </div>
+        </div>
+      </div>
+
       <!-- Título para Contraseña -->
       <div class="field-group">
         <h2>Actualizar Contraseña (Opcional)</h2>
