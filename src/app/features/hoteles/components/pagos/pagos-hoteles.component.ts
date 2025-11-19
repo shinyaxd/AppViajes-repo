@@ -51,6 +51,16 @@ export class PagosHotelesComponent implements OnInit {
   montoImpuesto = 0;
   totalPagar = 0;
 
+  // Datos para simular pasarela
+  mostrarModalPago = false;
+  falloConfirmar: boolean = false;
+
+  tarjeta = {
+    numero: '',
+    expiracion: '',
+    cvc: ''
+  };
+
   ngOnInit(): void {
     // 1) Hidratar primero con snapshot (por si ya están los params)
     this.hidratarDesdeParams(this.route.snapshot.queryParams, '[INIT][SNAPSHOT]');
@@ -167,6 +177,58 @@ export class PagosHotelesComponent implements OnInit {
   volverAtras(): void {
     this.router.navigate(['/hoteles']);
   }
+  soloNumeros(event: any) {
+    event.target.value = event.target.value.replace(/[^0-9]/g, '');
+  }
+  formatearTarjeta(event: any) {
+    // Elimina todo lo que no sea número
+    let value = event.target.value.replace(/\D/g, '');
+
+    // Máximo 16 dígitos
+    value = value.substring(0, 16);
+
+    // Inserta espacios cada 4 dígitos
+    value = value.replace(/(.{4})/g, '$1 ').trim();
+
+    event.target.value = value;
+    this.tarjeta.numero = value;
+  }
+
+  // Validación total de los campos
+  datosTarjetaValidos(): boolean {
+    const numeroSinEspacios = this.tarjeta.numero?.replace(/\s/g, '') || '';
+    const cvc = this.tarjeta.cvc || '';
+    const fecha = this.tarjeta.expiracion || '';
+
+    const datosValidos=numeroSinEspacios.length === 16 && /^\d{3}$/.test(cvc) && fecha !== '';
+    if (!datosValidos){
+      this.falloConfirmar=true;
+    }
+
+    return datosValidos;
+  }
+
+  // Modal de pago
+  abrirModalPago() {
+    this.mostrarModalPago = true;
+  }
+
+  cerrarModal() {
+    this.mostrarModalPago = false;
+  }
+
+  confirmarPago() {
+    if (!this.tarjeta.numero || !this.tarjeta.expiracion || !this.tarjeta.cvc) {
+      alert('Completa todos los datos de la tarjeta.');
+      return;
+    }
+
+    // Cierra modal
+    this.mostrarModalPago = false;
+
+    // Continúa el flujo de procesarPago
+    this.continuarPago();
+  }
 
   procesarPago = async (): Promise<void> => {
     if (!this.reservasService || !this.authService) {
@@ -179,6 +241,12 @@ export class PagosHotelesComponent implements OnInit {
       return;
     }
 
+    // 👉 Mostrar el modal antes de continuar
+    this.abrirModalPago();
+  };
+
+
+  continuarPago  = async (): Promise<void> => {
     const fechaInicio = this.checkIn ? this.toISODate(this.checkIn) : null;
     const fechaFin = this.checkOut ? this.toISODate(this.checkOut) : null;
 

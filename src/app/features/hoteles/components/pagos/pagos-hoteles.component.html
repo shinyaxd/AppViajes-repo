@@ -151,4 +151,47 @@
     </div>
 
   </div>
+
+  <!-- Modal de Pago -->
+  <div class="modal-backdrop" *ngIf="mostrarModalPago">
+    <div class="modal-card">
+      <h2>Datos de Tarjeta</h2>
+
+      <label>Número de tarjeta</label>
+      <input type="text"
+        name="numeroTarjeta"
+        minlength="19"
+        maxlength="19"
+        placeholder="XXXX XXXX XXXX XXXX"
+        [(ngModel)]="tarjeta.numero"
+        (input)="formatearTarjeta($event); falloConfirmar = false"
+        inputmode="numeric" required>
+
+      <label>Fecha de expiración</label>
+      <input type="month"
+        name="fechaExpiracion"
+       [(ngModel)]="tarjeta.expiracion"
+        (change)="falloConfirmar = false" required>
+
+      <label>CVV</label>
+      <input type="password"
+        name="cvc"
+       [(ngModel)]="tarjeta.cvc"
+       maxlength="3"
+       inputmode="numeric"
+       pattern="[0-9]*"
+       (input)="soloNumeros($event); falloConfirmar = false" required>
+
+       <!--p class="mensaje-error" *ngIf="falloConfirmar">
+        <i class="fas fa-exclamation-triangle"></i>
+        Datos de tarjeta inválidos. Verifica número, fecha y CVV.
+      </p--->
+      
+      <div class="modal-actions">
+        <button class="btn-primary" [disabled]="!datosTarjetaValidos()" (click)="confirmarPago()">Confirmar pago</button>
+        <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
 </div>
