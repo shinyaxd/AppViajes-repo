@@ -40,7 +40,7 @@
           <div class="includes-list" *ngIf="tour.actividades && tour.actividades.length > 0">
             <div *ngFor="let actividad of tour.actividades" class="include-item">
               <i class="fas fa-check-circle"></i>
-              <span>{{ actividad.descripcion || actividad.nombre }}</span>
+              <span>{{ actividad.titulo || actividad.descripcion }}</span>
             </div>
           </div>
           <div class="includes-list" *ngIf="!tour.actividades || tour.actividades.length === 0">
@@ -70,13 +70,15 @@
         <!-- Columna: Qué necesitas llevar -->
         <div class="needs-card">
           <h2 class="section-title">Qué necesitas llevar:</h2>
-          <div class="needs-list" *ngIf="tour && tour.tour && tour.tour.cosas_para_llevar && tour.tour.cosas_para_llevar.length > 0">
-            <div *ngFor="let item of tour.tour!.cosas_para_llevar" class="need-item">
-              <i [class]="getIconForItem(item)"></i>
-              <span>{{ item }}</span>
+          <div class="needs-list" *ngIf="tour && tour.tour && tour.tour.items && tour.tour.items.length > 0">
+            
+            <div *ngFor="let item of tour.tour!.items" class="need-item">
+              <i [class]="item.icono || getIconForItem(item.nombre)"></i> 
+              <span>{{ item.nombre }}</span>
             </div>
+
           </div>
-          <div class="needs-list" *ngIf="!tour || !tour.tour || !tour.tour.cosas_para_llevar || tour.tour.cosas_para_llevar.length === 0">
+          <div class="needs-list" *ngIf="!tour || !tour.tour || !tour.tour.items || tour.tour.items.length === 0">
             <div class="need-item">
               <i class="fas fa-tshirt"></i>
               <span>Ropa cómoda y zapatillas.</span>

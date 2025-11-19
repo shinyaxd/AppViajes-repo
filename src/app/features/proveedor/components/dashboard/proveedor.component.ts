@@ -225,9 +225,9 @@ export class ProveedorComponent implements OnInit, OnDestroy {
    */
   editPublication(id: number, type: string ): void {
     // Redirección al formulario de edición usando el servicio_id como parámetro de ruta
-    if (!confirm(`¿Estás seguro de que quieres editar el "${type}" (ID: ${id})? Esta acción es irreversible.`)) {
-      return;
-    }
+    //if (!confirm(`¿Estás seguro de que quieres editar el "${type}" (ID: ${id})? Esta acción es irreversible.`)) {
+    //  return;
+    //}
     if (type === 'hotel') {
       this.router.navigate(['/proveedor/editar-hotel', id]);
     } else if (type === 'tour') {

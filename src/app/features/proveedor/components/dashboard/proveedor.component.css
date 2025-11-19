@@ -370,3 +370,24 @@
   font-weight: 700;
   color: #2d6551;
 }
+.card-type-tag {
+  /* Estilo base */
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 8px; /* Espacio antes del título */
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  
+  /* Color de fondo y texto (puedes ajustarlo) */
+  background-color: #e0f7fa; /* Un azul claro */
+  color: #00838f; /* Un azul oscuro */
+}
+
+.card-type-tag .fa-solid {
+  margin-right: 6px;
+  font-size: 0.9rem;
+}

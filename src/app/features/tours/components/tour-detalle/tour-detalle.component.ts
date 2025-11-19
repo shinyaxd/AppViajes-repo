@@ -401,8 +401,8 @@ export class TourDetalleComponent implements OnInit {
   /**
    * Obtiene el ícono de FontAwesome correspondiente al item
    */
-  getIconForItem(item: string): string {
-    const itemLower = item.toLowerCase();
+  getIconForItem(nombreItem: string): string {
+    const itemLower = nombreItem.toLowerCase();
     
     // Mapeo de palabras clave a íconos
     const iconMap: { [key: string]: string } = {

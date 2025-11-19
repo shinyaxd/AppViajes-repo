@@ -86,6 +86,14 @@
 
           <!-- Detalles -->
           <div class="card-details">
+            <span class="card-type-tag">
+              <i class="fa-solid" 
+                [ngClass]="{
+                  'fa-hotel': pub.tipo === 'hotel',
+                  'fa-route': pub.tipo === 'tour'
+                }"></i>
+              {{ pub.tipo === 'hotel' ? 'Hotel' : (pub.tipo === 'tour' ? 'Tour' : pub.tipo) }}
+            </span>
             <!-- Nombre y Estrellas -->
             <h3 class="card-title-main">
               {{ pub.nombre }}

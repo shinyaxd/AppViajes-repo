@@ -43,8 +43,8 @@ export class DetallesHotelComponent implements OnInit {
   // 🔹 Datos para el componente genérico
   get servicioData(): ServicioDetalleData | null {
     if (!this.hotel) return null;
-    const galeria = ImageUtils.getAllImages(this.hotel.imagen_url, this.hotel.galeria_imagenes);
-    const galeriaFinal = galeria.length > 0 ? galeria : [ImageUtils.getPlaceholder('hotel')];
+    const galeria = ImageUtils.getAllImages(this.hotel.imagen_url, this.hotel.imagenes);
+    const galeriaFinal = ImageUtils.fillGallery(galeria, 5, 'hotel');
 
     // Intentar extraer textos 'alt' si el backend provee objetos con metadata
     const imagenesApiObjects = (this.hotel as any).imagenes?.map((img: any) => {

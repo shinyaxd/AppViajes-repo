@@ -33,7 +33,7 @@ export const PROVEEDOR_ROUTES: Routes = [
   {
     path: 'editar-hotel/:id',
     loadComponent: () => 
-      import('./components/hotel-form/formulario.component').then(m => m.HotelFormComponent),
+      import('./components/editar-hotel/editar-hotel.component').then(m => m.EditarHotelComponent),
     canActivate: [authGuard],
     title: 'Editar Hotel - Panel Proveedor'
   },

@@ -50,6 +50,7 @@ export class HotelesComponent implements OnInit {
       next: (hoteles: HotelData[]) => {
         // Hoteles recientes (ya limitado a 4)
         this.hotelesRecientes = hoteles.slice(0, 4); 
+        console.log('Hoteles recientes:', this.hotelesRecientes);
 
         // Hoteles populares: filtrar Y luego limitar a los primeros 4
         this.hotelesPopulares = hoteles
