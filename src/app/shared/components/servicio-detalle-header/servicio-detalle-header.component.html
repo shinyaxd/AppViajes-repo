@@ -101,7 +101,7 @@
         <div class="modal-caption" *ngIf="currentAlt">{{ currentAlt }}</div>
         <button class="nav-btn prev" aria-label="Anterior" (click)="$event.stopPropagation(); prevImage()">◀</button>
         <button class="nav-btn next" aria-label="Siguiente" (click)="$event.stopPropagation(); nextImage()">▶</button>
-        <div class="counter">{{ currentIndex + 1 }} / {{ imagenesParaGrid.length }}</div>
+        <div class="counter">{{ currentIndex + 1 }} / {{ imagenesViewer.length }}</div>
       </div>
   </div>
 </div>
