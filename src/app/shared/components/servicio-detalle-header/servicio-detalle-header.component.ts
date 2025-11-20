@@ -47,6 +47,15 @@ export class ServicioDetalleHeaderComponent {
     return ImageUtils.fillGallery(imagenesOriginales, 5, tipoImagen);
   }
 
+  /**
+   * Imágenes completas para el visor (no truncadas a 5)
+   * El grid sigue mostrando 5 miniaturas, pero el viewer puede navegar
+   * por todas las imágenes reales del servicio.
+   */
+  get imagenesViewer(): string[] {
+    return this.servicio?.galeria_imagenes || [];
+  }
+
   get imagenPrincipal(): string {
     return this.imagenesParaGrid[0];
   }
@@ -68,6 +77,9 @@ export class ServicioDetalleHeaderComponent {
   currentIndex = 0;
 
   openViewer(index: number): void {
+    // index corresponde al índice en la galería completa (si el grid muestra
+    // un subconjunto, asumimos que los índices coinciden para las imágenes
+    // mostradas). Abrir el viewer en esa posición.
     this.currentIndex = index;
     this.viewerOpen = true;
     // prevent body scroll
@@ -80,17 +92,17 @@ export class ServicioDetalleHeaderComponent {
   }
 
   nextImage(): void {
-    const length = this.imagenesParaGrid.length;
+    const length = this.imagenesViewer.length || 1;
     this.currentIndex = (this.currentIndex + 1) % length;
   }
 
   prevImage(): void {
-    const length = this.imagenesParaGrid.length;
+    const length = this.imagenesViewer.length || 1;
     this.currentIndex = (this.currentIndex - 1 + length) % length;
   }
 
   get currentImage(): string {
-    return this.imagenesParaGrid[this.currentIndex];
+    return this.imagenesViewer[this.currentIndex] || this.imagenesParaGrid[0];
   }
 
   /** Devuelve el texto alt asociado a un índice de imagen (si existe) */
