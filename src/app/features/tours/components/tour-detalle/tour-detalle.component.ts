@@ -95,7 +95,7 @@ export class TourDetalleComponent implements OnInit {
       const endFilter = this.checkOutDate ? new Date(this.checkOutDate) : null;
 
       const estaDentroDelRango = (!startFilter || tourDate >= startFilter) &&
-                                 (!endFilter || tourDate <= endFilter);
+                                (!endFilter || tourDate <= endFilter);
 
       if (estaDentroDelRango) {
         this.usarFechaTourDirecta = true;
@@ -204,8 +204,10 @@ export class TourDetalleComponent implements OnInit {
     const alt = anyImg.alt || anyImg.descripcion || anyImg.caption || anyImg.titulo || anyImg.alt_text || '';
     return { url, alt };
   }) || [];
+  // imagenesApiObjects es un arreglo de objetos { url, alt } que cumple la interfaz ImageObject
+  // ImageUtils.getAllImages espera (primary: string|null, gallery: ImageObject[]|null)
   const imagenesFromApi = imagenesApiObjects.map(x => x.url).filter((url): url is string => !!url);
-  const todasImagenes = ImageUtils.getAllImages(this.tour.imagen_url, imagenesFromApi);
+  const todasImagenes = ImageUtils.getAllImages(this.tour.imagen_url, imagenesApiObjects);
     
     // Asegurar que siempre haya al menos una imagen
     const imagenesFinal = todasImagenes.length > 0
