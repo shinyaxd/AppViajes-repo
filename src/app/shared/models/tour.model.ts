@@ -6,7 +6,7 @@ export interface TourData {
   id?: number;
   nombre: string;
   descripcion: string;
-  direccion: string;
+  //direccion?: string;
   ciudad: string;
   pais: string;
   precio: number;
@@ -17,7 +17,7 @@ export interface TourData {
   imagen_url: string;
   imagenes?: Array<{
     id?: number;
-    url?: string;
+    url: string;
     alt?: string;
   }>;
   items?: Array<{
@@ -56,18 +56,22 @@ export interface TourDetalles {
     categoria: TourCategoria;
     duracion: number; // en minutos
     precio: string | number;
-    cosas_para_llevar: string[];
+    items?: Array<{
+    id?: number;   
+      nombre: string;
+      icono?: string;
+    }>;
     fecha?: string; // Fecha del tour si no tiene salidas múltiples
     cupos?: number; // Cupos disponibles si no tiene salidas múltiples
   } | null;
   imagenes?: Array<{
     id: number;
-    url?: string;
-    imagen_url?: string;
+    url: string;
+    alt?: string;
   }>;
   actividades?: Array<{
     id: number;
-    nombre?: string;
+    titulo?: string;
     descripcion: string;
   }>;
   salidas?: Array<{

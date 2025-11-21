@@ -13,7 +13,11 @@ export interface HotelData {
   descripcion: string | null;
   estrellas: number;
   imagen_url: string; // imagen principal
-  galeria_imagenes: string[]; // todas las imágenes
+  imagenes?: Array<{
+    id?: number;
+    url: string;
+    alt?: string | null;
+  }>; // todas las imágenes
   precio_por_noche: number | null;
   reservations?: number; // reservas pendientes (para dashboard proveedor)
 }
@@ -40,7 +44,47 @@ export interface HotelListApiRespuesta {
     precio_por_noche: number | null;
     imagenUrl: string[];
     descripcion: string | null;
+    imagenes?: Array<{
+      id?: number;
+      url: string;
+      alt?: string | null;
+    }>;
   }>;
+}
+
+/**
+ * Respuesta de la API al listar todos los servicios del proveedor
+ */
+export interface ServiceData {
+  id: number;
+  tipo: 'hotel' | 'tour';
+  nombre: string;
+  descripcion: string | null;
+  ciudad: string;
+  pais: string;
+  imagen_url: string;
+  activo: boolean;
+  created_at: string;
+
+  // Campos específicos según tipo
+  meta_tipo: {
+    // Para hoteles
+    direccion?: string;
+    estrellas?: number;
+    habitaciones_count?: number;
+    tarifa_min_desde?: number;
+
+    // Para tours
+    categoria?: string;
+    duracion?: number;
+    precio?: number;
+    salidas_count?: number | null;
+    proximas_salidas?: number | null;
+  };
+  reservas_totales:{
+    confirmadas?: number;
+    canceladas?: number;
+  };
 }
 
 /**
@@ -48,7 +92,7 @@ export interface HotelListApiRespuesta {
  */
 export interface SupplierHotelListApiRespuesta {
   data: Array<{
-    servicio_id: number;
+    id: number;
     direccion: string;
     estrellas: number;
     nombre: string;
@@ -56,7 +100,11 @@ export interface SupplierHotelListApiRespuesta {
     pais: string;
     precio_por_noche: number | null;
     imagen_url: string; // imagen principal
-    galeria_imagenes: string[]; // todas las imágenes
+    imagenes?: Array<{
+      id?: number;
+      url: string;
+      alt?: string | null;
+    }>; // todas las imágenes
     descripcion: string | null;
     reservas_pendientes: number; // para el dashboard
   }>;
@@ -73,8 +121,28 @@ export interface HotelCreatePayload {
   ciudad: string;
   pais: string;
   imagen_url: string;
-  galeria_imagenes: string[];
+  imagenes?: Array<{
+    id?: number;
+    url: string;
+    alt?: string | null;
+  }>;
   activo?: boolean;
+}
+// Base de datos de una habitación (debería venir de habitacion.model.ts)
+// La defino aquí para que HabitacionUpdatePayload sea autocontenida:
+export interface HabitacionBase {
+  nombre: string;
+  capacidad_adultos: number;
+  capacidad_ninos: number;
+  precio_por_noche: number;
+  cantidad: number;
+  descripcion: string;
+}
+
+// 🆕 INTERFAZ REQUERIDA: Payload para ACTUALIZACIÓN
+// Es la base de la habitación, más el ID (que puede ser null para las habitaciones nuevas)
+export interface HabitacionUpdatePayload extends HabitacionBase {
+  id: number | null; // Null para las nuevas, number para las existentes
 }
 
 /**

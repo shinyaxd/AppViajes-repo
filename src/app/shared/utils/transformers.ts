@@ -19,7 +19,7 @@ export class ServicioTransformers {
       nombre: hotel.nombre,
       imagen_url: ImageUtils.getImageUrl(
         hotel.imagen_url,
-        hotel.galeria_imagenes,
+        hotel.imagenes,
         'hotel'
       ),
       ubicacion: `${hotel.ciudad}, ${hotel.pais}`,
@@ -45,7 +45,7 @@ export class ServicioTransformers {
       nombre: tour.nombre,
       imagen_url: ImageUtils.getImageUrl(
         tour.imagen_url,
-        tour.galeria_imagenes,
+        tour.imagenes,
         'tour'
       ),
       ubicacion: `${tour.ciudad}, ${tour.pais}`,
