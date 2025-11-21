@@ -89,6 +89,13 @@ textarea {
   resize: vertical;
 }
 
+/* Forzar que el textarea haga wrap y respete saltos de línea; rompe palabras largas si es necesario */
+textarea {
+  white-space: pre-wrap; /* conserva saltos de línea y permite el wrap */
+  overflow-wrap: anywhere; /* rompe palabras largas si es necesario */
+  word-break: break-word; /* compatibilidad adicional para romper strings largos */
+}
+
 .error-message { /* Clase usada en el HTML */
   display: block;
   color: #dc3545; /* Rojo de error */
@@ -316,6 +323,18 @@ button:not(.btn-submit):disabled {
 
 /* Poner en negrita las etiquetas del formulario crear-hotel */
 .hotel-form label {
-  font-weight: 700;
+  font-weight: 700 !important;
   color: #222;
+}
+
+.char-counter {
+  font-size: 0.85rem;
+  color: #555;
+  margin-top: 6px;
+  font-weight: 700 !important;
+}
+
+/* Forzar negrita en el texto del popup info */
+.input-with-info .info-popup {
+  font-weight: 700 !important;
 }

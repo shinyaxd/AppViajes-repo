@@ -311,6 +311,20 @@
   text-align: justify;
 }
 
+/* Asegurar que textos largos sin espacios se ajusten y que se respeten saltos de línea */
+.summary p {
+  white-space: pre-wrap; /* conserva saltos de línea y permite el wrap */
+  overflow-wrap: anywhere; /* rompe palabras largas si es necesario */
+  word-break: break-word; /* compatibilidad adicional para romper strings largos */
+}
+
+/* Regla más específica y con !important por si hay sobreescrituras globales */
+.content-section .summary p {
+  white-space: pre-wrap !important;
+  overflow-wrap: anywhere !important;
+  overflow-wrap: break-word !important;
+  word-break: break-all !important; /* rompe palabras largas sin esperas */
+}
 .italic {
   font-style: italic;
 }
