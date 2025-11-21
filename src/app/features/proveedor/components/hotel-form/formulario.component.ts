@@ -66,7 +66,8 @@ export class HotelFormComponent implements OnInit {
       hotel: this.fb.group({
         // Nombre: permitir letras, números, espacios, guiones y guion bajo (sin caracteres especiales)
         nombre: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9ÁÉÍÓÚÜÑáéíóúüñ\s\-_]+$/)]],
-        descripcion: ['', [Validators.required, Validators.minLength(10)]],
+        // Limitar descripción a 1000 caracteres
+        descripcion: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(1000)]],
         direccion: ['', [Validators.required]],
         ciudad: ['', [Validators.required]],
         pais: ['', [Validators.required]],
@@ -140,6 +141,26 @@ export class HotelFormComponent implements OnInit {
 
   get habitaciones(): FormArray<FormGroup> {
     return this.hotelForm.get('habitaciones') as FormArray<FormGroup>;
+  }
+
+  // Contador de caracteres para la descripción
+  readonly MAX_DESCRIPCION = 1000;
+  descripcionLength = 0;
+
+  get descripcionControl(): FormControl {
+    return this.hotelGroup.get('descripcion') as FormControl;
+  }
+
+  onDescripcionInput(event: any): void {
+    const raw = event?.target?.value ?? '';
+    if (raw.length > this.MAX_DESCRIPCION) {
+      const truncated = raw.slice(0, this.MAX_DESCRIPCION);
+      // Actualizamos el control con el valor truncado sin volver a emitir el evento
+      this.descripcionControl.setValue(truncated, { emitEvent: false });
+      this.descripcionLength = this.MAX_DESCRIPCION;
+    } else {
+      this.descripcionLength = raw.length;
+    }
   }
 
   // ======================================================

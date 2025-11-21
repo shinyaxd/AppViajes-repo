@@ -38,7 +38,9 @@
       </div>
 
       <label for="descripcion">Descripción:</label>
-      <textarea id="descripcion" formControlName="descripcion" placeholder="Describe tu tour" required></textarea>
+      <textarea id="descripcion" formControlName="descripcion" placeholder="Describe tu tour" required
+            (input)="onDescripcionInput($event)"></textarea>
+      <div class="char-counter">{{ descripcionLength }} / {{ MAX_DESCRIPCION }}</div>
 
       <label for="direccion">Dirección (Punto de encuentro):</label>
       <input id="direccion" type="text" formControlName="direccion" placeholder="Dirección del tour" required />

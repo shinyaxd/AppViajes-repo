@@ -64,7 +64,8 @@ export class TourFormComponent implements OnInit {
       tour: this.fb.group({
         // Nombre: permitir letras, números, espacios, guiones y guion bajo (sin caracteres especiales)
         nombre: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9ÁÉÍÓÚÜÑáéíóúüñ\s\-_]+$/)]],
-        descripcion: ['', [Validators.required, Validators.minLength(10)]],
+        // Limitar descripción a 1000 caracteres
+        descripcion: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(1000)]],
         direccion: ['', [Validators.required]],
         ciudad: ['', [Validators.required]], // ✅ Campo 1 para ubicación
         pais: ['', [Validators.required]],   // ✅ Campo 2 para ubicación
@@ -99,6 +100,25 @@ export class TourFormComponent implements OnInit {
 
   get salidas(): FormArray {
     return this.tourForm.get('salidas') as FormArray;
+  }
+
+  // Contador de caracteres para la descripción
+  readonly MAX_DESCRIPCION = 1000;
+  descripcionLength = 0;
+
+  get descripcionControl(): FormControl {
+    return this.tourGroup.get('descripcion') as FormControl;
+  }
+
+  onDescripcionInput(event: any): void {
+    const raw = event?.target?.value ?? '';
+    if (raw.length > this.MAX_DESCRIPCION) {
+      const truncated = raw.slice(0, this.MAX_DESCRIPCION);
+      this.descripcionControl.setValue(truncated, { emitEvent: false });
+      this.descripcionLength = this.MAX_DESCRIPCION;
+    } else {
+      this.descripcionLength = raw.length;
+    }
   }
 
   // Getter para el control 'nombre' del grupo 'tour'

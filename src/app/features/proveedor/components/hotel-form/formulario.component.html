@@ -41,7 +41,9 @@
 
       <label>
         Descripción:
-        <textarea formControlName="descripcion" placeholder="Describe tu hotel" required></textarea>
+        <textarea formControlName="descripcion" placeholder="Describe tu hotel" required
+                  (input)="onDescripcionInput($event)"></textarea>
+        <div class="char-counter">{{ descripcionLength }} / {{ MAX_DESCRIPCION }}</div>
       </label>
 
       <label>
