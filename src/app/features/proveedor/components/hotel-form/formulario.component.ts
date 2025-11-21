@@ -64,7 +64,8 @@ export class HotelFormComponent implements OnInit {
     this.hotelForm = this.fb.group({
       // Agrupación para los datos del Servicio/Hotel (Payload 1)
       hotel: this.fb.group({
-        nombre: ['', [Validators.required]],
+        // Nombre: permitir letras, números, espacios, guiones y guion bajo (sin caracteres especiales)
+        nombre: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9ÁÉÍÓÚÜÑáéíóúüñ\s\-_]+$/)]],
         descripcion: ['', [Validators.required, Validators.minLength(10)]],
         direccion: ['', [Validators.required]],
         ciudad: ['', [Validators.required]],
@@ -77,6 +78,53 @@ export class HotelFormComponent implements OnInit {
       // Agrupación para las Habitaciones (Payload 2, se procesa internamente)
       habitaciones: this.fb.array<FormGroup>([this.crearHabitacion()]),
     });
+  }
+
+  // Getter para el control 'nombre' del grupo 'hotel'
+  get nombreControl(): FormControl {
+    return this.hotelGroup.get('nombre') as FormControl;
+  }
+
+  // Sanitiza el valor del nombre eliminando caracteres especiales no permitidos
+  private sanitizeName(value: string): string {
+    if (!value) return '';
+    return value.replace(/[^A-Za-z0-9ÁÉÍÓÚÜÑáéíóúüñ\s\-_]/g, '');
+  }
+
+  // Manejador para el evento input
+  onNombreInput(event: any): void {
+    try {
+      const raw = event?.target?.value ?? '';
+      const sanitized = this.sanitizeName(raw);
+      if (sanitized !== raw) {
+        // Actualiza el control sin emitir eventos secundarios
+        this.nombreControl.setValue(sanitized, { emitEvent: false });
+      }
+    } catch (e) {
+      // no hacer nada en caso de error no crítico
+    }
+  }
+
+  // Manejador para pegar texto (paste)
+  onNombrePaste(event: ClipboardEvent): void {
+    if (!event) return;
+    event.preventDefault();
+    const text = (event.clipboardData || (window as any).clipboardData).getData('text') || '';
+    const sanitized = this.sanitizeName(text);
+    const current = this.nombreControl.value || '';
+    this.nombreControl.setValue((current + sanitized).trim(), { emitEvent: false });
+  }
+
+  // Estado para mostrar/ocultar el popup de información del nombre
+  // Estado para saber si el input 'nombre' está enfocado
+  nombreFocused = false;
+
+  onNombreFocus(): void {
+    this.nombreFocused = true;
+  }
+
+  onNombreBlur(): void {
+    this.nombreFocused = false;
   }
 
   // ======================================================
@@ -159,7 +207,16 @@ export class HotelFormComponent implements OnInit {
     this.mensajeError = '';
     this.mensajeExito = '';
 
-    // 1. Validar campos de formulario
+    // 1. Validar campo 'nombre' específico para mostrar aviso claro
+    if (this.nombreControl.invalid) {
+      this.mensajeError = '❌ Nombre inválido: no se permiten caracteres especiales.';
+      this.nombreControl.markAsTouched();
+      const el = document.getElementById('mensajeError');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
+    // 2. Validar campos de formulario (resto)
     if (this.hotelForm.invalid) {
       this.mensajeError = '❌ Por favor, completa todos los campos requeridos correctamente.';
       // CRÍTICO: Marca todos los campos como 'touched' para que Angular muestre los errores visualmente.

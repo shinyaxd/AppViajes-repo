@@ -20,7 +20,22 @@
       <h3>🏨 Datos del Tour</h3>
 
       <label for="nombre">Nombre:</label>
-      <input id="nombre" type="text" formControlName="nombre" placeholder="Nombre del tour" required />
+      <div class="input-with-info">
+        <input id="nombre" type="text" formControlName="nombre" placeholder="Nombre del tour" required
+               (input)="onNombreInput($event)" (paste)="onNombrePaste($event)"
+               (focus)="onNombreFocus()" (blur)="onNombreBlur()" />
+
+        <button *ngIf="nombreFocused || (nombreControl.invalid && (nombreControl.touched || enviado))"
+                type="button"
+                class="info-btn"
+                aria-label="Información sobre formato de nombre">
+          <span class="info-icon">i</span>
+        </button>
+
+        <div class="info-popup" role="dialog" aria-hidden="true">
+          No se permiten caracteres especiales. Usa letras, números, espacios, - o _.
+        </div>
+      </div>
 
       <label for="descripcion">Descripción:</label>
       <textarea id="descripcion" formControlName="descripcion" placeholder="Describe tu tour" required></textarea>

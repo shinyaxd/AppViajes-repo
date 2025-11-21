@@ -6,7 +6,7 @@
     {{ mensajeExito }}
   </div>
 
-  <div *ngIf="mensajeError" class="alert alert-danger">
+  <div id="mensajeError" *ngIf="mensajeError" class="alert alert-danger">
     {{ mensajeError }}
   </div>
 
@@ -21,7 +21,22 @@
 
       <label>
         Nombre:
-        <input type="text" formControlName="nombre" placeholder="Nombre del hotel" required />
+        <div class="input-with-info">
+          <input type="text" formControlName="nombre" placeholder="Nombre del hotel" required
+                 (input)="onNombreInput($event)" (paste)="onNombrePaste($event)"
+                 (focus)="onNombreFocus()" (blur)="onNombreBlur()" />
+
+          <button *ngIf="nombreFocused || (nombreControl.invalid && (nombreControl.touched || enviado))"
+                  type="button"
+                  class="info-btn"
+                  aria-label="Información sobre formato de nombre">
+            <span class="info-icon">i</span>
+          </button>
+
+          <div class="info-popup" role="dialog" aria-hidden="true">
+            No se permiten caracteres especiales. Usa letras, números, espacios, - o _.
+          </div>
+        </div>
       </label>
 
       <label>
