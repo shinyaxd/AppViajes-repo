@@ -34,6 +34,7 @@
             <input id="nombre" formControlName="nombre" type="text">
             <div *ngIf="form.get('nombre')?.invalid && (form.get('nombre')?.dirty || form.get('nombre')?.touched)">
               <p *ngIf="form.get('nombre')?.errors?.['required']">El nombre es obligatorio.</p>
+              <p *ngIf="form.get('nombre')?.errors?.['pattern']">El nombre solo puede contener letras y espacios.</p>
             </div>
           </div>
 

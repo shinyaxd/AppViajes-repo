@@ -113,6 +113,8 @@ export class EditarPerfilComponent implements OnInit {
     const role = userData?.rol ?? 'viajero';
     const isProveedor = role === 'proveedor';
     const telefonoPattern = /^\+51\s?9\d{8}$/;
+    // Permitir letras (incluye acentos) y espacios únicamente
+    const nombrePattern = /^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/;
 
     const emailCtrl = this.fb.control(
       { value: userData?.email ?? '', disabled: true },
@@ -121,7 +123,7 @@ export class EditarPerfilComponent implements OnInit {
 
     const nombreCtrl = this.fb.control(
       { value: userData?.nombre ?? '', disabled: isProveedor },
-      isProveedor ? [] : [Validators.required]
+      isProveedor ? [] : [Validators.required, Validators.pattern(nombrePattern)]
     );
 
     const apellidoCtrl = this.fb.control(
