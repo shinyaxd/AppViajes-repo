@@ -83,16 +83,18 @@
                 <i class="fa-solid fa-chevron-right chevron"></i>
               </a>
 
-              <a routerLink="/mis-reservas"
-                 class="dropdown-item"
-                 data-test="mis-reservas-link"
-                 [class.disabled]="isOnMisReservas"
-                 [attr.aria-disabled]="isOnMisReservas"
-                 (click)="isOnMisReservas && $event.preventDefault()">
-                <i class="fa-solid fa-calendar-check"></i>
-                <span class="item-label">Mis reservas</span>
-                <i class="fa-solid fa-chevron-right chevron"></i>
-              </a>
+              <ng-container *ngIf="!(isProveedor$ | async)">
+                <a routerLink="/mis-reservas"
+                   class="dropdown-item"
+                   data-test="mis-reservas-link"
+                   [class.disabled]="isOnMisReservas"
+                   [attr.aria-disabled]="isOnMisReservas"
+                   (click)="isOnMisReservas && $event.preventDefault()">
+                  <i class="fa-solid fa-calendar-check"></i>
+                  <span class="item-label">Mis reservas</span>
+                  <i class="fa-solid fa-chevron-right chevron"></i>
+                </a>
+              </ng-container>
             </div>
 
             <div class="dropdown-separator" aria-hidden="true"></div>
