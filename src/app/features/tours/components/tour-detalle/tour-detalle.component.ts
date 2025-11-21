@@ -377,6 +377,15 @@ export class TourDetalleComponent implements OnInit {
       categoria: this.tour.tour?.categoria || ''
     };
 
+    // Incluir imagen principal del tour en los query params para que la página de pagos
+    // y la lista 'Mis reservas' puedan mostrar una miniatura coherente.
+    try {
+      const imagenPrincipal = ImageUtils.getImageUrl(this.tour?.imagen_url, (this.tour as any)?.imagenes, 'tour');
+      if (imagenPrincipal) (queryParams as any)['imagen'] = imagenPrincipal;
+    } catch (e) {
+      console.warn('[NAV] no se pudo calcular imagenPrincipal para queryParams (tour)', e);
+    }
+
     console.log('[NAV] Navegando a pagos de tours:', queryParams);
     this.router.navigate(['/tour/pagos'], { queryParams })
       .then((success: boolean) => {

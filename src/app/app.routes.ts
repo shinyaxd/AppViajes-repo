@@ -53,6 +53,12 @@ export const routes: Routes = [
       import('./shared/components/editar-perfil/editar-perfil.component').then(m => m.EditarPerfilComponent) 
   },
 
+  // Página Mis Reservas (usuario) - placeholder mínima
+  { 
+    path: 'mis-reservas',
+    loadComponent: () => import('./shared/components/mis-reservas/mis-reservas.component').then(m => m.MisReservasComponent)
+  },
+
   // 🔄 Rutas legacy para mantener compatibilidad con URLs antiguas
   { 
     path: 'resultadosHoteles', 

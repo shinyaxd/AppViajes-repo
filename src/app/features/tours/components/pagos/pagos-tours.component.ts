@@ -6,6 +6,7 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { AuthService } from '../../../../core/services/auth.service';
 import { ReservasService } from '../../../hoteles/services/reservas.service';
+import { ReservasService as LocalReservasStore } from '../../../../shared/services/reservas.service';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
@@ -20,6 +21,7 @@ export class PagosToursComponent implements OnInit {
   private router = inject(Router);
   private authService = inject(AuthService);
   private reservasService = inject(ReservasService);
+  private localReservasStore = inject(LocalReservasStore);
 
   // UI state
   reservaExitosa = false;
@@ -27,6 +29,7 @@ export class PagosToursComponent implements OnInit {
   // Datos del tour
   nombreTour = '';
   ubicacion = '';
+  imagenTour?: string;
   fechaSalida: Date | null = null;
   salidaId = 0;
   tourId = 0;
@@ -56,6 +59,7 @@ export class PagosToursComponent implements OnInit {
 
     this.nombreTour = params['tourNombre'] || 'Tour Desconocido';
     this.ubicacion = params['ubicacion'] || '';
+    this.imagenTour = params['imagen'] || params['imagen_preview'] || params['imagen_principal'] || undefined;
     this.salidaId = +params['salidaId'] || 0;
     this.tourId = +params['tourId'] || 0;
     this.categoria = params['categoria'] || '';
@@ -179,6 +183,24 @@ export class PagosToursComponent implements OnInit {
       console.log('[PAGO TOUR] 💰 Monto a procesar: PEN', this.totalPagar.toFixed(2));
       await this.simularProcesoPago();
       console.log('[PAGO TOUR] ✅ Pago simulado completado');
+      // Guardar localmente la reserva para que aparezca en Mis reservas
+      try {
+        this.localReservasStore.addReserva({
+          id: Date.now(),
+          titulo: this.nombreTour,
+          fecha_inicio: this.fechaSalida ? this.toISODate(this.fechaSalida) : undefined,
+          fecha_fin: undefined,
+          total: this.totalPagar,
+          imagen: this.imagenTour,
+          adultos: this.adultos,
+          ninos: this.ninos,
+          totalPersonas: (this.adultos || 0) + (this.ninos || 0),
+          estado: 'confirmada',
+          creadoEn: new Date().toISOString()
+        });
+      } catch (e) {
+        console.warn('[PAGO TOUR] no se pudo guardar reserva localmente', e);
+      }
       
       // Marcar como exitosa para mostrar la página de confirmación
       this.reservaExitosa = true;

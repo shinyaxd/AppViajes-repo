@@ -1,5 +1,5 @@
-import { Component, inject } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { Component, inject, HostListener } from '@angular/core';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { map, Observable } from 'rxjs';
 // Ruta ajustada. Si esto falla, por favor verifica la estructura de carpetas
@@ -16,6 +16,30 @@ import { AuthService, User } from '../../../core/services/auth.service';
 })
 // Eliminamos OnInit y OnDestroy, ya que no son necesarios con el 'async' pipe.
 export class HeaderComponent {
+  // Controla si el dropdown está abierto por click
+  public menuOpen = false;
+
+  // Alterna el estado del menú (se invoca desde el botón)
+  toggleMenu(ev?: MouseEvent) {
+    ev?.stopPropagation();
+    this.menuOpen = !this.menuOpen;
+  }
+
+  // Cierra el menú (usado desde HostListener al click fuera o Escape)
+  closeMenu() {
+    this.menuOpen = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(_ev: MouseEvent) {
+    // Si hay un click en cualquier parte del documento, cerramos el menú
+    if (this.menuOpen) this.closeMenu();
+  }
+
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscapeKey(_ev: Event) {
+    if (this.menuOpen) this.closeMenu();
+  }
   // ======================================================
   // 🧱 Inyección de dependencias
   // ======================================================
@@ -51,6 +75,24 @@ export class HeaderComponent {
       }
     })
   );
+
+  // Indica si la ruta actual es /mis-reservas (útil para desactivar el enlace)
+  public isOnMisReservas = false;
+
+  constructor() {
+    // Inicializamos el flag y escuchamos cambios de navegación
+    try {
+      this.isOnMisReservas = this.router.url?.startsWith('/mis-reservas') ?? false;
+      this.router.events.subscribe(ev => {
+        if (ev instanceof NavigationEnd) {
+          this.isOnMisReservas = ev.urlAfterRedirects?.startsWith('/mis-reservas');
+        }
+      });
+    } catch (err) {
+      // En ambientes de testing o SSR la router puede no estar listo; ignoramos fallos silenciosamente
+      console.warn('No se pudo inicializar watcher de ruta en HeaderComponent', err);
+    }
+  }
 
   // ======================================================
   // 📤 Métodos

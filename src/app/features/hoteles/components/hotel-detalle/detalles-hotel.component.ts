@@ -386,6 +386,15 @@ verificarDisponibilidad(): void {
     });
 
     queryParams['precioTotalGeneral'] = total.toFixed(2);
+    
+    // Incluir imagen principal del hotel en los query params para que la página de pagos
+    // y la lista 'Mis reservas' puedan mostrar una miniatura coherente.
+    try {
+      const imagenPrincipal = ImageUtils.getImageUrl(this.hotel?.imagen_url, (this.hotel as any)?.imagenes, 'hotel');
+      if (imagenPrincipal) queryParams['imagen'] = imagenPrincipal;
+    } catch (e) {
+      console.warn('[NAV] no se pudo calcular imagenPrincipal para queryParams', e);
+    }
 
     console.log('[NAV] ruta destino:', '/hoteles/pagos');
     console.log('[NAV] queryParams:', queryParams);

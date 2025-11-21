@@ -6,6 +6,7 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { AuthService } from '../../../../core/services/auth.service';
 import { ReservasService, ReservaHabitacionPayload } from '../../services/reservas.service';
+import { ReservasService as LocalReservasStore } from '../../../../shared/services/reservas.service';
 import { firstValueFrom } from 'rxjs';
 
 interface ReservaItem {
@@ -28,6 +29,7 @@ export class PagosHotelesComponent implements OnInit {
   private router = inject(Router);
   private authService = inject(AuthService);
   private reservasService = inject(ReservasService);
+  private localReservasStore = inject(LocalReservasStore);
 
   // UI state
   reservaExitosa = false;
@@ -36,6 +38,7 @@ export class PagosHotelesComponent implements OnInit {
   nombreHotel = '';
   ubicacion = '';
   hotelId = 0;
+  imagenHotel?: string;
   checkIn: Date | null = null;
   checkOut: Date | null = null;
 
@@ -88,6 +91,7 @@ export class PagosHotelesComponent implements OnInit {
     // Texto
     this.nombreHotel = hotelNombre || 'Hotel Desconocido';
     this.ubicacion = ubicacion || '';
+    this.imagenHotel = params['imagen'] || params['imagen_preview'] || params['imagen_principal'] || undefined;
 
     // Números (usar + para coaccionar)
     this.adultosReservados = +params['adultos'] || 0;
@@ -313,6 +317,26 @@ export class PagosHotelesComponent implements OnInit {
       try {
         console.log('[PAGO] creando reserva...', payload);
         await firstValueFrom(this.reservasService.crearReservaHotel(payload));
+        // Al crear la reserva en el backend, también la guardamos localmente para "Mis reservas"
+        try {
+          this.localReservasStore.addReserva({
+            id: Date.now(),
+              titulo: `${this.nombreHotel} — ${item.tipo}`,
+            fecha_inicio: fechaInicio,
+            fecha_fin: fechaFin,
+            total: item.precioTotalReserva,
+              imagen: this.imagenHotel,
+            adultos: this.adultosReservados,
+            ninos: this.ninosReservados,
+            totalPersonas: (this.adultosReservados || 0) + (this.ninosReservados || 0),
+            noches: this.totalNoches,
+            habitaciones: this.cantidadTotalCuartos || this.habitacionesSolicitadas,
+            estado: 'confirmada',
+            creadoEn: new Date().toISOString()
+          });
+        } catch (e) {
+          console.warn('[PAGO] no se pudo guardar reserva localmente', e);
+        }
         console.log('[PAGO] OK', item.tipo);
       } catch (e: any) {
         console.error('[PAGO] error', e);

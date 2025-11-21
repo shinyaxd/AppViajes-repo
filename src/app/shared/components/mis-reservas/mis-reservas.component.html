@@ -1,0 +1,111 @@
+<section class="mis-reservas-page">
+  <div class="container">
+    <h2>Mis reservas</h2>
+    <p class="subtitle">Aquí verás todas tus reservas. (Vista preliminar)</p>
+
+    <ng-container *ngIf="reservas.length > 0; else empty">
+      <div class="reservas-list">
+        <div *ngFor="let r of reservas" class="reserva-card">
+          <div class="reserva-image-wrap">
+            <img [src]="getImageSrc(r.imagen)" alt="imagen" class="reserva-thumb" (error)="onImgError($event)" />
+          </div>
+
+          <div class="reserva-body">
+            <div class="reserva-row">
+              <div class="reserva-title">{{ r.titulo }}</div>
+            </div>
+
+            <div class="reserva-sub"> 
+              <span class="reserva-meta">{{ r.fecha_inicio || '—' }}</span>
+              <span class="sep">•</span>
+              <span class="reserva-estado">{{ r.estado || '—' }}</span>
+            </div>
+
+            <div class="reserva-tags">
+              <span *ngFor="let t of r.tags || []" class="tag">{{ t }}</span>
+            </div>
+          </div>
+
+          <div class="reserva-actions">
+            <button class="btn primary" (click)="showDetail(r)">Información</button>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #empty>
+      <div class="placeholder">
+        <p>No hay reservas para mostrar en este entorno de desarrollo.</p>
+        <a routerLink="/hoteles">Buscar hoteles</a>
+      </div>
+    </ng-template>
+  
+    <!-- Modal detalle reserva -->
+    <div class="mr-modal-overlay" *ngIf="modalOpen" (click)="closeModal()">
+      <div class="mr-modal" (click)="$event.stopPropagation()">
+        <header class="mr-modal-header">
+          <h3>{{ selectedReserva?.titulo }}</h3>
+          <button class="mr-close" (click)="closeModal()">×</button>
+        </header>
+
+        <div class="mr-modal-body">
+          <div class="mr-left">
+            <div class="mr-card">
+              <h4>Información</h4>
+              <p class="mr-location">{{ selectedReserva?.tags?.[0] || '' }}</p>
+              <div class="mr-image-wrap">
+                <img [src]="getImageSrc(selectedReserva?.imagen)" alt="imagen" (error)="onImgError($event)" />
+              </div>
+            </div>
+
+            <div class="mr-card">
+              <h4>Fechas de estadía</h4>
+              <div class="mr-dates">
+                <div>
+                  <div class="mr-label">Entrada</div>
+                  <div class="mr-value">{{ selectedReserva?.fecha_inicio || '—' }}</div>
+                </div>
+                <div>
+                  <div class="mr-label">Salida</div>
+                  <div class="mr-value">{{ selectedReserva?.fecha_fin || '—' }}</div>
+                </div>
+              </div>
+            </div>
+          
+            <div class="mr-card">
+              <h4>Fechas de estadía</h4>
+              <div class="mr-counts">
+                <div class="mr-count">
+                  <div class="mr-label">Adultos</div>
+                  <div class="mr-value">{{ selectedReserva?.adultos ?? '—' }}</div>
+                </div>
+                <div class="mr-count">
+                  <div class="mr-label">Niños</div>
+                  <div class="mr-value">{{ selectedReserva?.ninos ?? '—' }}</div>
+                </div>
+                <div class="mr-count">
+                  <div class="mr-label">Total</div>
+                  <div class="mr-value">{{ selectedReserva?.totalPersonas ?? ((selectedReserva?.adultos || 0) + (selectedReserva?.ninos || 0)) }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <aside class="mr-right">
+            <div class="mr-card">
+              <h4>Resumen de precios</h4>
+              <div class="mr-price-row">
+                <span>Subtotal</span>
+                <span>{{ selectedReserva?.total ? (selectedReserva?.total | number:'1.0-0') : '—' }}</span>
+              </div>
+              <div class="mr-price-row">
+                <strong>Total</strong>
+                <strong>{{ selectedReserva?.total ? ('PEN' + (selectedReserva?.total | number:'1.0-0')) : '—' }}</strong>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
