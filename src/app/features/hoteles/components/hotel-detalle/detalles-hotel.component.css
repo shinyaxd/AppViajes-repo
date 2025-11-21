@@ -231,6 +231,13 @@ h2 {
   line-height: 1.5;
 }
 
+/* Asegurar que las descripciones largas respeten saltos de línea y hagan wrap */
+.room-description {
+  white-space: pre-wrap; /* conserva saltos de línea */
+  overflow-wrap: anywhere; /* rompe palabras largas si es necesario */
+  word-break: break-word;
+}
+
 .room-price-section {
   display: flex;
   flex-direction: column;

@@ -79,6 +79,8 @@ export class HotelFormComponent implements OnInit {
       // Agrupación para las Habitaciones (Payload 2, se procesa internamente)
       habitaciones: this.fb.array<FormGroup>([this.crearHabitacion()]),
     });
+    // Inicializar contadores de descripción por habitación
+    this.habitacionesDescripcionLengths = this.habitaciones.controls.map(() => 0);
   }
 
   // Getter para el control 'nombre' del grupo 'hotel'
@@ -146,6 +148,11 @@ export class HotelFormComponent implements OnInit {
   // Contador de caracteres para la descripción
   readonly MAX_DESCRIPCION = 1000;
   descripcionLength = 0;
+  
+  // Limite para la descripción de cada habitación (500 caracteres)
+  readonly MAX_DESCRIPCION_HAB = 500;
+  // Contadores individuales para las descripciones de las habitaciones
+  habitacionesDescripcionLengths: number[] = [];
 
   get descripcionControl(): FormControl {
     return this.hotelGroup.get('descripcion') as FormControl;
@@ -206,17 +213,36 @@ export class HotelFormComponent implements OnInit {
       // y no bloquee el formulario al inicio.
       precio_por_noche: [100, [Validators.required, Validators.min(1)]], 
       cantidad: [1, [Validators.required, Validators.min(1)]],
-      descripcion: [''],
+      descripcion: ['', [Validators.maxLength(this.MAX_DESCRIPCION_HAB)]],
     });
   }
 
   agregarHabitacion(): void {
     this.habitaciones.push(this.crearHabitacion());
+    // Inicializar contador para la nueva habitación
+    this.habitacionesDescripcionLengths.push(0);
   }
 
   eliminarHabitacion(index: number): void {
     if (this.habitaciones.length > 1) { 
       this.habitaciones.removeAt(index);
+      // Eliminar contador asociado
+      this.habitacionesDescripcionLengths.splice(index, 1);
+    }
+  }
+
+  // Maneja el input de la descripción de una habitación específica
+  onHabitacionDescripcionInput(event: any, index: number): void {
+    const raw = event?.target?.value ?? '';
+    if (raw.length > this.MAX_DESCRIPCION_HAB) {
+      const truncated = raw.slice(0, this.MAX_DESCRIPCION_HAB);
+      const ctrl = this.habitaciones.at(index).get('descripcion') as FormControl;
+      if (ctrl) {
+        ctrl.setValue(truncated, { emitEvent: false });
+      }
+      this.habitacionesDescripcionLengths[index] = this.MAX_DESCRIPCION_HAB;
+    } else {
+      this.habitacionesDescripcionLengths[index] = raw.length;
     }
   }
 
@@ -255,19 +281,32 @@ export class HotelFormComponent implements OnInit {
 
     this.enviando = true;
     
-    // 3. Obtener el payload completo.
-    // El formato es: { hotel: HotelCreatePayload, habitaciones: HabitacionCreatePayload[] }
-    const payload = this.hotelForm.getRawValue() as { 
-        hotel: HotelCreatePayload, 
-        habitaciones: Array<Omit<HabitacionCreatePayload, 'servicio_id'>> 
-    };
+    // 3. Obtener y normalizar el payload completo.
+    // Construimos manualmente las habitaciones para asegurarnos de incluir y sanitizar `descripcion`.
+    const raw = this.hotelForm.getRawValue();
+    const habitacionesPayload = (raw.habitaciones || []).map((h: any) => ({
+      nombre: h.nombre,
+      capacidad_adultos: h.capacidad_adultos,
+      capacidad_ninos: h.capacidad_ninos,
+      precio_por_noche: h.precio_por_noche,
+      cantidad: h.cantidad,
+      descripcion: (h.descripcion || '').toString().trim(),
+    })) as Array<Omit<HabitacionCreatePayload, 'servicio_id'>>;
 
-    console.log('📦 Enviando payload de Hotel:', payload);
+    const payload = {
+      hotel: raw.hotel,
+      habitaciones: habitacionesPayload
+    } as { hotel: HotelCreatePayload, habitaciones: Array<Omit<HabitacionCreatePayload, 'servicio_id'>> };
+
+    console.log('📦 Enviando payload de Hotel (sanitizado):', payload);
+    // DEBUG: mostrar payload antes de enviar para inspección rápida
+    try { window.alert('Payload a enviar (crear hotel):\n' + JSON.stringify(payload, null, 2)); } catch (e) { /* ignore */ }
 
     // 4. Llamada al servicio, que maneja el encadenamiento de POST /api/hoteles
     // seguido de POST /api/habitaciones/batch
     this.hotelService.createHotelWithHabitaciones(payload).subscribe({
-      next: () => {
+      next: (res) => {
+        console.log('[CREAR] Respuesta del servidor al crear hotel:', res);
         this.enviando = false;
         this.mensajeExito = '✅ Hotel registrado correctamente. Redirigiendo a tu panel...';
         
