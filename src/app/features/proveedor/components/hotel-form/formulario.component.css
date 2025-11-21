@@ -313,3 +313,9 @@ button:not(.btn-submit):disabled {
 .input-with-info .info-popup:hover {
   display: block;
 }
+
+/* Poner en negrita las etiquetas del formulario crear-hotel */
+.hotel-form label {
+  font-weight: 700;
+  color: #222;
+}
