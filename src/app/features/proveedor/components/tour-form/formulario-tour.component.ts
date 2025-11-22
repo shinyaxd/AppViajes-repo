@@ -62,8 +62,10 @@ export class TourFormComponent implements OnInit {
   crearFormulario(): void {
     this.tourForm = this.fb.group({
       tour: this.fb.group({
-        nombre: ['', [Validators.required]],
-        descripcion: ['', [Validators.required, Validators.minLength(10)]],
+        // Nombre: permitir letras, números, espacios, guiones y guion bajo (sin caracteres especiales)
+        nombre: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9ÁÉÍÓÚÜÑáéíóúüñ\s\-_]+$/)]],
+        // Limitar descripción a 1000 caracteres
+        descripcion: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(1000)]],
         direccion: ['', [Validators.required]],
         ciudad: ['', [Validators.required]], // ✅ Campo 1 para ubicación
         pais: ['', [Validators.required]],   // ✅ Campo 2 para ubicación
@@ -98,6 +100,66 @@ export class TourFormComponent implements OnInit {
 
   get salidas(): FormArray {
     return this.tourForm.get('salidas') as FormArray;
+  }
+
+  // Contador de caracteres para la descripción
+  readonly MAX_DESCRIPCION = 1000;
+  descripcionLength = 0;
+
+  get descripcionControl(): FormControl {
+    return this.tourGroup.get('descripcion') as FormControl;
+  }
+
+  onDescripcionInput(event: any): void {
+    const raw = event?.target?.value ?? '';
+    if (raw.length > this.MAX_DESCRIPCION) {
+      const truncated = raw.slice(0, this.MAX_DESCRIPCION);
+      this.descripcionControl.setValue(truncated, { emitEvent: false });
+      this.descripcionLength = this.MAX_DESCRIPCION;
+    } else {
+      this.descripcionLength = raw.length;
+    }
+  }
+
+  // Getter para el control 'nombre' del grupo 'tour'
+  get nombreControl(): FormControl {
+    return this.tourGroup.get('nombre') as FormControl;
+  }
+
+  // Sanitiza el valor del nombre eliminando caracteres especiales no permitidos
+  private sanitizeName(value: string): string {
+    if (!value) return '';
+    return value.replace(/[^A-Za-z0-9ÁÉÍÓÚÜÑáéíóúüñ\s\-_]/g, '');
+  }
+
+  onNombreInput(event: any): void {
+    try {
+      const raw = event?.target?.value ?? '';
+      const sanitized = this.sanitizeName(raw);
+      if (sanitized !== raw) {
+        this.nombreControl.setValue(sanitized, { emitEvent: false });
+      }
+    } catch (e) {}
+  }
+
+  onNombrePaste(event: ClipboardEvent): void {
+    if (!event) return;
+    event.preventDefault();
+    const text = (event.clipboardData || (window as any).clipboardData).getData('text') || '';
+    const sanitized = this.sanitizeName(text);
+    const current = this.nombreControl.value || '';
+    this.nombreControl.setValue((current + sanitized).trim(), { emitEvent: false });
+  }
+
+  // Estado para saber si el input 'nombre' está enfocado
+  nombreFocused = false;
+
+  onNombreFocus(): void {
+    this.nombreFocused = true;
+  }
+
+  onNombreBlur(): void {
+    this.nombreFocused = false;
   }
 
   // ================================================
@@ -256,6 +318,15 @@ export class TourFormComponent implements OnInit {
     console.log('📸 Imágenes:', this.galeriaImagenes.length);
     console.log('🎒 Items:', this.items.length);
     console.log('📅 Salidas:', this.salidas.length);
+
+    // Mensaje específico si el nombre tiene caracteres inválidos
+    if (this.nombreControl.invalid) {
+      this.mensajeError = '❌ Nombre inválido: no se permiten caracteres especiales.';
+      this.nombreControl.markAsTouched();
+      const el = document.getElementById('mensajeError');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
 
     if (this.tourForm.invalid) {
       // ⚠️ Si la aplicación seguía fallando, este era el punto de error:

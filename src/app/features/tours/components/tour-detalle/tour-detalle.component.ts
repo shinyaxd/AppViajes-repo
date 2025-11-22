@@ -37,13 +37,13 @@ export class TourDetalleComponent implements OnInit {
 
   ngOnInit(): void {
     // 🆕 1. Obtener fechas de los QueryParams (como en el detalle-hotel)
-    this.route.queryParams.subscribe(qParams => {
+    this.route.queryParams.subscribe((qParams: Record<string, any>) => {
       this.checkInDate = qParams['checkIn'] || null;
       this.checkOutDate = qParams['checkOut'] || null;
       console.log('[INIT] Fechas de búsqueda:', { checkIn: this.checkInDate, checkOut: this.checkOutDate });
     });
 
-    this.route.paramMap.subscribe(params => {
+    this.route.paramMap.subscribe((params: import('@angular/router').ParamMap) => {
       const idParam = params.get('id');
       const tourId = idParam ? parseInt(idParam, 10) : undefined;
 
@@ -60,13 +60,13 @@ export class TourDetalleComponent implements OnInit {
   getTourDetails(id: number): void {
     console.log(`Cargando detalles para tour ID: ${id}`);
     this.tourService.getTourById(id).subscribe({
-      next: (data) => {
+      next: (data: TourDetalles) => {
         this.tour = data;
         this.loading = false;
         console.log('✅ Tour cargado:', this.tour);
         this.procesarSalidas(); 
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error(`❌ Error al cargar el tour ID ${id}:`, error);
         this.error = true;
         this.loading = false;
@@ -95,7 +95,7 @@ export class TourDetalleComponent implements OnInit {
       const endFilter = this.checkOutDate ? new Date(this.checkOutDate) : null;
 
       const estaDentroDelRango = (!startFilter || tourDate >= startFilter) &&
-                                 (!endFilter || tourDate <= endFilter);
+                                (!endFilter || tourDate <= endFilter);
 
       if (estaDentroDelRango) {
         this.usarFechaTourDirecta = true;
@@ -195,14 +195,33 @@ export class TourDetalleComponent implements OnInit {
     // Obtener datos del tour con tipado correcto
     const tourData = this.tour.tour;
     
-    // Usar ImageUtils para obtener y procesar imágenes
-    const imagenesFromApi:string[] = this.tour.imagenes?.map((img) => img.url).filter((url): url is string => !!url) || [];
-    const todasImagenes = ImageUtils.getAllImages(this.tour.imagen_url, this.tour.imagenes);
+  // Usar ImageUtils para obtener y procesar imágenes
+  // Mantener también los textos 'alt' asociados a cada URL si la API los provee
+  // Aceptar varios nombres de propiedad posibles para la descripción (alt, descripcion, caption, titulo, alt_text)
+  const imagenesApiObjects = this.tour.imagenes?.map((img) => {
+    const anyImg = img as any;
+    const url = anyImg.url || anyImg.imagen_url || '';
+    const alt = anyImg.alt || anyImg.descripcion || anyImg.caption || anyImg.titulo || anyImg.alt_text || '';
+    return { url, alt };
+  }) || [];
+  // imagenesApiObjects es un arreglo de objetos { url, alt } que cumple la interfaz ImageObject
+  // ImageUtils.getAllImages espera (primary: string|null, gallery: ImageObject[]|null)
+  const imagenesFromApi = imagenesApiObjects.map(x => x.url).filter((url): url is string => !!url);
+  const todasImagenes = ImageUtils.getAllImages(this.tour.imagen_url, imagenesApiObjects);
     
     // Asegurar que siempre haya al menos una imagen
-    const imagenesFinal = todasImagenes.length > 0 
-      ? todasImagenes 
+    const imagenesFinal = todasImagenes.length > 0
+      ? todasImagenes
       : [ImageUtils.getPlaceholder('tour')];
+
+    // Construir array de 'alt' alineado con imagenesFinal
+    const altsFinal: string[] = imagenesFinal.map(url => {
+      // Buscar el primer objeto de la API que coincida con la URL
+      const found = imagenesApiObjects.find(o => o.url === url);
+      if (found && found.alt && found.alt.trim().length > 0) return found.alt;
+      // Fallback: usar el nombre del tour
+      return this.tour?.nombre || '';
+    });
 
     // Convertir duración de minutos a formato legible
     const duracionHoras = tourData?.duracion 
@@ -217,7 +236,8 @@ export class TourDetalleComponent implements OnInit {
       precio: tourData?.precio ? parseFloat(tourData.precio as any) : null,
       descripcion: this.tour.descripcion || '',
       duracion: duracionHoras,
-      galeria_imagenes: imagenesFinal
+      galeria_imagenes: imagenesFinal,
+      galeria_alts: altsFinal
     };
   }
 
@@ -227,13 +247,26 @@ export class TourDetalleComponent implements OnInit {
   }
 
   volverAResultados(): void {
-    // 🆕 Incluir las fechas de búsqueda al volver
-    this.router.navigate(['/tour/resultados'], {
-        queryParams: {
-            checkIn: this.checkInDate,
-            checkOut: this.checkOutDate,
+    // Intentar volver en el historial del navegador (si existe). Si no cambia la ruta, navegar al fallback
+    try {
+      const currentParams = { ...this.route.snapshot.queryParams } as Record<string, any>;
+
+      // Intento principal: history.back() (mantiene estado si venías de la página de resultados)
+      window.history.back();
+
+      // Después de un pequeño delay, si seguimos en una ruta de detalle, hacer fallback a la ruta de resultados con los query params
+      setTimeout(() => {
+        const path = window.location.pathname || '';
+        const isStillDetail = path.includes('/detalle') || path.includes('/tour/detalle');
+        if (isStillDetail) {
+          this.router.navigate(['/tour/resultados'], { queryParams: currentParams });
         }
-    });
+      }, 300);
+    } catch (e) {
+      console.error('[NAV] Excepción en volverAResultados (tour):', e);
+      const qs = new URLSearchParams((this.route.snapshot.queryParams as Record<string, string>) || {}).toString();
+      window.location.href = `/tour/resultados${qs ? '?' + qs : ''}`;
+    }
   }
 
   /**
@@ -344,15 +377,24 @@ export class TourDetalleComponent implements OnInit {
       categoria: this.tour.tour?.categoria || ''
     };
 
+    // Incluir imagen principal del tour en los query params para que la página de pagos
+    // y la lista 'Mis reservas' puedan mostrar una miniatura coherente.
+    try {
+      const imagenPrincipal = ImageUtils.getImageUrl(this.tour?.imagen_url, (this.tour as any)?.imagenes, 'tour');
+      if (imagenPrincipal) (queryParams as any)['imagen'] = imagenPrincipal;
+    } catch (e) {
+      console.warn('[NAV] no se pudo calcular imagenPrincipal para queryParams (tour)', e);
+    }
+
     console.log('[NAV] Navegando a pagos de tours:', queryParams);
     this.router.navigate(['/tour/pagos'], { queryParams })
-      .then(success => {
+      .then((success: boolean) => {
         console.log('[NAV] Navegación exitosa:', success);
         if (!success) {
           console.error('[NAV] ❌ La navegación fue bloqueada o falló');
         }
       })
-      .catch(error => {
+      .catch((error: unknown) => {
         console.error('[NAV] ❌ Error en navegación:', error);
       });
   }

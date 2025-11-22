@@ -34,6 +34,7 @@
             <input id="nombre" formControlName="nombre" type="text">
             <div *ngIf="form.get('nombre')?.invalid && (form.get('nombre')?.dirty || form.get('nombre')?.touched)">
               <p *ngIf="form.get('nombre')?.errors?.['required']">El nombre es obligatorio.</p>
+              <p *ngIf="form.get('nombre')?.errors?.['pattern']">El nombre solo puede contener letras y espacios.</p>
             </div>
           </div>
 
@@ -57,6 +58,7 @@
             <label for="empresa_nombre">Nombre de la Empresa</label>
             <input id="empresa_nombre" formControlName="empresa_nombre" type="text">
             <p *ngIf="form.get('empresa_nombre')?.errors?.['required'] && (form.get('empresa_nombre')?.dirty || form.get('empresa_nombre')?.touched)">El nombre de la empresa es obligatorio.</p>
+            <p *ngIf="form.get('empresa_nombre')?.errors?.['pattern'] && (form.get('empresa_nombre')?.dirty || form.get('empresa_nombre')?.touched)">El nombre de la empresa no puede contener caracteres especiales (p. ej. # % +).</p>
           </div>
 
           <!-- Teléfono (Celular) - Ahora usa la clase .field-card -->

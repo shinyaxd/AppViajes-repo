@@ -170,6 +170,7 @@
       <label>Fecha de expiración</label>
       <input type="month"
         name="fechaExpiracion"
+        placeholder="MM/YY"
        [(ngModel)]="tarjeta.expiracion"
         (change)="falloConfirmar = false" required>
 
@@ -177,10 +178,19 @@
       <input type="password"
         name="cvc"
        [(ngModel)]="tarjeta.cvc"
+       placeholder="XXX"
        maxlength="3"
        inputmode="numeric"
        pattern="[0-9]*"
        (input)="soloNumeros($event); falloConfirmar = false" required>
+
+      <label>Nombre del propietario</label>
+      <input type="text"
+        name="nombreTitular"
+        placeholder="José Pérez"
+        [(ngModel)]="tarjeta.nombre"
+        (input)="soloLetras($event); falloConfirmar = false"
+        required>  
 
        <!--p class="mensaje-error" *ngIf="falloConfirmar">
         <i class="fas fa-exclamation-triangle"></i>

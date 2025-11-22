@@ -46,6 +46,19 @@ export class DetallesHotelComponent implements OnInit {
     const galeria = ImageUtils.getAllImages(this.hotel.imagen_url, this.hotel.imagenes);
     const galeriaFinal = ImageUtils.fillGallery(galeria, 5, 'hotel');
 
+    // Intentar extraer textos 'alt' si el backend provee objetos con metadata
+    const imagenesApiObjects = (this.hotel as any).imagenes?.map((img: any) => {
+      const url = img.url || img.imagen_url || '';
+      const alt = img.alt || img.descripcion || img.caption || img.titulo || img.alt_text || '';
+      return { url, alt };
+    }) || [];
+
+    const altsFinal: string[] = galeriaFinal.map(url => {
+      const found = imagenesApiObjects.find((o: any) => o.url === url);
+      if (found && found.alt && found.alt.trim().length > 0) return found.alt;
+      return this.hotel?.nombre || '';
+    });
+
     return {
       nombre: this.hotel.nombre,
       ciudad: this.hotel.ciudad,
@@ -54,7 +67,8 @@ export class DetallesHotelComponent implements OnInit {
       estrellas: this.hotel.estrellas,
       precio: this.precioHotelMostrado,
       descripcion: this.hotel.descripcion || '',
-      galeria_imagenes: galeriaFinal
+      galeria_imagenes: galeriaFinal,
+      galeria_alts: altsFinal
     };
   }
 
@@ -67,7 +81,7 @@ export class DetallesHotelComponent implements OnInit {
   // 🔸 Ciclo de vida
   // ==========================================================
   ngOnInit(): void {
-    this.route.queryParams.subscribe(qParams => {
+    this.route.queryParams.subscribe((qParams: Record<string, any>) => {
       this.checkInDate = qParams['checkIn'] || '';
       this.checkOutDate = qParams['checkOut'] || '';
       this.adultos = +qParams['adultos'] || 1;
@@ -79,7 +93,7 @@ export class DetallesHotelComponent implements OnInit {
       });
     });
 
-    this.route.paramMap.subscribe(params => {
+    this.route.paramMap.subscribe((params: import('@angular/router').ParamMap) => {
       const idParam = params.get('id');
       this.hotelId = idParam;
       const hotelId = idParam ? parseInt(idParam, 10) : undefined;
@@ -96,14 +110,14 @@ export class DetallesHotelComponent implements OnInit {
   getHotelDetails(id: number): void {
     console.log(`[API] getHotelCompleto(${id})`);
     this.hotelService.getHotelCompleto(id).subscribe({
-      next: (detalle) => {
+      next: (detalle: any) => {
         this.hotel = detalle.hotel;
-        this.habitacionesFiltradas = detalle.habitaciones.map(h => ({ ...h, seleccionada: 0 }));
+        this.habitacionesFiltradas = (detalle.habitaciones as any[]).map((h: any) => ({ ...h, seleccionada: 0 }));
         console.log('[DATA] hotel cargado', { hotel: this.hotel?.nombre, habitaciones: this.habitacionesFiltradas.length });
         this.verificarDisponibilidad();
         this.verificarSeleccion();
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error(`❌ Error al cargar el hotel ID ${id}:`, error);
         this.hotel = undefined;
         this.habitacionesFiltradas = [];
@@ -263,18 +277,41 @@ verificarDisponibilidad(): void {
   // 🔙 Volver a resultados
   // ==========================================================
   volverAResultados(): void {
-    if (!this.hotel) return;
-    console.log('[NAV] volver a resultados con queryParams');
-    this.router.navigate(['/resultadosHoteles'], {
-      queryParams: {
-        ciudad: this.hotel.ciudad,
-        checkIn: this.checkInDate,
-        checkOut: this.checkOutDate,
-        adultos: this.adultos,
-        ninos: this.ninos,
-        habitaciones: this.habitaciones
-      }
-    });
+    // Intentar volver en el historial del navegador (si existe). Si no cambia la ruta, navegar al fallback
+    try {
+      const queryParams = {
+        ciudad: this.hotel?.ciudad || '',
+        checkIn: this.checkInDate || '',
+        checkOut: this.checkOutDate || '',
+        adultos: this.adultos || 1,
+        ninos: this.ninos || 0,
+        habitaciones: this.habitaciones || 1
+      } as Record<string, any>;
+
+      // Intento principal: history.back() (mantiene estado si venías de la página de resultados)
+      window.history.back();
+
+      // Después de un pequeño delay, si seguimos en una ruta de detalle, hacer fallback a la ruta de resultados con los query params
+      setTimeout(() => {
+        const path = window.location.pathname || '';
+        const isStillDetail = path.includes('/detalle') || path.includes('/hoteles/detalle');
+        if (isStillDetail) {
+          this.router.navigate(['/hoteles/resultados'], { queryParams });
+        }
+      }, 300);
+    } catch (e) {
+      console.error('[NAV] Excepción en volverAResultados (hotel):', e);
+      this.router.navigate(['/hoteles/resultados'], {
+        queryParams: {
+          ciudad: this.hotel?.ciudad || '',
+          checkIn: this.checkInDate || '',
+          checkOut: this.checkOutDate || '',
+          adultos: this.adultos || 1,
+          ninos: this.ninos || 0,
+          habitaciones: this.habitaciones || 1
+        }
+      });
+    }
   }
 
   // ==========================================================
@@ -349,10 +386,19 @@ verificarDisponibilidad(): void {
     });
 
     queryParams['precioTotalGeneral'] = total.toFixed(2);
+    
+    // Incluir imagen principal del hotel en los query params para que la página de pagos
+    // y la lista 'Mis reservas' puedan mostrar una miniatura coherente.
+    try {
+      const imagenPrincipal = ImageUtils.getImageUrl(this.hotel?.imagen_url, (this.hotel as any)?.imagenes, 'hotel');
+      if (imagenPrincipal) queryParams['imagen'] = imagenPrincipal;
+    } catch (e) {
+      console.warn('[NAV] no se pudo calcular imagenPrincipal para queryParams', e);
+    }
 
     console.log('[NAV] ruta destino:', '/hoteles/pagos');
     console.log('[NAV] queryParams:', queryParams);
     this.router.navigate(['/hoteles/pagos'], { queryParams })
-      .then(ok => console.log('[NAV] navigate() result:', ok));
+      .then((ok: boolean) => console.log('[NAV] navigate() result:', ok));
   }
 }

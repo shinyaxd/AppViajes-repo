@@ -6,6 +6,7 @@
 // Cada feature se carga bajo demanda (on-demand) cuando el usuario navega.
 
 import { Routes } from '@angular/router';
+import { viajeroGuard } from './core/guards/viajero.guard';
 
 export const routes: Routes = [
   // 🏠 Redirección raíz
@@ -51,6 +52,13 @@ export const routes: Routes = [
     path: 'editar-perfil', 
     loadComponent: () => 
       import('./shared/components/editar-perfil/editar-perfil.component').then(m => m.EditarPerfilComponent) 
+  },
+
+  // Página Mis Reservas (usuario) - placeholder mínima
+  { 
+    path: 'mis-reservas',
+    loadComponent: () => import('./shared/components/mis-reservas/mis-reservas.component').then(m => m.MisReservasComponent),
+    canActivate: [viajeroGuard]
   },
 
   // 🔄 Rutas legacy para mantener compatibilidad con URLs antiguas

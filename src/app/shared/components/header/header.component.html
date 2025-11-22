@@ -17,6 +17,12 @@
           class="somb">
           <i class="fa-solid fa-building-circle-check"></i> Crear Hotel
         </a>
+        
+        <a
+          routerLink="/proveedor"
+          class="somb">
+          <i class="fa-solid fa-list"></i> Mis publicaciones
+        </a>
       </ng-container>
 
       <!-- Lógica para Viajeros (Rol: 'viajero' o no logueado) -->
@@ -45,8 +51,8 @@
       <!-- Lógica: Usuario Autenticado -->
       <ng-container *ngIf="isAuthenticated$ | async; else authButtons">
         
-        <div class="dropdown-usuario">
-          <button class="bienvenida dropdown-toggle">
+        <div class="dropdown-usuario" [class.open]="menuOpen">
+          <button class="bienvenida dropdown-toggle" (click)="toggleMenu($event)" [attr.aria-expanded]="menuOpen">
             Hola, 
             
             <!-- CORRECCIÓN CLAVE: Usamos 'currentUser$ | async as user' para acceder a las propiedades -->
@@ -69,14 +75,39 @@
             <i class="fa-solid fa-caret-down fa-xs"></i>
           </button>
           
-          <div class="dropdown-menu">
-            <!-- Botón Editar Perfil -->
-            <a routerLink="/editar-perfil" class="dropdown-item">
-              <i class="fa-solid fa-user-pen"></i> Editar perfil
-            </a>
+          <div class="dropdown-menu" (click)="$event.stopPropagation()">
+            <div class="dropdown-header">
+              <ng-container *ngIf="currentUser$ | async as user">
+                <div class="dropdown-name">{{ user.nombre || user.empresa_nombre || user.email }}</div>
+              </ng-container>
+            </div>
+
+            <div class="account-links">
+              <a routerLink="/editar-perfil" class="dropdown-item">
+                <i class="fa-solid fa-user"></i>
+                <span class="item-label">Mi cuenta</span>
+                <i class="fa-solid fa-chevron-right chevron"></i>
+              </a>
+
+              <ng-container *ngIf="!(isProveedor$ | async)">
+                <a routerLink="/mis-reservas"
+                   class="dropdown-item"
+                   data-test="mis-reservas-link"
+                   [class.disabled]="isOnMisReservas"
+                   [attr.aria-disabled]="isOnMisReservas"
+                   (click)="isOnMisReservas && $event.preventDefault()">
+                  <i class="fa-solid fa-calendar-check"></i>
+                  <span class="item-label">Mis reservas</span>
+                  <i class="fa-solid fa-chevron-right chevron"></i>
+                </a>
+              </ng-container>
+            </div>
+
+            <div class="dropdown-separator" aria-hidden="true"></div>
 
             <button (click)="logout()" class="dropdown-item">
-              <i class="fa-solid fa-right-from-bracket"></i> Cerrar sesión
+              <i class="fa-solid fa-right-from-bracket"></i>
+              <span class="item-label">Cerrar sesión</span>
             </button>
           </div>
         </div>

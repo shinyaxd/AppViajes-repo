@@ -231,6 +231,13 @@ h2 {
   line-height: 1.5;
 }
 
+/* Asegurar que las descripciones largas respeten saltos de línea y hagan wrap */
+.room-description {
+  white-space: pre-wrap; /* conserva saltos de línea */
+  overflow-wrap: anywhere; /* rompe palabras largas si es necesario */
+  word-break: break-word;
+}
+
 .room-price-section {
   display: flex;
   flex-direction: column;
@@ -331,11 +338,29 @@ h2 {
 /* ======================= */
 /* MENSAJE DE CARGA */
 /* ======================= */
-.loading-message {
+.loading-message,
+.error-message {
   text-align: center;
-  font-style: italic;
+  padding: 40px 20px;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+/* Alinearlo con el estilo del detalle de hotel: asegurar que el header no lo tape */
+.loading-message {
   color: #000000;
-  margin-top: 50px;
+  font-style: normal; /* quitar cursiva */
+  font-weight: 400;
+  font-family: Arial, sans-serif; /* igual que detalle hotel */
+  /* Separación mayor para evitar que el header fijo lo tape */
+  margin-top: 120px;
+  padding-top: 8px;
+}
+
+@media (max-width: 640px) {
+  .loading-message {
+    margin-top: 80px;
+  }
 }
 
 /* ======================= */

@@ -6,6 +6,7 @@ import { HttpClientModule } from '@angular/common/http';
 
 import { AuthService } from '../../../../core/services/auth.service';
 import { ReservasService, ReservaHabitacionPayload } from '../../services/reservas.service';
+import { ReservasService as LocalReservasStore } from '../../../../shared/services/reservas.service';
 import { firstValueFrom } from 'rxjs';
 
 interface ReservaItem {
@@ -28,6 +29,7 @@ export class PagosHotelesComponent implements OnInit {
   private router = inject(Router);
   private authService = inject(AuthService);
   private reservasService = inject(ReservasService);
+  private localReservasStore = inject(LocalReservasStore);
 
   // UI state
   reservaExitosa = false;
@@ -35,6 +37,8 @@ export class PagosHotelesComponent implements OnInit {
   // Datos visibles
   nombreHotel = '';
   ubicacion = '';
+  hotelId = 0;
+  imagenHotel?: string;
   checkIn: Date | null = null;
   checkOut: Date | null = null;
 
@@ -56,6 +60,7 @@ export class PagosHotelesComponent implements OnInit {
   falloConfirmar: boolean = false;
 
   tarjeta = {
+    nombre: '',
     numero: '',
     expiracion: '',
     cvc: ''
@@ -75,8 +80,9 @@ export class PagosHotelesComponent implements OnInit {
     console.log(`${tag} params:`, params);
 
     // Seguridad: si no vienen cosas clave, lo vas a ver aquí.
-    const hotelNombre = params['hotelNombre'];
+  const hotelNombre = params['hotelNombre'];
     const ubicacion = params['ubicacion'];
+  this.hotelId = +params['hotelId'] || 0;
     const checkInStr = params['checkIn'];
     const checkOutStr = params['checkOut'];
 
@@ -86,6 +92,7 @@ export class PagosHotelesComponent implements OnInit {
     // Texto
     this.nombreHotel = hotelNombre || 'Hotel Desconocido';
     this.ubicacion = ubicacion || '';
+    this.imagenHotel = params['imagen'] || params['imagen_preview'] || params['imagen_principal'] || undefined;
 
     // Números (usar + para coaccionar)
     this.adultosReservados = +params['adultos'] || 0;
@@ -175,10 +182,58 @@ export class PagosHotelesComponent implements OnInit {
   }
 
   volverAtras(): void {
-    this.router.navigate(['/hoteles']);
+    // Intentar volver en el historial del navegador primero (mantiene estado si venías del detalle)
+    try {
+      window.history.back();
+
+      // Si después de un corto delay seguimos en la página de pagos, navegar al detalle del hotel con los query params necesarios
+      setTimeout(() => {
+        const path = window.location.pathname || '';
+        const stillOnPagos = path.includes('/pagos') || path.includes('/hoteles/pagos');
+        if (stillOnPagos) {
+          // Fallback: si tenemos hotelId, ir al detalle; si no, ir a resultados con filtros
+          const ciudadFromUbicacion = (this.ubicacion || '').split(',').pop()?.trim() || '';
+          const qp: Record<string, any> = {
+            ciudad: ciudadFromUbicacion,
+            checkIn: this.checkIn ? this.toISODate(this.checkIn) : '',
+            checkOut: this.checkOut ? this.toISODate(this.checkOut) : '',
+            adultos: this.adultosReservados || 1,
+            ninos: this.ninosReservados || 0,
+            habitaciones: this.habitacionesSolicitadas || 1
+          };
+
+          if (this.hotelId) {
+            this.router.navigate(['/hoteles/detalle', this.hotelId], { queryParams: qp });
+          } else {
+            this.router.navigate(['/hoteles/resultados'], { queryParams: qp });
+          }
+        }
+      }, 250);
+    } catch (e) {
+      console.error('[PAGOS HOTELES] Error al intentar volver atrás:', e);
+      // Fallback directo
+      const ciudadFromUbicacion = (this.ubicacion || '').split(',').pop()?.trim() || '';
+      const qp: Record<string, any> = {
+        ciudad: ciudadFromUbicacion,
+        checkIn: this.checkIn ? this.toISODate(this.checkIn) : '',
+        checkOut: this.checkOut ? this.toISODate(this.checkOut) : '',
+        adultos: this.adultosReservados || 1,
+        ninos: this.ninosReservados || 0,
+        habitaciones: this.habitacionesSolicitadas || 1
+      };
+      if (this.hotelId) {
+        this.router.navigate(['/hoteles/detalle', this.hotelId], { queryParams: qp });
+      } else {
+        this.router.navigate(['/hoteles/resultados'], { queryParams: qp });
+      }
+    }
   }
   soloNumeros(event: any) {
     event.target.value = event.target.value.replace(/[^0-9]/g, '');
+  }
+  soloLetras(event: any) {
+    event.target.value = event.target.value.replace(/[^a-zA-Z\s]/g, '');
+    this.tarjeta.nombre = event.target.value;
   }
   formatearTarjeta(event: any) {
     // Elimina todo lo que no sea número
@@ -196,11 +251,12 @@ export class PagosHotelesComponent implements OnInit {
 
   // Validación total de los campos
   datosTarjetaValidos(): boolean {
+    const nombreValido = (this.tarjeta.nombre || '').trim().length > 0;
     const numeroSinEspacios = this.tarjeta.numero?.replace(/\s/g, '') || '';
     const cvc = this.tarjeta.cvc || '';
     const fecha = this.tarjeta.expiracion || '';
 
-    const datosValidos=numeroSinEspacios.length === 16 && /^\d{3}$/.test(cvc) && fecha !== '';
+    const datosValidos =  nombreValido && numeroSinEspacios.length === 16 && /^\d{3}$/.test(cvc) && fecha !== '';
     if (!datosValidos){
       this.falloConfirmar=true;
     }
@@ -218,7 +274,7 @@ export class PagosHotelesComponent implements OnInit {
   }
 
   confirmarPago() {
-    if (!this.tarjeta.numero || !this.tarjeta.expiracion || !this.tarjeta.cvc) {
+    if (!this.tarjeta.nombre || !this.tarjeta.numero || !this.tarjeta.expiracion || !this.tarjeta.cvc) {
       alert('Completa todos los datos de la tarjeta.');
       return;
     }
@@ -267,6 +323,26 @@ export class PagosHotelesComponent implements OnInit {
       try {
         console.log('[PAGO] creando reserva...', payload);
         await firstValueFrom(this.reservasService.crearReservaHotel(payload));
+        // Al crear la reserva en el backend, también la guardamos localmente para "Mis reservas"
+        try {
+          this.localReservasStore.addReserva({
+            id: Date.now(),
+              titulo: `${this.nombreHotel} — ${item.tipo}`,
+            fecha_inicio: fechaInicio,
+            fecha_fin: fechaFin,
+            total: item.precioTotalReserva,
+              imagen: this.imagenHotel,
+            adultos: this.adultosReservados,
+            ninos: this.ninosReservados,
+            totalPersonas: (this.adultosReservados || 0) + (this.ninosReservados || 0),
+            noches: this.totalNoches,
+            habitaciones: this.cantidadTotalCuartos || this.habitacionesSolicitadas,
+            estado: 'confirmada',
+            creadoEn: new Date().toISOString()
+          });
+        } catch (e) {
+          console.warn('[PAGO] no se pudo guardar reserva localmente', e);
+        }
         console.log('[PAGO] OK', item.tipo);
       } catch (e: any) {
         console.error('[PAGO] error', e);

@@ -26,6 +26,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 export class EditarHotelComponent implements OnInit {
   // ======================================================
   // 🧩 Variables principales
+
   // ======================================================
   hotelId: number | null = null;
   cargandoDatosHotel: boolean = true;
@@ -34,6 +35,11 @@ export class EditarHotelComponent implements OnInit {
   enviando = false;
   mensajeExito = '';
   mensajeError = '';
+
+  // Limite para la descripción de cada habitación (500 caracteres)
+  readonly MAX_DESCRIPCION_HAB = 500;
+  // Contadores individuales para las descripciones de las habitaciones
+  habitacionesDescripcionLengths: number[] = [];
 
   // ======================================================
   // 🧱 Inyección de dependencias
@@ -77,6 +83,8 @@ export class EditarHotelComponent implements OnInit {
         console.error('Error al leer los parámetros de la ruta:', err);
       }
     });
+    // Inicializar contadores por habitación
+    this.habitacionesDescripcionLengths = this.habitaciones.controls.map(() => 0);
   }
 
   // ======================================================
@@ -160,17 +168,34 @@ export class EditarHotelComponent implements OnInit {
       // y no bloquee el formulario al inicio.
       precio_por_noche: [100, [Validators.required, Validators.min(1)]], 
       cantidad: [1, [Validators.required, Validators.min(1)]],
-      descripcion: [''],
+      descripcion: ['', [Validators.maxLength(this.MAX_DESCRIPCION_HAB)]],
     });
   }
 
   agregarHabitacion(): void {
     this.habitaciones.push(this.crearHabitacion());
+    this.habitacionesDescripcionLengths.push(0);
   }
 
   eliminarHabitacion(index: number): void {
     if (this.habitaciones.length > 1) { 
       this.habitaciones.removeAt(index);
+      this.habitacionesDescripcionLengths.splice(index, 1);
+    }
+  }
+  
+  // Maneja el input de la descripción de una habitación específica
+  onHabitacionDescripcionInput(event: any, index: number): void {
+    const raw = event?.target?.value ?? '';
+    if (raw.length > this.MAX_DESCRIPCION_HAB) {
+      const truncated = raw.slice(0, this.MAX_DESCRIPCION_HAB);
+      const ctrl = this.habitaciones.at(index).get('descripcion') as FormControl;
+      if (ctrl) {
+        ctrl.setValue(truncated, { emitEvent: false });
+      }
+      this.habitacionesDescripcionLengths[index] = this.MAX_DESCRIPCION_HAB;
+    } else {
+      this.habitacionesDescripcionLengths[index] = raw.length;
     }
   }
   // ======================================================
@@ -234,6 +259,8 @@ export class EditarHotelComponent implements OnInit {
             // NOTA: Agregar el ID de la habitación para actualizarla en el FormGroup de la habitación
           });
           this.habitaciones.push(habitacionGroup);
+          // Inicializar contador con la longitud actual de la descripción
+          this.habitacionesDescripcionLengths.push((hab.descripcion || '').toString().length);
         });
         if (this.habitaciones.length === 0) {
           this.agregarHabitacion(); 
@@ -276,19 +303,32 @@ export class EditarHotelComponent implements OnInit {
 
     this.enviando = true;
     
-    // 3. Obtener el payload completo.
-    // El formato es: { hotel: HotelCreatePayload, habitaciones: HabitacionCreatePayload[] }
-    const payload = this.hotelForm.getRawValue() as { 
-        hotel: HotelCreatePayload, 
-        habitaciones: HabitacionUpdatePayload[]
-    };
+    // 3. Obtener y normalizar el payload completo para asegurar que `descripcion` llegue correctamente.
+    const raw = this.hotelForm.getRawValue();
+    const habitacionesPayload = (raw.habitaciones || []).map((h: any) => ({
+      id: h.id ?? null,
+      nombre: h.nombre,
+      capacidad_adultos: h.capacidad_adultos,
+      capacidad_ninos: h.capacidad_ninos,
+      precio_por_noche: h.precio_por_noche,
+      cantidad: h.cantidad,
+      descripcion: (h.descripcion || '').toString().trim(),
+    })) as HabitacionUpdatePayload[];
 
-    console.log('📦 Enviando payload de Hotel:', payload);
+    const payload = {
+      hotel: raw.hotel,
+      habitaciones: habitacionesPayload
+    } as { hotel: HotelCreatePayload, habitaciones: HabitacionUpdatePayload[] };
+
+    console.log('📦 Enviando payload de actualización (sanitizado):', payload);
+    // DEBUG: mostrar payload en alert para verificar en caliente
+    try { window.alert('Payload a enviar:\n' + JSON.stringify(payload, null, 2)); } catch (e) { /* ignore */ }
 
     // 4. Llamada al servicio, que maneja el encadenamiento de POST /api/hoteles
     // seguido de POST /api/habitaciones/batch
     this.hotelService.updateHotelWithHabitaciones(this.hotelId!,payload).subscribe({
-      next: () => {
+      next: (res) => {
+        console.log('[EDITAR] Respuesta del servidor al actualizar hotel:', res);
         this.enviando = false;
         this.mensajeExito = '✅ Hotel actualizado correctamente. Redirigiendo a tu panel...';
         

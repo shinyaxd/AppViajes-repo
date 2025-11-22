@@ -17,6 +17,7 @@ export interface ServicioDetalleData {
   descripcion: string;
   duracion?: string; // Solo para tours: "10 Horas"
   galeria_imagenes: string[];
+  galeria_alts?: string[]; // textos 'alt' alineados por índice con `galeria_imagenes`
 }
 
 @Component({
@@ -31,6 +32,7 @@ export class ServicioDetalleHeaderComponent {
   @Input() servicio!: ServicioDetalleData;
   @Input() breadcrumb: string[] = []; // Ej: ['Lima', 'Perú', 'Hotel B']
   @Output() onReservar = new EventEmitter<void>();
+  @Output() onBack = new EventEmitter<void>();
 
   /**
    * Obtiene el set completo de 5 imágenes para el grid
@@ -43,6 +45,15 @@ export class ServicioDetalleHeaderComponent {
     
     // Usar ImageUtils para completar la galería hasta 5 imágenes
     return ImageUtils.fillGallery(imagenesOriginales, 5, tipoImagen);
+  }
+
+  /**
+   * Imágenes completas para el visor (no truncadas a 5)
+   * El grid sigue mostrando 5 miniaturas, pero el viewer puede navegar
+   * por todas las imágenes reales del servicio.
+   */
+  get imagenesViewer(): string[] {
+    return this.servicio?.galeria_imagenes || [];
   }
 
   get imagenPrincipal(): string {
@@ -66,6 +77,9 @@ export class ServicioDetalleHeaderComponent {
   currentIndex = 0;
 
   openViewer(index: number): void {
+    // index corresponde al índice en la galería completa (si el grid muestra
+    // un subconjunto, asumimos que los índices coinciden para las imágenes
+    // mostradas). Abrir el viewer en esa posición.
     this.currentIndex = index;
     this.viewerOpen = true;
     // prevent body scroll
@@ -78,17 +92,31 @@ export class ServicioDetalleHeaderComponent {
   }
 
   nextImage(): void {
-    const length = this.imagenesParaGrid.length;
+    const length = this.imagenesViewer.length || 1;
     this.currentIndex = (this.currentIndex + 1) % length;
   }
 
   prevImage(): void {
-    const length = this.imagenesParaGrid.length;
+    const length = this.imagenesViewer.length || 1;
     this.currentIndex = (this.currentIndex - 1 + length) % length;
   }
 
   get currentImage(): string {
-    return this.imagenesParaGrid[this.currentIndex];
+    return this.imagenesViewer[this.currentIndex] || this.imagenesParaGrid[0];
+  }
+
+  /** Devuelve el texto alt asociado a un índice de imagen (si existe) */
+  get currentAlt(): string {
+    const alts = this.servicio?.galeria_alts || [];
+    return alts[this.currentIndex] || (this.servicio?.nombre || 'Imagen');
+  }
+
+  getAltForIndex(index: number): string {
+    const alts = this.servicio?.galeria_alts || [];
+    const alt = alts[index];
+    if (alt && alt.trim().length > 0) return alt;
+    // Fallback legible
+    return `${this.servicio?.nombre || 'Imagen'} - ${index + 1}`;
   }
 
   @HostListener('window:keydown', ['$event'])
@@ -101,5 +129,10 @@ export class ServicioDetalleHeaderComponent {
 
   repetirEstrellas(cantidad: number): string {
     return '⭐'.repeat(cantidad || 0);
+  }
+
+  volverClicked(): void {
+    // Emitir el evento para que el componente padre controle la navegación.
+    this.onBack.emit();
   }
 }

@@ -1,16 +1,13 @@
 <div class="pagos-container">
-  <!-- Botón volver -->
   <button class="back-button" (click)="volverAtras()">
     <i class="fas fa-arrow-left"></i> Volver
   </button>
 
-  <!-- Header -->
   <div class="page-header">
     <h1>Confirma tu reserva</h1>
     <p class="subtitle">Revisa los detalles de tu tour antes de continuar</p>
   </div>
 
-  <!-- Mensaje de éxito -->
   <div *ngIf="reservaExitosa" class="success-card">
     <div class="success-icon">
       <i class="fas fa-check-circle"></i>
@@ -22,13 +19,10 @@
     </button>
   </div>
 
-  <!-- Contenido principal -->
   <div *ngIf="!reservaExitosa" class="checkout-grid">
     
-    <!-- Columna izquierda -->
     <div class="main-content">
       
-      <!-- Info del tour -->
       <div class="info-card">
         <div class="card-header">
           <i class="fas fa-map-marked-alt"></i>
@@ -53,7 +47,6 @@
         </div>
       </div>
 
-      <!-- Fecha de salida -->
       <div class="info-card">
         <div class="card-header">
           <i class="fas fa-calendar-day"></i>
@@ -64,7 +57,6 @@
         </div>
       </div>
 
-      <!-- Participantes -->
       <div class="info-card">
         <div class="card-header">
           <i class="fas fa-users"></i>
@@ -90,7 +82,6 @@
 
     </div>
 
-    <!-- Columna derecha: Resumen -->
     <div class="sidebar">
       <div class="price-summary-card">
         <h2>Resumen de precios</h2>
@@ -124,10 +115,62 @@
 
         <p class="payment-note">
           <i class="fas fa-info-circle"></i>
-          Pago seguro. Confirmación inmediata.
+          No se realizará ningún cargo hasta confirmar la reserva
         </p>
       </div>
     </div>
-
   </div>
+
+  <!-- Modal de Pago -->
+  <div class="modal-backdrop" *ngIf="mostrarModalPago">
+    <div class="modal-card">
+      <h2>Datos de Tarjeta</h2>
+
+      <label>Número de tarjeta</label>
+      <input type="text"
+        name="numeroTarjeta"
+        minlength="19"
+        maxlength="19"
+        placeholder="XXXX XXXX XXXX XXXX"
+        [(ngModel)]="tarjeta.numero"
+        (input)="formatearTarjeta($event); falloConfirmar = false"
+        inputmode="numeric" required>
+
+      <label>Fecha de expiración</label>
+      <input type="month"
+        name="fechaExpiracion"
+        placeholder="MM/YY"
+       [(ngModel)]="tarjeta.expiracion"
+        (change)="falloConfirmar = false" required>
+
+      <label>CVV</label>
+      <input type="password"
+        name="cvc"
+       [(ngModel)]="tarjeta.cvc"
+       placeholder="XXX"
+       maxlength="3"
+       inputmode="numeric"
+       pattern="[0-9]*"
+       (input)="soloNumeros($event); falloConfirmar = false" required>
+
+      <label>Nombre del propietario</label>
+      <input type="text"
+        name="nombreTitular"
+        placeholder="José Pérez"
+        [(ngModel)]="tarjeta.nombre"
+        (input)="soloLetras($event); falloConfirmar = false"
+        required>  
+
+       <!--p class="mensaje-error" *ngIf="falloConfirmar">
+        <i class="fas fa-exclamation-triangle"></i>
+        Datos de tarjeta inválidos. Verifica número, fecha y CVV.
+      </p--->
+      
+      <div class="modal-actions">
+        <button class="btn-primary" [disabled]="!datosTarjetaValidos()" (click)="confirmarPago()">Confirmar pago</button>
+        <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
 </div>

@@ -112,7 +112,9 @@
           <textarea
             formControlName="descripcion"
             placeholder="Detalles de la habitación"
+            (input)="onHabitacionDescripcionInput($event, i)"
           ></textarea>
+          <div class="char-counter">{{ habitacionesDescripcionLengths[i] || 0 }} / {{ MAX_DESCRIPCION_HAB }}</div>
         </label>
 
         <div class="inline-group">

@@ -1,3 +1,23 @@
+export interface Reserva {
+  id: number;
+  titulo: string; // nombre del servicio (hotel/tour)
+  fecha_inicio?: string;
+  fecha_fin?: string;
+  total?: number;
+  imagen?: string; // URL de imagen principal a mostrar en lista
+  userId?: number; // opciona: id del usuario propietario
+  estado?: 'confirmada' | 'pendiente' | 'cancelada';
+  tags?: string[];
+  notas?: string;
+  creadoEn?: string;
+  adultos?: number;
+  ninos?: number;
+  totalPersonas?: number;
+  noches?: number;
+  habitaciones?: number;
+}
+
+export type MisReservas = Reserva[];
 /**
  * Payload para crear una reserva de habitación
  */

@@ -1,0 +1,62 @@
+.mis-reservas-page { padding: 90px 16px 40px; }
+.mis-reservas-page .container { max-width: 980px; margin: 0 auto; background: #fff; border-radius: 10px; padding: 24px; box-shadow: 0 6px 18px rgba(2,6,23,0.06); }
+.mis-reservas-page h2 { margin: 0 0 8px; color: #0f1721; }
+.mis-reservas-page .subtitle { margin: 0 0 16px; color: #4b5563; }
+.mis-reservas-page .placeholder { padding: 28px; border: 1px dashed #e6e6e6; border-radius: 8px; text-align: center; color: #6b7280 }
+.mis-reservas-page .placeholder a { display: inline-block; margin-top: 10px; color: #0b6b3a; text-decoration: none }
+
+.reservas-list { display: flex; flex-direction: column; gap: 12px; margin-top: 12px }
+.reserva-card {
+	display: flex;
+	gap: 16px;
+	align-items: center;
+	justify-content: space-between;
+	padding: 14px 18px;
+	border-radius: 10px;
+	background: #fff;
+	border: 1px solid rgba(59,130,246,0.12); /* subtle bluish border like sample */
+	box-shadow: 0 6px 18px rgba(2,6,23,0.04);
+}
+
+.reserva-image-wrap { width: 120px; flex-shrink: 0; display:flex; align-items:center; justify-content:center }
+.reserva-thumb { width: 110px; height: 80px; object-fit: cover; border-radius: 8px; border: 2px solid rgba(59,130,246,0.14) }
+.reserva-thumb.placeholder { display:flex; align-items:center; justify-content:center; width:110px; height:80px; background:#f3f4f6; color:#6b7280; border-radius:8px }
+.reserva-thumb.placeholder svg { display:block }
+
+.reserva-body { flex: 1 1 auto; display:flex; flex-direction:column; gap:8px }
+.reserva-row { display:flex; align-items:center; gap:12px; }
+.reserva-title { font-weight: 700; color: #0f1721; font-size: 1.02rem }
+.reserva-price { margin-left: auto; color:#065f46; font-weight:700; background: rgba(6,95,70,0.06); padding:6px 10px; border-radius:6px }
+
+.reserva-sub { color:#6b7280; font-size:0.95rem }
+.reserva-sub .sep { margin: 0 8px; color:#d1d5db }
+
+.reserva-tags { display:flex; gap:6px; }
+.tag { background: #f1f5f9; color: #0f1721; padding: 4px 8px; border-radius: 999px; font-size: 0.82rem }
+
+.reserva-actions { flex-shrink: 0; margin-left: 12px }
+.btn.primary { background: #10b981; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer }
+.btn.primary:hover { filter: brightness(0.95) }
+.reserva-meta { font-size: 0.9rem; color: #6b7280 }
+.reserva-actions .btn.small { padding: 6px 10px; font-size: 0.85rem; border-radius: 6px }
+
+/* Modal MisReservas */
+.mr-modal-overlay { position: fixed; inset: 0; background: rgba(2,6,23,0.45); display:flex; align-items:center; justify-content:center; z-index:2000 }
+.mr-modal { width: min(980px, 94%); background:#fff; border-radius:10px; box-shadow:0 12px 40px rgba(2,6,23,0.25); overflow:hidden }
+.mr-modal-header { display:flex; align-items:center; justify-content:space-between; padding:18px 20px; border-bottom:1px solid #efefef }
+.mr-modal-header h3 { margin:0; font-size:1.1rem }
+.mr-close { background:transparent; border:none; font-size:22px; cursor:pointer }
+.mr-modal-body { display:flex; gap:18px; padding:20px }
+.mr-left { flex:1 }
+.mr-right { width:300px }
+.mr-card { background:#fff; padding:14px; border-radius:8px; margin-bottom:14px; border:1px solid #eef6f0 }
+.mr-image-wrap img { width:100%; height:160px; object-fit:cover; border-radius:6px; border:1px solid #e6eef0 }
+.mr-dates { display:flex; gap:12px }
+.mr-label { font-size:0.8rem; color:#6b7280 }
+.mr-value { font-weight:700; margin-top:6px }
+.mr-price-row { display:flex; justify-content:space-between; padding:8px 0; border-top:1px solid #f3f4f6 }
+.mr-counts { display:flex; gap:12px }
+.mr-count { background:#fafafa; padding:12px; border-radius:8px; flex:1; text-align:center; border:1px solid #eef6f0 }
+.mr-count .mr-label { font-size:0.75rem; color:#6b7280 }
+.mr-count .mr-value { font-size:1.1rem; font-weight:700 }
+

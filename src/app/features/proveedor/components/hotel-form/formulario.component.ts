@@ -64,8 +64,10 @@ export class HotelFormComponent implements OnInit {
     this.hotelForm = this.fb.group({
       // Agrupación para los datos del Servicio/Hotel (Payload 1)
       hotel: this.fb.group({
-        nombre: ['', [Validators.required]],
-        descripcion: ['', [Validators.required, Validators.minLength(10)]],
+        // Nombre: permitir letras, números, espacios, guiones y guion bajo (sin caracteres especiales)
+        nombre: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9ÁÉÍÓÚÜÑáéíóúüñ\s\-_]+$/)]],
+        // Limitar descripción a 1000 caracteres
+        descripcion: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(1000)]],
         direccion: ['', [Validators.required]],
         ciudad: ['', [Validators.required]],
         pais: ['', [Validators.required]],
@@ -77,6 +79,55 @@ export class HotelFormComponent implements OnInit {
       // Agrupación para las Habitaciones (Payload 2, se procesa internamente)
       habitaciones: this.fb.array<FormGroup>([this.crearHabitacion()]),
     });
+    // Inicializar contadores de descripción por habitación
+    this.habitacionesDescripcionLengths = this.habitaciones.controls.map(() => 0);
+  }
+
+  // Getter para el control 'nombre' del grupo 'hotel'
+  get nombreControl(): FormControl {
+    return this.hotelGroup.get('nombre') as FormControl;
+  }
+
+  // Sanitiza el valor del nombre eliminando caracteres especiales no permitidos
+  private sanitizeName(value: string): string {
+    if (!value) return '';
+    return value.replace(/[^A-Za-z0-9ÁÉÍÓÚÜÑáéíóúüñ\s\-_]/g, '');
+  }
+
+  // Manejador para el evento input
+  onNombreInput(event: any): void {
+    try {
+      const raw = event?.target?.value ?? '';
+      const sanitized = this.sanitizeName(raw);
+      if (sanitized !== raw) {
+        // Actualiza el control sin emitir eventos secundarios
+        this.nombreControl.setValue(sanitized, { emitEvent: false });
+      }
+    } catch (e) {
+      // no hacer nada en caso de error no crítico
+    }
+  }
+
+  // Manejador para pegar texto (paste)
+  onNombrePaste(event: ClipboardEvent): void {
+    if (!event) return;
+    event.preventDefault();
+    const text = (event.clipboardData || (window as any).clipboardData).getData('text') || '';
+    const sanitized = this.sanitizeName(text);
+    const current = this.nombreControl.value || '';
+    this.nombreControl.setValue((current + sanitized).trim(), { emitEvent: false });
+  }
+
+  // Estado para mostrar/ocultar el popup de información del nombre
+  // Estado para saber si el input 'nombre' está enfocado
+  nombreFocused = false;
+
+  onNombreFocus(): void {
+    this.nombreFocused = true;
+  }
+
+  onNombreBlur(): void {
+    this.nombreFocused = false;
   }
 
   // ======================================================
@@ -92,6 +143,31 @@ export class HotelFormComponent implements OnInit {
 
   get habitaciones(): FormArray<FormGroup> {
     return this.hotelForm.get('habitaciones') as FormArray<FormGroup>;
+  }
+
+  // Contador de caracteres para la descripción
+  readonly MAX_DESCRIPCION = 1000;
+  descripcionLength = 0;
+  
+  // Limite para la descripción de cada habitación (500 caracteres)
+  readonly MAX_DESCRIPCION_HAB = 500;
+  // Contadores individuales para las descripciones de las habitaciones
+  habitacionesDescripcionLengths: number[] = [];
+
+  get descripcionControl(): FormControl {
+    return this.hotelGroup.get('descripcion') as FormControl;
+  }
+
+  onDescripcionInput(event: any): void {
+    const raw = event?.target?.value ?? '';
+    if (raw.length > this.MAX_DESCRIPCION) {
+      const truncated = raw.slice(0, this.MAX_DESCRIPCION);
+      // Actualizamos el control con el valor truncado sin volver a emitir el evento
+      this.descripcionControl.setValue(truncated, { emitEvent: false });
+      this.descripcionLength = this.MAX_DESCRIPCION;
+    } else {
+      this.descripcionLength = raw.length;
+    }
   }
 
   // ======================================================
@@ -137,17 +213,36 @@ export class HotelFormComponent implements OnInit {
       // y no bloquee el formulario al inicio.
       precio_por_noche: [100, [Validators.required, Validators.min(1)]], 
       cantidad: [1, [Validators.required, Validators.min(1)]],
-      descripcion: [''],
+      descripcion: ['', [Validators.maxLength(this.MAX_DESCRIPCION_HAB)]],
     });
   }
 
   agregarHabitacion(): void {
     this.habitaciones.push(this.crearHabitacion());
+    // Inicializar contador para la nueva habitación
+    this.habitacionesDescripcionLengths.push(0);
   }
 
   eliminarHabitacion(index: number): void {
     if (this.habitaciones.length > 1) { 
       this.habitaciones.removeAt(index);
+      // Eliminar contador asociado
+      this.habitacionesDescripcionLengths.splice(index, 1);
+    }
+  }
+
+  // Maneja el input de la descripción de una habitación específica
+  onHabitacionDescripcionInput(event: any, index: number): void {
+    const raw = event?.target?.value ?? '';
+    if (raw.length > this.MAX_DESCRIPCION_HAB) {
+      const truncated = raw.slice(0, this.MAX_DESCRIPCION_HAB);
+      const ctrl = this.habitaciones.at(index).get('descripcion') as FormControl;
+      if (ctrl) {
+        ctrl.setValue(truncated, { emitEvent: false });
+      }
+      this.habitacionesDescripcionLengths[index] = this.MAX_DESCRIPCION_HAB;
+    } else {
+      this.habitacionesDescripcionLengths[index] = raw.length;
     }
   }
 
@@ -159,7 +254,16 @@ export class HotelFormComponent implements OnInit {
     this.mensajeError = '';
     this.mensajeExito = '';
 
-    // 1. Validar campos de formulario
+    // 1. Validar campo 'nombre' específico para mostrar aviso claro
+    if (this.nombreControl.invalid) {
+      this.mensajeError = '❌ Nombre inválido: no se permiten caracteres especiales.';
+      this.nombreControl.markAsTouched();
+      const el = document.getElementById('mensajeError');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
+    // 2. Validar campos de formulario (resto)
     if (this.hotelForm.invalid) {
       this.mensajeError = '❌ Por favor, completa todos los campos requeridos correctamente.';
       // CRÍTICO: Marca todos los campos como 'touched' para que Angular muestre los errores visualmente.
@@ -177,19 +281,32 @@ export class HotelFormComponent implements OnInit {
 
     this.enviando = true;
     
-    // 3. Obtener el payload completo.
-    // El formato es: { hotel: HotelCreatePayload, habitaciones: HabitacionCreatePayload[] }
-    const payload = this.hotelForm.getRawValue() as { 
-        hotel: HotelCreatePayload, 
-        habitaciones: Array<Omit<HabitacionCreatePayload, 'servicio_id'>> 
-    };
+    // 3. Obtener y normalizar el payload completo.
+    // Construimos manualmente las habitaciones para asegurarnos de incluir y sanitizar `descripcion`.
+    const raw = this.hotelForm.getRawValue();
+    const habitacionesPayload = (raw.habitaciones || []).map((h: any) => ({
+      nombre: h.nombre,
+      capacidad_adultos: h.capacidad_adultos,
+      capacidad_ninos: h.capacidad_ninos,
+      precio_por_noche: h.precio_por_noche,
+      cantidad: h.cantidad,
+      descripcion: (h.descripcion || '').toString().trim(),
+    })) as Array<Omit<HabitacionCreatePayload, 'servicio_id'>>;
 
-    console.log('📦 Enviando payload de Hotel:', payload);
+    const payload = {
+      hotel: raw.hotel,
+      habitaciones: habitacionesPayload
+    } as { hotel: HotelCreatePayload, habitaciones: Array<Omit<HabitacionCreatePayload, 'servicio_id'>> };
+
+    console.log('📦 Enviando payload de Hotel (sanitizado):', payload);
+    // DEBUG: mostrar payload antes de enviar para inspección rápida
+    try { window.alert('Payload a enviar (crear hotel):\n' + JSON.stringify(payload, null, 2)); } catch (e) { /* ignore */ }
 
     // 4. Llamada al servicio, que maneja el encadenamiento de POST /api/hoteles
     // seguido de POST /api/habitaciones/batch
     this.hotelService.createHotelWithHabitaciones(payload).subscribe({
-      next: () => {
+      next: (res) => {
+        console.log('[CREAR] Respuesta del servidor al crear hotel:', res);
         this.enviando = false;
         this.mensajeExito = '✅ Hotel registrado correctamente. Redirigiendo a tu panel...';
         

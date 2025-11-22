@@ -11,7 +11,8 @@
     [tipo]="'hotel'"
     [servicio]="servicioData"
     [breadcrumb]="breadcrumbItems"
-    (onReservar)="scrollToHabitaciones()"
+      (onReservar)="scrollToHabitaciones()"
+      (onBack)="volverAResultados()"
   ></app-servicio-detalle-header>
 
   <!-- ======================= -->
@@ -34,7 +35,12 @@
         <div class="room-availability">
           <span>Unidades disponibles: {{ habitacion.unidades_disponibles || habitacion.cantidad || 0 }}</span>
         </div>
-        <p class="room-description">{{ habitacion.descripcion || 'Sin descripción disponible.' }}</p>
+        <p class="room-description" *ngIf="habitacion.descripcion && habitacion.descripcion.trim().length > 0">
+          {{ habitacion.descripcion }}
+        </p>
+        <p class="room-description" *ngIf="!habitacion.descripcion || habitacion.descripcion.trim().length === 0">
+          Sin descripción disponible.
+        </p>
       </div>
 
       <div class="room-price-section">

@@ -71,8 +71,14 @@ export class HotelService {
     const creationRequests = habitaciones.map(habitacion => {
       const endpoint = `${this.API_URL}/hoteles/${servicioId}/habitaciones`; 
       
+      // Asegurar que `descripcion` siempre sea un string (evitar undefined/null)
+      const body = {
+        ...habitacion,
+        descripcion: (habitacion.descripcion || '').toString()
+      };
+      console.log('[SERVICE] Creando habitación:', endpoint, body);
       // 🚨 CAMBIO: getHeaders() ya no tiene token, pero lo enviamos por consistencia
-      return this.http.post(endpoint, habitacion, { headers: this.getHeaders() });
+      return this.http.post(endpoint, body, { headers: this.getHeaders() });
     });
 
     return forkJoin(creationRequests).pipe(
@@ -93,6 +99,7 @@ export class HotelService {
       
       // 1. Crear el Servicio y Hotel (POST /api/hoteles)
       // 🚨 CAMBIO: getHeaders() ya no tiene token, pero lo enviamos
+      console.log('[SERVICE] Payload para crear hotel:', payload.hotel, ' habitaciones:', payload.habitaciones);
       return this.http.post<HotelCreateResponse>(`${this.API_URL}/hoteles`, payload.hotel, { headers: this.getHeaders() }).pipe(
           
           // 2. Usar switchMap para tomar el ID del hotel creado y crear las habitaciones
@@ -125,8 +132,7 @@ export class HotelService {
       ...payload.hotel,
       habitaciones: payload.habitaciones
     };
-
-    console.log(`[SERVICE] Enviando PUT a /hoteles/${servicioId} con payload completo.`);
+    console.log(`[SERVICE] Enviando PUT a /hoteles/${servicioId} con payload completo.`, fullPayload);
         
     // 2. Llamar al endpoint PUT /api/hoteles/{servicio_id}
     // El backend ahora maneja: 

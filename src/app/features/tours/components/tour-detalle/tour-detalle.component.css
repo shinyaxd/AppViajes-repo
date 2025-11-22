@@ -38,6 +38,23 @@
   color: #666;
 }
 
+/* Alinearlo con el estilo del detalle de hotel: asegurar que el header no lo tape */
+.loading-message {
+  color: #000000;
+  font-style: normal; /* quitar cursiva */
+  font-weight: 400;
+  font-family: Arial, sans-serif; /* igual que detalle hotel */
+  /* SeparaciÃ³n mayor para evitar que el header fijo lo tape */
+  margin-top: 120px;
+  padding-top: 8px;
+}
+
+@media (max-width: 640px) {
+  .loading-message {
+    margin-top: 80px;
+  }
+}
+
 .error-message {
   color: #ef4444;
 }
@@ -266,7 +283,7 @@
   }
 }
 /* ======================= */
-/* SECCIÓN DE SALIDAS */
+/* SECCIï¿½N DE SALIDAS */
 /* ======================= */
 .tour-salidas-section {
   background: #ffffff;
@@ -412,7 +429,7 @@
   font-weight: 600;
 }
 
-/* Check de selección */
+/* Check de selecciï¿½n */
 .salida-check {
   position: absolute;
   top: 10px;
@@ -535,7 +552,7 @@
   color: #83c4a6;
 }
 
-/* Botón de reserva final */
+/* Botï¿½n de reserva final */
 .final-reserve-section {
   position: sticky;
   bottom: 20px;
