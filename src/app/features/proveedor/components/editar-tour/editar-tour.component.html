@@ -1,5 +1,5 @@
 <div class="formulario-container">
-  <h2>🛎️ Publicar nuevo tour</h2>
+  <h2>🛎️ Editar tour (ID: {{ tourId || 'Cargando...' }})</h2>
 
   <!-- ⚠️ Mensajes de éxito o error -->
   <div *ngIf="mensajeExito" class="alert alert-success">
@@ -13,7 +13,11 @@
   <!-- ========================= -->
   <!-- FORMULARIO PRINCIPAL -->
   <!-- ========================= -->
-  <form [formGroup]="tourForm" (ngSubmit)="onSubmit()" class="tour-form">
+  <div *ngIf="cargandoDatos" class="loading-message">
+    <h2>Cargando datos del tour... ⏳</h2>
+    <p>Por favor, espere.</p>
+  </div>
+  <form *ngIf="!cargandoDatos" [formGroup]="tourForm" (ngSubmit)="onSubmit()" class="tour-form">
 
     <!-- ✅ Agrupamos los campos del tour -->
     <div formGroupName="tour" class="form-section">
@@ -25,8 +29,8 @@
       <label for="descripcion">Descripción:</label>
       <textarea id="descripcion" formControlName="descripcion" placeholder="Describe tu tour" required></textarea>
 
-      <label for="direccion">Dirección (Punto de encuentro):</label>
-      <input id="direccion" type="text" formControlName="direccion" placeholder="Dirección del tour" required />
+      <!--label for="direccion">Dirección (Punto de encuentro):</label---->
+      <!---input id="direccion" type="text" formControlName="direccion" placeholder="Dirección del tour" required /---->
       
       <!-- 🔄 CORRECCIÓN: Se añaden ciudad y país para que el formulario sea válido con el TS -->
       <div class="inline-group">
@@ -254,8 +258,7 @@
       class="btn-submit" 
       [disabled]="tourForm.invalid || enviando" 
     > 
-      {{ enviando ? 'Enviando...' : 'Publicar tour' }} 
+      {{ enviando ? 'Guardando...' : 'Guardar cambios' }} 
     </button> 
-    <!--tourForm.invalid ||  {{ enviando ? 'Enviando...' : 'Publicar tour' }}  -->
   </form> 
 </div>

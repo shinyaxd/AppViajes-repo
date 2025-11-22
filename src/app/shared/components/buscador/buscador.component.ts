@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
  import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 
 import { HotelService, Habitacion, HotelData, HotelDetalles } from '../../../features/hoteles/services/hoteles.service'; 
+import { TourData, TourService } from '../../../features/tours/services/tour.service'; 
 import { DateUtils } from '../../utils/date.utils'; 
 
 // Define la estructura de los filtros para Hoteles
@@ -36,6 +37,7 @@ export class BuscadorComponent implements OnInit {
   // 🔑 Inyección de servicios usando inject()
   private router = inject(Router);
   private hotelService = inject(HotelService); 
+  private tourService = inject(TourService);
   private route = inject(ActivatedRoute);
 
   // La propiedad de entrada para determinar qué tipo de buscador mostrar
@@ -122,24 +124,40 @@ export class BuscadorComponent implements OnInit {
    * Utiliza hotelService.getHoteles() y extrae la propiedad 'ciudad'.
    */
   cargarDestinosDisponibles() {
-    this.hotelService.getHoteles().subscribe({
-      next: (hoteles: HotelData[]) => { // <-- ¡CORREGIDO!
-        // 1. Mapeamos para obtener solo el campo 'ciudad' de cada hotel
-        const ciudades = hoteles
-          .map(hotel => hotel.ciudad)
-          // 2. Usamos Set para obtener solo valores únicos (sin duplicados)
-          .filter(ciudad => !!ciudad);
+    console.log('tipo de busqueda: ', this.tipoBusqueda);
+    if (this.tipoBusqueda === 'hoteles') {
+      this.hotelService.getHoteles().subscribe({
+        next: (hoteles: HotelData[]) => { // <-- ¡CORREGIDO!
+          // 1. Mapeamos para obtener solo el campo 'ciudad' de cada hotel
+          const ciudades = hoteles
+            .map(hotel => hotel.ciudad)
+            // 2. Usamos Set para obtener solo valores únicos (sin duplicados)
+            .filter(ciudad => !!ciudad);
 
-        this.lugaresDisponibles = Array.from(new Set(ciudades));
+          this.lugaresDisponibles = Array.from(new Set(ciudades));
 
-        console.log('Ciudades disponibles cargadas desde la API:', this.lugaresDisponibles);
-      },
-      error: (error: any) => {
-        console.error('Error al cargar la lista de ciudades desde la API:', error);
-        // Fallback en caso de que la API falle
-        this.lugaresDisponibles = ['Lima', 'Cusco', 'Arequipa']; 
-      }
-    });
+          console.log('Ciudades disponibles cargadas desde la API:', this.lugaresDisponibles);
+        },
+        error: (error: any) => {
+          console.error('Error al cargar la lista de ciudades desde la API:', error);
+          // Fallback en caso de que la API falle
+          this.lugaresDisponibles = ['Lima', 'Cusco', 'Arequipa']; 
+        }
+      });
+    } else if (this.tipoBusqueda === 'tours'){
+      this.tourService.getTours().subscribe({
+        next: (tours: TourData[]) => {
+          // extraemos las ciudades de los tours
+          const ciudades = tours.map(t => t.ciudad).filter(c => !!c);
+          this.lugaresDisponibles = Array.from(new Set(ciudades));
+
+          console.log('Ciudades disponibles para tours desde la API:', this.lugaresDisponibles);
+        },
+        error: () => {
+          this.lugaresDisponibles = ['Lima', 'Cusco', 'Arequipa']; // fallback
+        }
+      });
+    }
   }
 
   buscarSugerencias() {
@@ -192,7 +210,7 @@ export class BuscadorComponent implements OnInit {
   // Método de Tours
   changeCountTour(tipo: 'total', cambio: number) {
     if (tipo === 'total') {
-      this.personas.total = Math.max(1, this.personas.total + cambio);
+      this.personas.total =  Math.min(15, Math.max(1, this.personas.total + cambio));
     }
   }
 

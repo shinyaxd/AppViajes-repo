@@ -18,6 +18,8 @@ const API_GET_PROFILE_URL = `${BASE_URL}/auth/me`;
 const API_UPDATE_PROFILE_URL = `${BASE_URL}/usuarios/me`; 
 const API_DELETE_PROFILE_URL = `${BASE_URL}/usuarios/me`; 
 
+const API_IMAGES_SEARCH_URL = `${BASE_URL}/images/search`;
+
 /** Validador para asegurar que password y confirmarPassword coincidan, solo si al menos uno tiene valor. */
 function passwordMatchValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
@@ -53,6 +55,11 @@ export class EditarPerfilComponent implements OnInit {
   messageType = signal<'success' | 'error'>('success');
 
   rol: string = '';
+
+  imageSearchResults: any[] = [];
+  isSearchingImages = signal(false);
+  imageSearchError = signal<string | null>(null);
+  selectedImageUrl = signal<string | null>(null);
 
   private authService = inject(AuthService);
   loadingService = inject(LoadingService);
@@ -377,5 +384,58 @@ export class EditarPerfilComponent implements OnInit {
         // Error manejado en catchError
       }
     });
+  }
+
+  // ==========================================================
+  // BÚSQUEDA DE IMÁGENES (Unsplash → /api/images/search)
+  // ==========================================================
+  searchForImage(query: string): void {
+    const trimmed = query.trim();
+    if (!trimmed) {
+      this.imageSearchResults = [];
+      this.imageSearchError.set(null);
+      return;
+    }
+
+    this.isSearchingImages.set(true);
+    this.imageSearchError.set(null);
+
+    this.http.get<{ images: any[] }>(API_IMAGES_SEARCH_URL, {
+      params: { q: trimmed }
+    })
+    .pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error al buscar imágenes:', error);
+
+        if (error.status === 401) {
+          console.warn('Sesión expirada al buscar imágenes (401). Redirigiendo...');
+          this.authService.cleanSession();
+          this.router.navigate(['/auth/login']);
+        }
+
+        this.imageSearchError.set('No se pudieron cargar las imágenes. Intente de nuevo.');
+        this.imageSearchResults = [];
+        return of({ images: [] }); // devolvemos vacío para no romper el subscribe
+      }),
+      finalize(() => this.isSearchingImages.set(false))
+    )
+    .subscribe({
+      next: (res) => {
+        this.imageSearchResults = res.images ?? [];
+      }
+    });
+  }
+
+  /**
+   * Pone la URL seleccionada como imagen de perfil (solo frontend por ahora)
+   */
+  selectImage(imageUrl: string): void {
+    this.selectedImageUrl.set(imageUrl);
+
+    // Si quieres también guardar en el form (para luego enviarlo al backend),
+    // primero crea un control en buildForm, por ejemplo 'avatar':
+    // this.form.patchValue({ avatar: imageUrl });
+
+    this.imageSearchResults = [];
   }
 }

@@ -34,6 +34,14 @@ interface TourApiResponse {
   last_page: number;
 }
 
+interface TourFilters {
+  destino?: string;
+  categoria?: string;
+  checkIn?: string;
+  checkOut?: string;
+  cupos?: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -79,7 +87,21 @@ export class TourService {
       map((response: TourDetalleApiResponse) => response.servicio)
     );
   }
+  // Obtener tours aplicando los filtros
+  getToursFiltrados(filtros: TourFilters = {}): Observable<TourData[]> {
+    const params: any = {};
 
+    Object.keys(filtros).forEach(key => {
+      if (filtros[key as keyof TourFilters] !== undefined && filtros[key as keyof TourFilters] !== null) {
+        params[key] = filtros[key as keyof TourFilters];
+      }
+    });
+
+    return this.http.get<TourListApiResponse>(`${this.API_URL}/tours`, {
+      headers: this.getHeaders(),
+      params
+    }).pipe(map(res => res.data));
+  }
   /**
    * Crear un nuevo tour (requiere autenticación)
    */

@@ -96,7 +96,7 @@ export class TourComponent implements OnInit {
             nombre: cat.nombre,
             descripcion: cat.descripcion,
             imagen_url: cat.imagen_url, // Mantener imagen estática local
-            galeria_imagenes: tourDeCategoria?.galeria_imagenes || [],
+            imagenes: tourDeCategoria?.imagenes || [],
             categoria: cat.nombre
           };
         });

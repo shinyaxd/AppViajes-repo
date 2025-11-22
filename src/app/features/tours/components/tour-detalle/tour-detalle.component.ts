@@ -5,6 +5,7 @@ import { TourService, TourDetalles } from '../../services/tour.service';
 import { ServicioDetalleHeaderComponent, ServicioDetalleData } from '../../../../shared/components/servicio-detalle-header/servicio-detalle-header.component';
 import { ReviewsSectionComponent } from '../../../../shared/components/reviews-section/reviews-section.component';
 import { ImageUtils } from '../../../../shared/utils/image.utils';
+import { normalizarFecha } from './tour-detalle.utils';
 
 @Component({
   selector: 'app-tour-detalle',
@@ -100,7 +101,7 @@ export class TourDetalleComponent implements OnInit {
         this.usarFechaTourDirecta = true;
         const salidaVirtual = {
           id: this.tour.tour.servicio_id || this.tour.id, 
-          fecha_salida: this.tour.tour.fecha,
+          fecha_salida: normalizarFecha(this.tour.tour.fecha),
           cupos_disponibles: this.tour.tour.cupos
         };
         this.salidasFiltradas = [salidaVirtual];
@@ -151,7 +152,7 @@ export class TourDetalleComponent implements OnInit {
         // Transformar al formato esperado por el componente
         return {
           id: salida.id,
-          fecha_salida: salida.fecha,
+          fecha_salida: normalizarFecha(salida.fecha),
           cupos_disponibles: cuposDisponibles,
           hora: salida.hora,
           estado: salida.estado
@@ -195,8 +196,8 @@ export class TourDetalleComponent implements OnInit {
     const tourData = this.tour.tour;
     
     // Usar ImageUtils para obtener y procesar imágenes
-    const imagenesFromApi = this.tour.imagenes?.map((img) => img.url || img.imagen_url).filter((url): url is string => !!url) || [];
-    const todasImagenes = ImageUtils.getAllImages(this.tour.imagen_url, imagenesFromApi);
+    const imagenesFromApi:string[] = this.tour.imagenes?.map((img) => img.url).filter((url): url is string => !!url) || [];
+    const todasImagenes = ImageUtils.getAllImages(this.tour.imagen_url, this.tour.imagenes);
     
     // Asegurar que siempre haya al menos una imagen
     const imagenesFinal = todasImagenes.length > 0 
@@ -369,8 +370,8 @@ export class TourDetalleComponent implements OnInit {
   /**
    * Obtiene el ícono de FontAwesome correspondiente al item
    */
-  getIconForItem(item: string): string {
-    const itemLower = item.toLowerCase();
+  getIconForItem(nombreItem: string): string {
+    const itemLower = nombreItem.toLowerCase();
     
     // Mapeo de palabras clave a íconos
     const iconMap: { [key: string]: string } = {

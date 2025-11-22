@@ -8,8 +8,8 @@ import {
   ReactiveFormsModule,
   FormControl,
 } from '@angular/forms';
-import { Router } from '@angular/router'; 
-import { HotelService, HabitacionCreatePayload, HotelCreatePayload } from '../../../hoteles/services/hoteles.service'; // Importar interfaces
+import { ActivatedRoute, ParamMap, Router } from '@angular/router';
+import { HotelService, HotelDetalles, HabitacionCreatePayload, HotelCreatePayload,HabitacionUpdatePayload } from '../../../hoteles/services/hoteles.service'; // Importar interfaces
 import { AuthService } from '../../../../core/services/auth.service';
 
 /**
@@ -17,16 +17,18 @@ import { AuthService } from '../../../../core/services/auth.service';
  * Implementa la validación de roles en el envío.
  */
 @Component({
-  selector: 'app-hotel-formulario', 
+  selector: 'app-editar-hotel', 
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule], 
-  templateUrl: './formulario.component.html', // Usando la ruta correcta del HTML
-  styleUrls: ['./formulario.component.css'], 
+  imports: [CommonModule, ReactiveFormsModule],
+  templateUrl: './editar-hotel.component.html',
+  styleUrls: ['./editar-hotel.component.css'],
 })
-export class HotelFormComponent implements OnInit {
+export class EditarHotelComponent implements OnInit {
   // ======================================================
   // 🧩 Variables principales
   // ======================================================
+  hotelId: number | null = null;
+  cargandoDatosHotel: boolean = true;
   hotelForm!: FormGroup;
   enviado = false;
   enviando = false;
@@ -40,6 +42,7 @@ export class HotelFormComponent implements OnInit {
   private hotelService = inject(HotelService);
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   // ======================================================
   // 🚀 Inicialización
@@ -55,6 +58,25 @@ export class HotelFormComponent implements OnInit {
         // Comprueba si la primera habitación está inválida y por qué
         console.log('DEBUG: Errores en la primera Habitación:', this.habitaciones.controls[0]?.errors); 
     }
+    this.route.paramMap.subscribe({
+      next: (params: ParamMap) => {
+        const idString = params.get('id'); // 'id' debe coincidir con el nombre de tu ruta: 'editar-tour/:id'
+        
+        if (idString) {
+          // El '+' convierte el string del parámetro a número (number)
+          this.hotelId = +idString; 
+          console.log('ID del Hotel extraído:', this.hotelId);
+          
+          // 3. Llamar a la función de carga
+          this.cargarDatosHotel(this.hotelId);
+        } else {
+          console.error('No se encontró el ID del tour en la ruta.');
+        }
+      },
+      error: (err) => {
+        console.error('Error al leer los parámetros de la ruta:', err);
+      }
+    });
   }
 
   // ======================================================
@@ -95,7 +117,7 @@ export class HotelFormComponent implements OnInit {
   }
 
   // ======================================================
-  // 🖼️   Galería de Imágenes
+  // 🖼️ Lógica de Galería de Imágenes
   // ======================================================
   agregarImagen(url: string, alt:string=''): void {
     const MAX_IMAGES = 5; // Definimos el límite máximo de imágenes
@@ -130,6 +152,7 @@ export class HotelFormComponent implements OnInit {
   // ======================================================
   crearHabitacion(): FormGroup {
     return this.fb.group({
+      id:[null],
       nombre: ['', [Validators.required]],
       capacidad_adultos: [1, [Validators.required, Validators.min(1)]],
       capacidad_ninos: [0, [Validators.min(0)]],
@@ -150,7 +173,79 @@ export class HotelFormComponent implements OnInit {
       this.habitaciones.removeAt(index);
     }
   }
-
+  // ======================================================
+  // Cargar datos de hotel
+  // ======================================================
+  cargarDatosHotel(id: number): void {
+    this.cargandoDatosHotel = true;
+    // 1. Llamar al servicio para obtener los datos
+    this.hotelService.getHotelDetalles(id).subscribe({
+      next: (data:HotelDetalles) => {
+        console.log('Datos del Hotel cargados:', data);
+        // 2. Precargar el formulario principal (Hotel Group)
+        this.hotelForm.patchValue({
+          hotel: {
+            nombre: data.hotel.nombre,
+            descripcion: data.hotel.descripcion,
+            direccion: data.hotel.direccion,
+            ciudad: data.hotel.ciudad,
+            pais: data.hotel.pais,
+            estrellas: data.hotel.estrellas, 
+            imagen_url: data.hotel.imagen_url,
+          },
+        });
+        // 5. Precargar FormArray: Galería de Imágenes
+        // A. Limpiar el FormArray 'galeriaImagenes' primero.
+        while (this.galeriaImagenes.length > 0) {
+          this.galeriaImagenes.removeAt(0);
+        }
+        
+        // Nuevo código dentro de cargarDatosHotel:
+        (data.hotel.imagenes as any[])?.forEach((imgElement: any) => { 
+          // 1. Extraer URL: Si es string (URL), usarlo directamente. Si es objeto, usar .url.
+          const url = typeof imgElement === 'string' ? imgElement : imgElement?.url;
+          // 2. Extraer ALT: Si es objeto, usar .alt. Si no, usar ''
+          const alt = typeof imgElement === 'object' ? (imgElement.alt ?? '') : '';
+          // 3. Crear FormGroup solo si tenemos una URL
+          if(url){
+            this.galeriaImagenes.push(this.fb.group({
+              url: [(url?? ''), Validators.required], 
+              alt: [alt]
+            }));
+          }
+        });
+        // A. Limpiar el FormArray 'habitaciones' que inicia con un control vacío por defecto.
+        while (this.habitaciones.length > 0) {
+          this.habitaciones.removeAt(0);
+        }
+      
+        // B. Iterar sobre los datos de la API y añadir al FormArray
+        data.habitaciones.forEach((hab) => {
+          // Crea un nuevo FormGroup usando la estructura base (crearHabitacion)
+          const habitacionGroup = this.crearHabitacion(); 
+          habitacionGroup.patchValue({
+            id: hab.id,
+            nombre: hab.nombre,
+            capacidad_adultos: hab.capacidad_adultos,
+            capacidad_ninos: hab.capacidad_ninos,
+            precio_por_noche: hab.precio_por_noche,
+            cantidad: hab.cantidad,
+            descripcion: hab.descripcion,
+            // NOTA: Agregar el ID de la habitación para actualizarla en el FormGroup de la habitación
+          });
+          this.habitaciones.push(habitacionGroup);
+        });
+        if (this.habitaciones.length === 0) {
+          this.agregarHabitacion(); 
+        }
+        this.cargandoDatosHotel=false;
+      },
+      error: (error) => {
+        this.mensajeError = '❌ Error al cargar los datos del hotel: ' + (error.error?.message || 'Desconocido');
+        console.error('Error de carga:', error);
+      }
+    });
+  }
   // ======================================================
   // 📤 Envío del formulario
   // ======================================================
@@ -167,6 +262,10 @@ export class HotelFormComponent implements OnInit {
       return;
     }
 
+    // Verificar que envio al backend
+    console.log('✅ Estado general:', this.hotelForm.valid);
+    console.log('🧱 Formulario completo:', this.hotelForm.value);
+
     // 2. Validar Rol (Autorización en el frontend)
     const userRole = this.authService.getRole(); 
     if (userRole !== 'proveedor') {
@@ -181,21 +280,21 @@ export class HotelFormComponent implements OnInit {
     // El formato es: { hotel: HotelCreatePayload, habitaciones: HabitacionCreatePayload[] }
     const payload = this.hotelForm.getRawValue() as { 
         hotel: HotelCreatePayload, 
-        habitaciones: Array<Omit<HabitacionCreatePayload, 'servicio_id'>> 
+        habitaciones: HabitacionUpdatePayload[]
     };
 
     console.log('📦 Enviando payload de Hotel:', payload);
 
     // 4. Llamada al servicio, que maneja el encadenamiento de POST /api/hoteles
     // seguido de POST /api/habitaciones/batch
-    this.hotelService.createHotelWithHabitaciones(payload).subscribe({
+    this.hotelService.updateHotelWithHabitaciones(this.hotelId!,payload).subscribe({
       next: () => {
         this.enviando = false;
-        this.mensajeExito = '✅ Hotel registrado correctamente. Redirigiendo a tu panel...';
+        this.mensajeExito = '✅ Hotel actualizado correctamente. Redirigiendo a tu panel...';
         
         // Limpiar y resetear el formulario
         this.hotelForm.reset({
-            hotel: { estrellas: 3, precio_por_noche: 100 }, // Incluir valores por defecto
+            hotel: { estrellas: 3}, // Incluir valores por defecto
             habitaciones: []
         });
         // Asegurar que el FormArray de habitaciones se reinicie con 1 control
