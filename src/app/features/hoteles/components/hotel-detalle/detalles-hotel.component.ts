@@ -9,6 +9,70 @@ import { ReviewsSectionComponent } from '../../../../shared/components/reviews-s
 import { DateUtils } from '../../../../shared/utils/date.utils';
 import { ImageUtils } from '../../../../shared/utils/image.utils';
 
+// 1. MOCK DATA (Mismo que en resultados para consistencia)
+const MOCK_ACTIVIDADES_HOTEL = [
+  {
+    id: 1,
+    titulo: 'Tour de Aventura Extrema en Lunahuaná',
+    imagen: 'https://mochileaperu.com/wp-content/uploads/2020/03/canopy-tdp-696x415.png',
+    rating: 4.8,
+    ratingTexto: 'Excelente',
+    resenias: 35,
+    duracion: '10 Horas',
+    precio: 85
+  },
+  {
+    id: 2,
+    titulo: 'Aventura en la Naturaleza en Lomas de Lachay',
+    imagen: 'https://majestictyt.com/wp-content/uploads/2020/10/Lomas-de-Lachay-960x1149.jpg',
+    rating: 4.5,
+    ratingTexto: 'Muy bueno',
+    resenias: 21,
+    duracion: '9 Horas',
+    precio: 40
+  },
+  {
+    id: 3,
+    titulo: 'Aventura en el Mar de la Costa Verde',
+    imagen: 'https://freewalkingtoursperu.com/wp-content/uploads/2019/07/costa-verde-lima-peru-5.jpg',
+    rating: 4.5,
+    ratingTexto: 'Muy bueno',
+    resenias: 21,
+    duracion: '3 Horas',
+    precio: 35
+  },
+  {
+    id: 4,
+    titulo: 'Trekking a la Laguna 69',
+    imagen: 'https://images.squarespace-cdn.com/content/v1/5a87961cbe42d637c54cab93/1611152719695-GYI2P6S5ZL2Z1042UOAO/hiking-guide-laguna-69-peru.jpg',
+    rating: 4.9,
+    ratingTexto: 'Excepcional',
+    resenias: 120,
+    duracion: '12 Horas',
+    precio: 60
+  },
+  {
+    id: 5,
+    titulo: 'Sandboarding en la Huacachina',
+    imagen: 'https://cdn.getyourguide.com/image/format=auto,fit=contain,gravity=auto,quality=60,width=1440,height=650,dpr=1/tour_img/db43fe07a5896774c48ecda19a0c0920bb154c3782f9c4a4fe2c9086b0cbe402.jpg',
+    rating: 4.7,
+    ratingTexto: 'Excelente',
+    resenias: 85,
+    duracion: '4 Horas',
+    precio: 30
+  },
+  {
+    id: 6,
+    titulo: 'City Tour Nocturno y Circuito Mágico',
+    imagen: 'https://machupicchuwayna.com/wp-content/uploads/2025/06/Circuito-Magico-del-Agua.webp',
+    rating: 4.6,
+    ratingTexto: 'Muy bueno',
+    resenias: 55,
+    duracion: '5 Horas',
+    precio: 45
+  }
+];
+
 @Component({
   selector: 'app-detalles-hotel',
   templateUrl: './detalles-hotel.component.html',
@@ -26,13 +90,18 @@ export class DetallesHotelComponent implements OnInit {
   habitacionesFiltradas: Habitacion[] = [];
   mostrarBotonReservar = false;
 
-  // 🟢 Control de formulario emergente de fechas
+  // Control de formulario emergente de fechas
   mostrarFormularioFechas = false;
   mensajeDisponibilidad = '';
   fechaMinimaHoy: string = DateUtils.getTodayISO();
   fechaMinimaCheckOut: string = '';
 
-  // 🔹 Parámetros de búsqueda
+  // 🟢 NUEVAS VARIABLES: CONTROL DE MODALES DE ITINERARIO
+  mostrarPreguntaItinerario = false;
+  mostrarDetalleItinerario = false;
+  itinerarioGenerado: any[] = [];
+
+  // Parámetros de búsqueda
   hotelId: string | null = null;
   checkInDate = '';
   checkOutDate = '';
@@ -40,13 +109,11 @@ export class DetallesHotelComponent implements OnInit {
   ninos = 0;
   habitaciones = 1;
 
-  // 🔹 Datos para el componente genérico
   get servicioData(): ServicioDetalleData | null {
     if (!this.hotel) return null;
     const galeria = ImageUtils.getAllImages(this.hotel.imagen_url, this.hotel.imagenes);
     const galeriaFinal = ImageUtils.fillGallery(galeria, 5, 'hotel');
 
-    // Intentar extraer textos 'alt' si el backend provee objetos con metadata
     const imagenesApiObjects = (this.hotel as any).imagenes?.map((img: any) => {
       const url = img.url || img.imagen_url || '';
       const alt = img.alt || img.descripcion || img.caption || img.titulo || img.alt_text || '';
@@ -77,9 +144,6 @@ export class DetallesHotelComponent implements OnInit {
     return [this.hotel.ciudad, this.hotel.pais, this.hotel.nombre];
   }
 
-  // ==========================================================
-  // 🔸 Ciclo de vida
-  // ==========================================================
   ngOnInit(): void {
     this.route.queryParams.subscribe((qParams: Record<string, any>) => {
       this.checkInDate = qParams['checkIn'] || '';
@@ -87,38 +151,25 @@ export class DetallesHotelComponent implements OnInit {
       this.adultos = +qParams['adultos'] || 1;
       this.ninos = +qParams['ninos'] || 0;
       this.habitaciones = +qParams['habitaciones'] || 1;
-      console.log('[INIT] queryParams', {
-        checkIn: this.checkInDate, checkOut: this.checkOutDate,
-        adultos: this.adultos, ninos: this.ninos, habitaciones: this.habitaciones
-      });
     });
 
     this.route.paramMap.subscribe((params: import('@angular/router').ParamMap) => {
       const idParam = params.get('id');
       this.hotelId = idParam;
       const hotelId = idParam ? parseInt(idParam, 10) : undefined;
-      console.log('[INIT] route param id', { idParam, hotelId });
-
       if (hotelId) this.getHotelDetails(hotelId);
-      else console.error("❌ No se encontró 'id' en los parámetros de la ruta.");
     });
   }
 
-  // ==========================================================
-  // 🔹 Obtener hotel y habitaciones
-  // ==========================================================
   getHotelDetails(id: number): void {
-    console.log(`[API] getHotelCompleto(${id})`);
     this.hotelService.getHotelCompleto(id).subscribe({
       next: (detalle: any) => {
         this.hotel = detalle.hotel;
         this.habitacionesFiltradas = (detalle.habitaciones as any[]).map((h: any) => ({ ...h, seleccionada: 0 }));
-        console.log('[DATA] hotel cargado', { hotel: this.hotel?.nombre, habitaciones: this.habitacionesFiltradas.length });
         this.verificarDisponibilidad();
         this.verificarSeleccion();
       },
       error: (error: any) => {
-        console.error(`❌ Error al cargar el hotel ID ${id}:`, error);
         this.hotel = undefined;
         this.habitacionesFiltradas = [];
         this.mostrarBotonReservar = false;
@@ -126,158 +177,104 @@ export class DetallesHotelComponent implements OnInit {
     });
   }
 
-  // ==========================================================
-  // 🔹 Validar disponibilidad según fechas
-  // ==========================================================
-verificarDisponibilidad(): void {
+  verificarDisponibilidad(): void {
     if (!this.hotel) return;
-
     if (!this.checkInDate || !this.checkOutDate) {
       this.mensajeDisponibilidad = '';
-      console.log('[DISPO] sin fechas → no filtro');
-      // No aplicamos ningún filtro si faltan fechas
       return;
     }
 
-    const antes = this.habitacionesFiltradas.length;
-    
-    // --- Lógica de Filtrado Actualizada ---
     const disponibles = this.habitacionesFiltradas.filter(h => {
-      
-      // 1. FILTRO DE STOCK/UNIDADES
       const stock = (h.unidades_disponibles ?? h.cantidad ?? 0);
-      if (stock <= 0) {
-        return false; // No hay stock
-      }
+      if (stock <= 0) return false;
       
-      // 2. FILTRO DE CAPACIDAD POR HUÉSPEDES (NUEVA LÓGICA)
-      // Asumimos que la habitación debe tener la capacidad para alojar a TODOS los adultos/niños buscados
-      // Si el hotel permite alojar X adultos en Y habitaciones, esta lógica debe ser más compleja.
-      // Aquí, filtramos la habitación si su capacidad es menor a lo que busca el usuario.
+      const capacidadAdultos = h.capacidad_adultos ?? 0; 
+      const capacidadNinos = h.capacidad_ninos ?? 0;     
       
-      const capacidadAdultos = h.capacidad_adultos ?? 0; // Se asume esta propiedad existe
-      const capacidadNinos = h.capacidad_ninos ?? 0;     // Se asume esta propiedad existe
-      
-      if (this.adultos > capacidadAdultos) {
-        console.log(`[DISPO] ❌ Habitación ${h.id} (${h.nombre}) filtrada: Adultos buscados (${this.adultos}) > Capacidad Adultos (${capacidadAdultos})`);
-        return false;
-      }
-      
-      if (this.ninos > capacidadNinos) {
-        console.log(`[DISPO] ❌ Habitación ${h.id} (${h.nombre}) filtrada: Niños buscados (${this.ninos}) > Capacidad Niños (${capacidadNinos})`);
-        return false;
-      }
+      if (this.adultos > capacidadAdultos) return false;
+      if (this.ninos > capacidadNinos) return false;
 
-      return true; // Pasa ambos filtros: tiene stock y tiene capacidad suficiente
+      return true; 
     });
-    // --- Fin de Lógica de Filtrado Actualizada ---
 
     this.mensajeDisponibilidad = disponibles.length === 0
       ? '❌ El hotel no tiene disponibilidad entre las fechas seleccionadas o sus habitaciones no cumplen con los requisitos de huéspedes.'
       : '';
 
     this.habitacionesFiltradas = disponibles;
-    console.log('[DISPO] filtrado por fechas y capacidad', { antes, despues: disponibles.length, mensaje: this.mensajeDisponibilidad });
     this.verificarSeleccion();
   }
+
   // ==========================================================
-  // 🔸 Guardar fechas seleccionadas manualmente (modal)
+  // 🟢 LÓGICA MODIFICADA: GUARDAR FECHAS
   // ==========================================================
   guardarFechas(): void {
-    console.log('[MODAL] guardarFechas click', { checkIn: this.checkInDate, checkOut: this.checkOutDate });
     if (!this.checkInDate || !this.checkOutDate) {
       alert('Por favor selecciona ambas fechas.');
-      console.warn('[MODAL] faltan fechas');
       return;
     }
-
     const noches = this.calcularNoches();
-    console.log('[MODAL] noches calculadas', { noches });
     if (noches <= 0) {
       alert('Las fechas no son válidas.');
-      console.warn('[MODAL] noches <= 0');
       return;
     }
-
     this.mostrarFormularioFechas = false;
     this.verificarDisponibilidad();
-    this.reservarHotelFinal(); // vuelve al flujo multi
+    
+    // Si guardó fechas y ya tenía selección, intentamos reservar
+    // 🔥 IMPORTANTE: Pasamos 'true' porque venimos del modal de fechas
+    if (this.mostrarBotonReservar) {
+      this.reservarHotelFinal(true);
+    }
   }
 
-  // ==========================================================
-  // 🔸 Control de inputs fecha
-  // ==========================================================
   onFechaCheckInChange(event: any): void {
     this.checkInDate = event.target.value;
     this.fechaMinimaCheckOut = DateUtils.getMinCheckoutDate(this.checkInDate);
-    console.log('[UI] checkIn change', { checkIn: this.checkInDate, minCheckout: this.fechaMinimaCheckOut });
   }
 
   onFechaCheckOutChange(event: any): void {
     this.checkOutDate = event.target.value;
-    console.log('[UI] checkOut change', { checkOut: this.checkOutDate });
   }
 
   cancelarFormularioFechas(): void {
     this.mostrarFormularioFechas = false;
-    console.log('[UI] modal fechas → cancelar');
   }
 
-  // ==========================================================
-  // 💰 Precio visible (mínimo entre hotel o habitaciones)
-  // ==========================================================
   get precioHotelMostrado(): number | null {
     if (!this.hotel) return null;
-
     if (this.hotel.precio_por_noche && this.hotel.precio_por_noche > 0)
       return this.hotel.precio_por_noche;
-
     const precios = this.habitacionesFiltradas.map(h => h.precio_por_noche).filter(p => p > 0);
     return precios.length > 0 ? Math.min(...precios) : null;
   }
 
-  // ==========================================================
-  // 🔹 Selección de habitaciones (+ / −)
-  // ==========================================================
   actualizarSeleccion(h: Habitacion, cambio: number): void {
     const limite = (h.unidades_disponibles ?? h.cantidad ?? 0);
     const prev = h.seleccionada ?? 0;
     h.seleccionada = Math.max(0, Math.min(prev + cambio, limite));
-    console.log('[UI] cambiar seleccion', { id: h.id, nombre: h.nombre, prev, cambio, limite, ahora: h.seleccionada });
     this.verificarSeleccion();
   }
 
   private verificarSeleccion(): void {
     const seleccionadas = this.habitacionesFiltradas.filter(h => (h.seleccionada ?? 0) > 0);
     this.mostrarBotonReservar = seleccionadas.length > 0;
-    console.log('[STATE] verificarSeleccion', { haySeleccion: this.mostrarBotonReservar, seleccionadas: seleccionadas.map(s => ({ id: s.id, cant: s.seleccionada })) });
   }
 
-  // ==========================================================
-  // 📅 Cálculo de noches (LOCAL, sin sorpresas de timezone)
-  // ==========================================================
   private calcularNoches(): number {
     if (!this.checkInDate || !this.checkOutDate) return 0;
-
-    // Parse YYYY-MM-DD a fecha LOCAL (00:00 local)
     const toLocal = (s: string) => {
       const [y, m, d] = s.split('-').map(Number);
       return new Date(y, (m ?? 1) - 1, d ?? 1);
     };
     const inD = toLocal(this.checkInDate);
     const outD = toLocal(this.checkOutDate);
-
     const MS_DAY = 24 * 60 * 60 * 1000;
     const diff = outD.getTime() - inD.getTime();
-    const noches = diff > 0 ? Math.round(diff / MS_DAY) : 0;
-    return noches;
+    return diff > 0 ? Math.round(diff / MS_DAY) : 0;
   }
 
-  // ==========================================================
-  // 🔙 Volver a resultados
-  // ==========================================================
   volverAResultados(): void {
-    // Intentar volver en el historial del navegador (si existe). Si no cambia la ruta, navegar al fallback
     try {
       const queryParams = {
         ciudad: this.hotel?.ciudad || '',
@@ -287,77 +284,109 @@ verificarDisponibilidad(): void {
         ninos: this.ninos || 0,
         habitaciones: this.habitaciones || 1
       } as Record<string, any>;
-
-      // Intento principal: history.back() (mantiene estado si venías de la página de resultados)
       window.history.back();
-
-      // Después de un pequeño delay, si seguimos en una ruta de detalle, hacer fallback a la ruta de resultados con los query params
       setTimeout(() => {
         const path = window.location.pathname || '';
-        const isStillDetail = path.includes('/detalle') || path.includes('/hoteles/detalle');
-        if (isStillDetail) {
+        if (path.includes('/detalle')) {
           this.router.navigate(['/hoteles/resultados'], { queryParams });
         }
       }, 300);
     } catch (e) {
-      console.error('[NAV] Excepción en volverAResultados (hotel):', e);
-      this.router.navigate(['/hoteles/resultados'], {
-        queryParams: {
-          ciudad: this.hotel?.ciudad || '',
-          checkIn: this.checkInDate || '',
-          checkOut: this.checkOutDate || '',
-          adultos: this.adultos || 1,
-          ninos: this.ninos || 0,
-          habitaciones: this.habitaciones || 1
-        }
-      });
+      this.router.navigate(['/hoteles/resultados']);
     }
   }
 
-  // ==========================================================
-  // 📜 Scroll
-  // ==========================================================
   scrollToHabitaciones(): void {
     const element = document.getElementById('seccion-habitaciones');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      console.log('[UI] scroll a seccion-habitaciones');
-    }
+    if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   // ==========================================================
-  // 🧾 Generar reserva (multi) → NAV a pagos-hoteles
+  // 🟢 FLUJO DE RESERVA CON ITINERARIO
   // ==========================================================
-  reservarHotelFinal(): void {
-    console.log('[RESERVA] iniciar', { checkIn: this.checkInDate, checkOut: this.checkOutDate });
 
+  // 1. Valida y pregunta por itinerario (CONDICIONALMENTE)
+  reservarHotelFinal(vieneDeModalFechas: boolean = false): void {
     if (!this.checkInDate || !this.checkOutDate) {
       this.mostrarFormularioFechas = true;
-      console.warn('[RESERVA] faltan fechas → abrir modal');
       return;
     }
-
     const noches = this.calcularNoches();
-    console.log('[RESERVA] noches calculadas', { noches });
     if (noches <= 0) {
       alert('Por favor selecciona fechas válidas antes de continuar.');
-      console.warn('[RESERVA] noches <= 0');
       return;
     }
-
     const seleccionadas = this.habitacionesFiltradas.filter(h => (h.seleccionada ?? 0) > 0);
-    console.log('[RESERVA] seleccionadas', seleccionadas.map(h => ({ id: h.id, cant: h.seleccionada, precio: h.precio_por_noche })));
     if (!this.hotel || seleccionadas.length === 0) {
       alert('No hay habitaciones seleccionadas.');
-      console.warn('[RESERVA] sin seleccionadas');
       return;
     }
 
-    if (this.habitacionesFiltradas.every(h => (h.unidades_disponibles ?? h.cantidad ?? 0) === 0)) {
-      alert('❌ El hotel no tiene disponibilidad entre las fechas seleccionadas.');
-      console.warn('[RESERVA] sin disponibilidad');
-      return;
+    // 🔥 LÓGICA "SOLO EN ESE CASO"
+    // Si viene del modal de fechas, mostramos la pregunta.
+    // Si ya tenía fechas (clic directo), va directo a pagos sin itinerario.
+    if (vieneDeModalFechas) {
+      this.mostrarPreguntaItinerario = true;
+    } else {
+      this.navegarAPagos(false);
     }
+  }
+
+  // Opción 2A: Rechazar itinerario
+  rechazarItinerario(): void {
+    this.mostrarPreguntaItinerario = false;
+    
+    // Limpiamos memoria para que pagos NO cobre nada extra
+    if (this.hotel?.id) {
+      sessionStorage.removeItem('itinerario_hotel_' + this.hotel.id);
+    }
+    
+    // Navegamos sin itinerario
+    this.navegarAPagos(false);
+  }
+
+  // Opción 2B: Aceptar itinerario -> Generar y Mostrar
+  aceptarItinerario(): void {
+    this.mostrarPreguntaItinerario = false;
+    this.generarYGuardarItinerario();
+    this.mostrarDetalleItinerario = true;
+  }
+
+  // Paso 3: Continuar al pago DESPUÉS de ver el itinerario
+  continuarAlPagoConItinerario(): void {
+    this.mostrarDetalleItinerario = false;
+    this.navegarAPagos(true);
+  }
+
+  // Helper: Genera datos aleatorios y los guarda en SessionStorage con ID
+  private generarYGuardarItinerario(): void {
+    if (!this.hotel) return;
+
+    const dias = this.calcularNoches() || 1;
+    this.itinerarioGenerado = [];
+    const pool = [...MOCK_ACTIVIDADES_HOTEL];
+
+    while (this.itinerarioGenerado.length < dias) {
+      pool.sort(() => 0.5 - Math.random());
+      for (const actividad of pool) {
+        if (this.itinerarioGenerado.length < dias) {
+          this.itinerarioGenerado.push({ ...actividad });
+        } else {
+          break;
+        }
+      }
+    }
+
+    const key = 'itinerario_hotel_' + this.hotel.id;
+    sessionStorage.setItem(key, JSON.stringify(this.itinerarioGenerado));
+    console.log('[DETALLE] Itinerario generado y guardado:', key);
+  }
+
+  // 4. Navegación final
+  private navegarAPagos(conItinerario: boolean): void {
+    if (!this.hotel) return;
+    const noches = this.calcularNoches();
+    const seleccionadas = this.habitacionesFiltradas.filter(h => (h.seleccionada ?? 0) > 0);
 
     let total = 0;
     const queryParams: Record<string, any> = {
@@ -370,6 +399,8 @@ verificarDisponibilidad(): void {
       habitaciones: this.habitaciones,
       noches,
       numTiposReservados: seleccionadas.length,
+      // Flag para la página de pagos
+      itinerarioBasico: conItinerario 
     };
 
     seleccionadas.forEach((hab, i) => {
@@ -387,18 +418,11 @@ verificarDisponibilidad(): void {
 
     queryParams['precioTotalGeneral'] = total.toFixed(2);
     
-    // Incluir imagen principal del hotel en los query params para que la página de pagos
-    // y la lista 'Mis reservas' puedan mostrar una miniatura coherente.
     try {
       const imagenPrincipal = ImageUtils.getImageUrl(this.hotel?.imagen_url, (this.hotel as any)?.imagenes, 'hotel');
       if (imagenPrincipal) queryParams['imagen'] = imagenPrincipal;
-    } catch (e) {
-      console.warn('[NAV] no se pudo calcular imagenPrincipal para queryParams', e);
-    }
+    } catch (e) {}
 
-    console.log('[NAV] ruta destino:', '/hoteles/pagos');
-    console.log('[NAV] queryParams:', queryParams);
-    this.router.navigate(['/hoteles/pagos'], { queryParams })
-      .then((ok: boolean) => console.log('[NAV] navigate() result:', ok));
+    this.router.navigate(['/hoteles/pagos'], { queryParams });
   }
 }

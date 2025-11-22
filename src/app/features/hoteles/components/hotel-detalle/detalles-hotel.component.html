@@ -4,15 +4,15 @@
   <button class="back-button" (click)="volverAResultados()"> ← Volver a resultados </button>
 
   <!-- ======================= -->
-  <!-- COMPONENTE GENÉRICO: HEADER + GALERÍA + DESCRIPCIÓN -->
+  <!-- HEADER + GALERÍA -->
   <!-- ======================= -->
   <app-servicio-detalle-header
     *ngIf="servicioData"
     [tipo]="'hotel'"
     [servicio]="servicioData"
     [breadcrumb]="breadcrumbItems"
-      (onReservar)="scrollToHabitaciones()"
-      (onBack)="volverAResultados()"
+    (onReservar)="scrollToHabitaciones()"
+    (onBack)="volverAResultados()"
   ></app-servicio-detalle-header>
 
   <!-- ======================= -->
@@ -35,12 +35,7 @@
         <div class="room-availability">
           <span>Unidades disponibles: {{ habitacion.unidades_disponibles || habitacion.cantidad || 0 }}</span>
         </div>
-        <p class="room-description" *ngIf="habitacion.descripcion && habitacion.descripcion.trim().length > 0">
-          {{ habitacion.descripcion }}
-        </p>
-        <p class="room-description" *ngIf="!habitacion.descripcion || habitacion.descripcion.trim().length === 0">
-          Sin descripción disponible.
-        </p>
+        <p class="room-description" *ngIf="habitacion.descripcion">{{ habitacion.descripcion }}</p>
       </div>
 
       <div class="room-price-section">
@@ -50,51 +45,38 @@
         </div>
 
         <div class="quantity-controls">
-          <button
-            (click)="actualizarSeleccion(habitacion, -1)"
-            [disabled]="(habitacion.seleccionada ?? 0) === 0"
-          >−</button>
-
+          <button (click)="actualizarSeleccion(habitacion, -1)" [disabled]="(habitacion.seleccionada ?? 0) === 0">−</button>
           <span>{{ habitacion.seleccionada || 0 }}</span>
-
-          <button
-            (click)="actualizarSeleccion(habitacion, 1)"
-              [disabled]="(habitacion.seleccionada ?? 0) >= ($any(habitacion).unidades_disponibles ?? $any(habitacion).cantidad ?? 0)"
-          >+</button>
+          <button (click)="actualizarSeleccion(habitacion, 1)" [disabled]="(habitacion.seleccionada ?? 0) >= ($any(habitacion).unidades_disponibles ?? $any(habitacion).cantidad ?? 0)">+</button>
         </div>
       </div>
     </div>
-
   </div>
 
-<!-- ======================= -->
-<!-- MENSAJE DE CARGA -->
-<!-- ======================= -->
-<div *ngIf="!hotel" class="loading-message">
-  <p>Cargando detalles del hotel...</p>
+  <!-- BOTÓN FINAL DE RESERVA -->
+  <!-- Al hacer click aquí, el TS decide: si faltan fechas abre el modal 1, sino va directo a pagos -->
+  <div *ngIf="mostrarBotonReservar" class="final-reserve-section">
+    <button class="final-reserve-button" (click)="reservarHotelFinal()">Reservar</button>
+  </div>
+  
+  <!-- RESEÑAS -->
+  <app-reviews-section *ngIf="hotel" [servicioId]="hotel.id" [servicioTipo]="'hotel'"></app-reviews-section>
 </div>
 
-<!-- 🟢 Formulario emergente de fechas -->
+<!-- MENSAJES DE ESTADO -->
+<div *ngIf="!hotel" class="loading-message"><p>Cargando detalles del hotel...</p></div>
+<div *ngIf="mensajeDisponibilidad" class="sin-disponibilidad"><p>{{ mensajeDisponibilidad }}</p></div>
+
+<!-- ========================================== -->
+<!-- 🟢 MODAL 1: FORMULARIO FECHAS (SI FALTAN) -->
+<!-- ========================================== -->
 <div *ngIf="mostrarFormularioFechas" class="modal-fechas">
   <div class="contenido-modal">
     <h3>Selecciona tus fechas de estadía</h3>
-
     <label>Check-in:</label>
-    <input
-      type="date"
-      [min]="fechaMinimaHoy"
-      [(ngModel)]="checkInDate"
-      (change)="onFechaCheckInChange($event)"
-    />
-
+    <input type="date" [min]="fechaMinimaHoy" [(ngModel)]="checkInDate" (change)="onFechaCheckInChange($event)"/>
     <label>Check-out:</label>
-    <input
-      type="date"
-      [min]="fechaMinimaCheckOut || fechaMinimaHoy"
-      [(ngModel)]="checkOutDate"
-      (change)="onFechaCheckOutChange($event)"
-    />
-
+    <input type="date" [min]="fechaMinimaCheckOut || fechaMinimaHoy" [(ngModel)]="checkOutDate" (change)="onFechaCheckOutChange($event)"/>
     <div class="botones-modal">
       <button (click)="guardarFechas()">Confirmar</button>
       <button (click)="cancelarFormularioFechas()">Cancelar</button>
@@ -102,24 +84,72 @@
   </div>
 </div>
 
-  <!-- BOTÓN FINAL DE RESERVA (multi selección) -->
-  <div *ngIf="mostrarBotonReservar" class="final-reserve-section">
-    <button class="final-reserve-button" (click)="reservarHotelFinal()">Reservar</button>
+<!-- ========================================== -->
+<!-- 🟢 MODAL 2: PREGUNTA ITINERARIO            -->
+<!-- ========================================== -->
+<div class="modal-overlay" *ngIf="mostrarPreguntaItinerario">
+  <div class="modal-card itinerario-pregunta">
+    <div class="icon-header"><i class="fas fa-map-marked-alt"></i></div>
+    <h3>¿Deseas agregar un itinerario?</h3>
+    <p>Podemos generar un plan de actividades personalizado para complementar tu estadía en {{ hotel?.nombre }}.</p>
+    <div class="modal-actions vertical">
+      <button (click)="aceptarItinerario()" class="btn-confirm full">Sí, generar itinerario</button>
+      <button (click)="rechazarItinerario()" class="btn-cancel full">No, solo reservar hotel</button>
+    </div>
   </div>
-  
-  <!-- ======================= -->
-  <!-- SECCIÓN DE RESEÑAS -->
-  <!-- ======================= -->
-  <app-reviews-section
-    *ngIf="hotel"
-    [servicioId]="hotel.id"
-    [servicioTipo]="'hotel'"
-  ></app-reviews-section>
 </div>
 
-<!-- ======================= -->
-<!-- MENSAJE SIN DISPONIBILIDAD -->
-<!-- ======================= -->
-<div *ngIf="mensajeDisponibilidad" class="sin-disponibilidad">
-  <p>{{ mensajeDisponibilidad }}</p>
+<!-- ========================================== -->
+<!-- 🟢 MODAL 3: DETALLE ITINERARIO (TIMELINE)  -->
+<!-- ========================================== -->
+
+<div class="modal-overlay" *ngIf="mostrarDetalleItinerario" (click)="mostrarDetalleItinerario = false">
+  <div class="modal-content-timeline" (click)="$event.stopPropagation()">
+    
+    <div class="modal-header">
+      <div class="header-text">
+        <h3>Tu Itinerario Sugerido</h3>
+        <p class="subtitle" *ngIf="hotel">Complementa tu estadía en {{ hotel.nombre }}</p>
+      </div>
+      <button class="close-btn" (click)="mostrarDetalleItinerario = false">×</button>
+    </div>
+
+    <div class="modal-body">
+      <p class="intro-text">Hemos organizado estas experiencias para tus días de estadía:</p>
+      <div class="timeline-container">
+        <div class="timeline-item" *ngFor="let actividad of itinerarioGenerado; let i = index">
+          <h4 class="dia-label">Día {{ i + 1 }}:</h4>
+          <div class="actividad-card">
+            <div class="card-img"><img [src]="actividad.imagen" [alt]="actividad.titulo"></div>
+            <div class="card-content">
+              <!-- Fila 1 -->
+              <div class="card-top-row">
+                <h5 class="card-title">{{ actividad.titulo }}</h5>
+                <div class="card-price-block">
+                  <span class="label">Desde:</span>
+                  <span class="amount">${{ actividad.precio }}<small>/p</small></span>
+                  <span class="tax">excl. tax</span>
+                </div>
+              </div>
+              <!-- Fila 2 -->
+              <div class="card-rating-row">
+                <span class="badge">{{ actividad.rating }}</span>
+                <span class="rating-text">{{ actividad.ratingTexto }}</span>
+                <span class="reviews">{{ actividad.resenias }} reseñas</span>
+              </div>
+              <!-- Fila 3 -->
+              <div class="card-bottom-row">
+                <i class="far fa-clock"></i>
+                <span>{{ actividad.duracion }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-reservar-final" (click)="continuarAlPagoConItinerario()">Continuar al pago</button>
+    </div>
+  </div>
 </div>

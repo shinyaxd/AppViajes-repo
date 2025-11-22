@@ -70,6 +70,17 @@
           <button class="save-button" (click)="toggleGuestMenu()">Listo</button>
         </div>
       </div>
+      <div class="input-group input-group-row"> 
+        <span class="switch-label" [class.disabled-text]="itinerarioBloqueado">Itinerario básico</span>
+        <label class="switch" [title]="itinerarioBloqueado ? 'Selecciona fechas primero' : ''">
+          <input 
+            type="checkbox" 
+            [(ngModel)]="itinerarioBasico" 
+            (change)="onItinerarioChange()"
+            [disabled]="itinerarioBloqueado"> <!-- 🔒 BLOQUEO -->
+          <span class="slider round"></span>
+        </label>
+      </div>
     </ng-container>
     
     <ng-container *ngIf="tipoBusqueda === 'tours'">
@@ -127,7 +138,7 @@
       </div>
     </ng-container>
   </div>
-  
+
   <button 
     class="search-button" 
     (click)="mostrarLugares()" 

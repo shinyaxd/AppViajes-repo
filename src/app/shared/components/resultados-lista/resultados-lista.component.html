@@ -59,14 +59,26 @@
           <p class="precio-impuestos">excl. tax</p>
         </div>
         
-        <button 
-          class="btn-ver-detalles"
-          [routerLink]="getDetalleRoute(item)"
-          [queryParamsHandling]="'preserve'"
-          (click)="onVerDetalleClick(item)"
-          type="button">
-          Ver detalles
-        </button>
+        <div class="acciones-botones">
+          
+          <button 
+            *ngIf="itinerarioActivo && tipo === 'hoteles'"
+            class="btn-ver-itinerario"
+            type="button"
+            (click)="onVerItinerarioClick(item)">
+            <i class="fa-solid fa-map-location-dot"></i> Ver itinerario
+          </button>
+
+          <button 
+            class="btn-ver-detalles"
+            [routerLink]="getDetalleRoute(item)"
+            [queryParamsHandling]="'preserve'"
+            (click)="onVerDetalleClick(item)"
+            type="button">
+            Ver detalles
+          </button>
+
+        </div>
       </div>
     </div>
   </div>

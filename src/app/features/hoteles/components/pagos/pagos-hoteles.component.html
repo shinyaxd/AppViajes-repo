@@ -129,12 +129,22 @@
             <span>Impuestos ({{ impuesto * 100 }}%)</span>
             <span>{{ montoImpuesto | currency:'PEN':'symbol':'1.0-0' }}</span>
           </div>
+
+          <!-- ✅ NUEVO BLOQUE: Muestra el costo del itinerario si está activo -->
+          <div class="price-item itinerario" *ngIf="incluyeItinerario" style="color: #2d3e50; font-weight: 500; margin-top: 8px;">
+            <span style="display: flex; align-items: center; gap: 6px;">
+              Itinerario básico
+            </span>
+            <span>{{ costoItinerario | currency:'PEN':'symbol':'1.0-0' }}</span>
+          </div>
+
         </div>
 
         <div class="divider"></div>
 
         <div class="total-price">
           <span class="total-label">Total a pagar</span>
+          <!-- El totalPagar ya viene sumado desde el TS -->
           <span class="total-amount">{{ totalPagar | currency:'PEN':'symbol':'1.0-0' }}</span>
         </div>
 
@@ -156,6 +166,14 @@
   <div class="modal-backdrop" *ngIf="mostrarModalPago">
     <div class="modal-card">
       <h2>Datos de Tarjeta</h2>
+
+      <label>Nombre del propietario</label>
+      <input type="text"
+        name="nombreTitular"
+        placeholder="José Pérez"
+        [(ngModel)]="tarjeta.nombre"
+        (input)="soloLetras($event); falloConfirmar = false"
+        required>
 
       <label>Número de tarjeta</label>
       <input type="text"
@@ -183,19 +201,6 @@
        inputmode="numeric"
        pattern="[0-9]*"
        (input)="soloNumeros($event); falloConfirmar = false" required>
-
-      <label>Nombre del propietario</label>
-      <input type="text"
-        name="nombreTitular"
-        placeholder="José Pérez"
-        [(ngModel)]="tarjeta.nombre"
-        (input)="soloLetras($event); falloConfirmar = false"
-        required>  
-
-       <!--p class="mensaje-error" *ngIf="falloConfirmar">
-        <i class="fas fa-exclamation-triangle"></i>
-        Datos de tarjeta inválidos. Verifica número, fecha y CVV.
-      </p--->
       
       <div class="modal-actions">
         <button class="btn-primary" [disabled]="!datosTarjetaValidos()" (click)="confirmarPago()">Confirmar pago</button>

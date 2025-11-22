@@ -165,13 +165,13 @@
 }
 
 /* ========================================= */
-/* ACCIONES (PRECIO Y BOTÓN) */
+/* ACCIONES (PRECIO Y BOTONES) */
 /* ========================================= */
 .resultado-acciones {
   flex: 0 0 160px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: space-between; /* Separa precio arriba y botones abajo */
   align-items: flex-end;
   padding: 20px;
   text-align: right;
@@ -209,25 +209,51 @@
   margin: 2px 0 0 0;
 }
 
-.btn-ver-detalles {
-  background-color: #8dd3bb;
+/* --- NUEVO: CONTENEDOR PARA LOS BOTONES --- */
+.acciones-botones {
+  display: flex;
+  flex-direction: column; /* Apila los botones verticalmente */
+  gap: 10px; /* Espacio entre el botón de itinerario y el de detalles */
+  width: 100%;
+  margin-top: 15px;
+}
+
+/* --- ESTILOS COMPARTIDOS PARA AMBOS BOTONES --- */
+.btn-ver-detalles,
+.btn-ver-itinerario {
+  background-color: #8dd3bb; /* Color Verde Menta Original */
   color: white;
   border: none;
-  padding: 10px 24px;
+  padding: 10px 12px;
   border-radius: 8px;
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.1s ease;
   white-space: nowrap;
+  
+  /* Asegurar que ocupen todo el ancho y centren contenido */
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; /* Espacio para el ícono si lo tienen */
 }
 
-.btn-ver-detalles:hover {
+/* Efecto Hover idéntico para ambos */
+.btn-ver-detalles:hover,
+.btn-ver-itinerario:hover {
   background-color: #73c0a6;
 }
 
+/* Efecto Active idéntico */
+.btn-ver-detalles:active,
+.btn-ver-itinerario:active {
+  transform: scale(0.98);
+}
+
 /* ========================================= */
-/* BOTÓN VER MÁS RESULTADOS */
+/* BOTÓN VER MÁS RESULTADOS (PIE DE PÁGINA) */
 /* ========================================= */
 .ver-mas-container {
   margin-top: 40px;
@@ -294,9 +320,9 @@
 
   .resultado-acciones {
     flex: 0 0 auto;
-    flex-direction: row;
+    flex-direction: row; /* En móvil pone precio a la izq, botones a la der */
     justify-content: space-between;
-    align-items: center;
+    align-items: center; /* Alineación vertical centrada */
     padding: 16px;
     width: 100%;
   }
@@ -304,10 +330,20 @@
   .precio-container {
     align-items: flex-start;
     text-align: left;
+    flex: 1; /* El precio toma espacio disponible */
   }
 
-  .btn-ver-detalles {
-    margin: 0;
+  /* Ajuste del contenedor de botones en móvil */
+  .acciones-botones {
+    width: auto; /* Ya no 100%, sino lo necesario */
+    margin-top: 0;
+    min-width: 140px; /* Ancho mínimo para que los botones se vean bien */
+  }
+
+  .btn-ver-detalles,
+  .btn-ver-itinerario {
+    width: 100%; /* Llenan su contenedor (.acciones-botones) */
+    padding: 10px 16px;
   }
 
   .resultado-nombre {
@@ -326,7 +362,7 @@
   }
 
   .resultado-acciones {
-    flex-direction: column;
+    flex-direction: column; /* Vuelve a columna para que quepa todo */
     align-items: stretch;
     gap: 12px;
   }
@@ -336,7 +372,12 @@
     text-align: center;
   }
 
-  .btn-ver-detalles {
+  .acciones-botones {
+    width: 100%; /* Botones full width otra vez */
+  }
+  
+  .btn-ver-detalles,
+  .btn-ver-itinerario {
     width: 100%;
   }
 }

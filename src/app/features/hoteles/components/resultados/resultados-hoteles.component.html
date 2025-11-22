@@ -2,16 +2,98 @@
 <app-buscador-dinamico [tipoBusqueda]="'hoteles'"></app-buscador-dinamico>
 
 <!-- Lista de resultados usando componente genérico -->
-<ng-container *ngIf="hoteles$ | async as hoteles">
-  <app-resultados-lista
-    [tipo]="'hoteles'"
-    [items]="resultadosItems"
-    [totalItems]="totalHoteles"
-    [mostrarMas]="false">
-  </app-resultados-lista>
+<!-- Usamos un objeto data para suscribirnos a ambos observables (hoteles e itinerario) -->
+<ng-container *ngIf="{ hoteles: hoteles$ | async, itinerario: itinerarioActivo$ | async } as data">
+  
+  <ng-container *ngIf="data.hoteles">
+    <app-resultados-lista
+      [tipo]="'hoteles'"
+      [items]="resultadosItems"
+      [totalItems]="totalHoteles"
+      [mostrarMas]="false"
+      [itinerarioActivo]="data.itinerario === true"
+      (verItinerarioClick)="abrirItinerario($event)"> <!-- 👈 ¡IMPORTANTE! Esto conecta el botón -->
+    </app-resultados-lista>
 
-  <!-- Mensaje si no hay resultados -->
-  <div *ngIf="hoteles.length === 0" class="no-results-message">
-    <p>No se encontraron hoteles para su búsqueda.</p>
-  </div>
+    <!-- Mensaje si no hay resultados -->
+    <div *ngIf="data.hoteles.length === 0" class="no-results-message">
+      <p>No se encontraron hoteles para su búsqueda.</p>
+    </div>
+  </ng-container>
+
 </ng-container>
+
+<!-- ========================================== -->
+<!-- MODAL DE ITINERARIO (ESTILO TIMELINE)      -->
+<!-- ========================================== -->
+<div class="modal-overlay" *ngIf="mostrarModalItinerario" (click)="cerrarItinerario()">
+  <!-- stopPropagation evita que al dar click dentro del modal se cierre -->
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="header-text">
+        <h3>Itinerario Sugerido</h3>
+        <p class="subtitle" *ngIf="hotelSeleccionado">Complementa tu estadía en {{ hotelSeleccionado.nombre }}</p>
+      </div>
+      <button class="close-btn" (click)="cerrarItinerario()">×</button>
+    </div>
+
+    <!-- Body -->
+    <div class="modal-body">
+      <p class="intro-text">Hemos generado un plan con actividades distribuidas por día:</p>
+
+      <div class="timeline-container">
+        <!-- Loop de días -->
+        <div class="timeline-item" *ngFor="let actividad of itinerarioGenerado; let i = index">
+          
+          <!-- Título del Día -->
+          <h4 class="dia-label">Día {{ i + 1 }}:</h4>
+
+          <!-- Tarjeta Horizontal -->
+          <div class="actividad-card">
+            <!-- Imagen Izquierda -->
+            <div class="card-img">
+              <img [src]="actividad.imagen" [alt]="actividad.titulo">
+            </div>
+
+            <!-- Contenido Derecha -->
+            <div class="card-content">
+              
+              <!-- Fila Superior: Título + Precio -->
+              <div class="card-top-row">
+                <h5 class="card-title">{{ actividad.titulo }}</h5>
+                <div class="card-price-block">
+                  <span class="label">Desde:</span>
+                  <span class="amount">${{ actividad.precio }}<small>/persona</small></span>
+                  <span class="tax">excl. tax</span>
+                </div>
+              </div>
+
+              <!-- Fila Rating -->
+              <div class="card-rating-row">
+                <span class="badge">{{ actividad.rating }}</span>
+                <span class="rating-text">{{ actividad.ratingTexto }}</span>
+                <span class="reviews">{{ actividad.resenias }} reseñas</span>
+              </div>
+
+              <!-- Fila Duración -->
+              <div class="card-bottom-row">
+                <i class="fa-regular fa-clock"></i>
+                <span>{{ actividad.duracion }}</span>
+              </div>
+
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+    
+    <!-- Footer opcional -->
+    <div class="modal-footer">
+      <button class="btn-reservar-todo" (click)="cerrarItinerario()">Entendido</button>
+    </div>
+
+  </div>
+</div>

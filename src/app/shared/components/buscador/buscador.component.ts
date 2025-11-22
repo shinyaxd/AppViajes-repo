@@ -1,25 +1,21 @@
 import { Component, OnInit, Input, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
- import { Router, RouterModule, ActivatedRoute } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 
-import { HotelService, Habitacion, HotelData, HotelDetalles } from '../../../features/hoteles/services/hoteles.service'; 
+import { HotelService, HotelData } from '../../../features/hoteles/services/hoteles.service'; 
 import { TourData, TourService } from '../../../features/tours/services/tour.service'; 
 import { DateUtils } from '../../utils/date.utils'; 
 
-// Define la estructura de los filtros para Hoteles
 interface FiltroHotel {
   adultos: number;
   ninos: number;
   habitaciones: number;
 }
 
-// Define la estructura de los filtros para Tours
 interface FiltroTour {
   total: number;
 }
-
-// -----------------------------------------------------------------
 
 @Component({
   selector: 'app-buscador-dinamico',
@@ -34,35 +30,31 @@ interface FiltroTour {
 })
 export class BuscadorComponent implements OnInit {
 
-  // 🔑 Inyección de servicios usando inject()
   private router = inject(Router);
   private hotelService = inject(HotelService); 
   private tourService = inject(TourService);
   private route = inject(ActivatedRoute);
 
-  // La propiedad de entrada para determinar qué tipo de buscador mostrar
   @Input() tipoBusqueda: 'hoteles' | 'tours' | undefined;
 
-  // Propiedades del buscador
-  destino: string = ''; // Ahora representa la ciudad
+  destino: string = '';
   sugerencias: string[] = [];
   lugaresDisponibles: string[] = []; 
 
-  // Propiedades para fechas
   checkInDate: string = '';
   checkOutDate: string = '';
   minDate: string;
   minCheckoutDate: string;
 
-  // Propiedades para huéspedes y cuartos de HOTELES
+  itinerarioBasico: boolean = false;
+
   huespedes: FiltroHotel = {
-    adultos: 1, // Mínimo 1 adulto
-    ninos: 0,   // Mínimo 0 niños
+    adultos: 1,
+    ninos: 0,
     habitaciones: 1
   };
   showGuestMenu = false;
 
-  // Propiedades para TOURS
   categoriaTour: string = '';
   personas: FiltroTour = {
     total: 1
@@ -70,22 +62,24 @@ export class BuscadorComponent implements OnInit {
   showGuestMenuTour = false;
 
   constructor() {
-    // Usar DateUtils para obtener fechas mínimas
     this.minDate = DateUtils.getTodayISO();
     this.minCheckoutDate = DateUtils.getTomorrowISO();
+
+    const preferenciaSesion = sessionStorage.getItem('itinerarioBasico');
+    this.itinerarioBasico = preferenciaSesion === 'true';
+  }
+
+  // Propiedad computada: Si falta alguna fecha, devuelve true (bloqueado)
+  get itinerarioBloqueado(): boolean {
+    return !this.checkInDate || !this.checkOutDate;
   }
 
   ngOnInit(): void {
     this.cargarDestinosDisponibles();
-    // Inicializar campos desde query params para conservar "memoria" al navegar
     try {
       this.route.queryParams.subscribe(params => {
-        // Hoteles usan 'ciudad', tours usan 'destino'
-        if (params['ciudad']) {
-          this.destino = params['ciudad'];
-        } else if (params['destino']) {
-          this.destino = params['destino'];
-        }
+        if (params['ciudad']) { this.destino = params['ciudad']; } 
+        else if (params['destino']) { this.destino = params['destino']; }
 
         if (params['checkIn']) {
           this.checkInDate = params['checkIn'];
@@ -95,67 +89,83 @@ export class BuscadorComponent implements OnInit {
           this.checkOutDate = params['checkOut'];
         }
 
-        // Hoteles
-        if (params['adultos']) {
-          this.huespedes.adultos = +params['adultos'] || this.huespedes.adultos;
-        }
-        if (params['ninos']) {
-          this.huespedes.ninos = +params['ninos'] || this.huespedes.ninos;
-        }
-        if (params['habitaciones']) {
-          this.huespedes.habitaciones = +params['habitaciones'] || this.huespedes.habitaciones;
-        }
+        if (params['adultos']) { this.huespedes.adultos = +params['adultos'] || this.huespedes.adultos; }
+        if (params['ninos']) { this.huespedes.ninos = +params['ninos'] || this.huespedes.ninos; }
+        if (params['habitaciones']) { this.huespedes.habitaciones = +params['habitaciones'] || this.huespedes.habitaciones; }
 
-        // Tours
-        if (params['categoria']) {
-          this.categoriaTour = params['categoria'] || '';
+        if (params['categoria']) { this.categoriaTour = params['categoria'] || ''; }
+        if (params['personas']) { this.personas.total = +params['personas'] || this.personas.total; }
+        
+        if (params['itinerarioBasico']) {
+          this.itinerarioBasico = params['itinerarioBasico'] === 'true';
         }
-        if (params['personas']) {
-          this.personas.total = +params['personas'] || this.personas.total;
+        
+        // Validación inicial: Si faltan fechas, apagar todo
+        if (this.itinerarioBloqueado) {
+          this.apagarItinerarioForzoso();
         }
       });
-    } catch (e) {
-      // ignore
+    } catch (e) { }
+  }
+
+  // ✅ MÉTODO DE LIMPIEZA: Apaga switch y borra session
+  private apagarItinerarioForzoso() {
+    this.itinerarioBasico = false;
+    sessionStorage.setItem('itinerarioBasico', 'false');
+  }
+
+  // Se llama cuando el usuario intenta mover el switch manualmente
+  onItinerarioChange() {
+    if (this.itinerarioBloqueado) {
+      // Si logró hacer click pero estaba bloqueado (por hack o error), lo apagamos
+      setTimeout(() => this.apagarItinerarioForzoso(), 0);
+      return;
+    }
+
+    sessionStorage.setItem('itinerarioBasico', String(this.itinerarioBasico));
+    console.log('Modo itinerario (sesión):', this.itinerarioBasico);
+
+    // Si ya estamos en resultados, actualizamos la URL en tiempo real
+    if (this.router.url.includes('/resultados')) {
+     this.mostrarLugares();
     }
   }
 
-  /**
-   * Carga la lista de ciudades disponibles desde la API de Hoteles.
-   * Utiliza hotelService.getHoteles() y extrae la propiedad 'ciudad'.
-   */
+  // Evento para Check-In
+  onCheckInChange(event: Event) {
+    const checkInDate = (event.target as HTMLInputElement).value;
+    this.minCheckoutDate = DateUtils.getMinCheckoutDate(checkInDate);
+    this.verificarBloqueo(); // Verificar si debemos apagar el switch
+  }
+
+  // ✅ Evento para Check-Out (Nuevo)
+  onCheckOutChange(event: Event) {
+    this.verificarBloqueo();
+  }
+
+  // Revisa si faltan fechas y apaga el itinerario si es necesario
+  verificarBloqueo() {
+    if (this.itinerarioBloqueado) {
+      this.apagarItinerarioForzoso();
+    }
+  }
+
   cargarDestinosDisponibles() {
-    console.log('tipo de busqueda: ', this.tipoBusqueda);
     if (this.tipoBusqueda === 'hoteles') {
       this.hotelService.getHoteles().subscribe({
-        next: (hoteles: HotelData[]) => { // <-- ¡CORREGIDO!
-          // 1. Mapeamos para obtener solo el campo 'ciudad' de cada hotel
-          const ciudades = hoteles
-            .map(hotel => hotel.ciudad)
-            // 2. Usamos Set para obtener solo valores únicos (sin duplicados)
-            .filter(ciudad => !!ciudad);
-
+        next: (hoteles: HotelData[]) => {
+          const ciudades = hoteles.map(hotel => hotel.ciudad).filter(ciudad => !!ciudad);
           this.lugaresDisponibles = Array.from(new Set(ciudades));
-
-          console.log('Ciudades disponibles cargadas desde la API:', this.lugaresDisponibles);
         },
-        error: (error: any) => {
-          console.error('Error al cargar la lista de ciudades desde la API:', error);
-          // Fallback en caso de que la API falle
-          this.lugaresDisponibles = ['Lima', 'Cusco', 'Arequipa']; 
-        }
+        error: (error: any) => { this.lugaresDisponibles = ['Lima', 'Cusco', 'Arequipa']; }
       });
     } else if (this.tipoBusqueda === 'tours'){
       this.tourService.getTours().subscribe({
         next: (tours: TourData[]) => {
-          // extraemos las ciudades de los tours
           const ciudades = tours.map(t => t.ciudad).filter(c => !!c);
           this.lugaresDisponibles = Array.from(new Set(ciudades));
-
-          console.log('Ciudades disponibles para tours desde la API:', this.lugaresDisponibles);
         },
-        error: () => {
-          this.lugaresDisponibles = ['Lima', 'Cusco', 'Arequipa']; // fallback
-        }
+        error: () => { this.lugaresDisponibles = ['Lima', 'Cusco', 'Arequipa']; }
       });
     }
   }
@@ -163,7 +173,6 @@ export class BuscadorComponent implements OnInit {
   buscarSugerencias() {
     if (this.destino.length > 2) {
       this.sugerencias = this.lugaresDisponibles.filter(lugar =>
-        // Filtramos por ciudad (antes ubicación)
         lugar.toLowerCase().includes(this.destino.toLowerCase())
       );
     } else {
@@ -180,52 +189,29 @@ export class BuscadorComponent implements OnInit {
     this.sugerencias = [];
   }
 
-  onCheckInChange(event: Event) {
-    const checkInDate = (event.target as HTMLInputElement).value;
-    // Usar DateUtils para calcular fecha mínima de checkout
-    this.minCheckoutDate = DateUtils.getMinCheckoutDate(checkInDate);
-  }
+  toggleGuestMenu() { this.showGuestMenu = !this.showGuestMenu; }
+  toggleGuestMenuTour() { this.showGuestMenuTour = !this.showGuestMenuTour; }
 
-  // Método de Hoteles
-  toggleGuestMenu() {
-    this.showGuestMenu = !this.showGuestMenu;
-  }
-
-  // Método de Tours
-  toggleGuestMenuTour() {
-    this.showGuestMenuTour = !this.showGuestMenuTour;
-  }
-
-  // Método de Hoteles (Alineado con 'habitaciones')
   changeCount(tipo: 'adultos' | 'ninos' | 'habitaciones', cambio: number) {
-    if (tipo === 'adultos') {
-      this.huespedes.adultos = Math.max(1, this.huespedes.adultos + cambio);
-    } else if (tipo === 'ninos') {
-      this.huespedes.ninos = Math.max(0, this.huespedes.ninos + cambio);
-    } else if (tipo === 'habitaciones') {
-      this.huespedes.habitaciones = Math.max(1, this.huespedes.habitaciones + cambio);
-    }
+    if (tipo === 'adultos') { this.huespedes.adultos = Math.max(1, this.huespedes.adultos + cambio); } 
+    else if (tipo === 'ninos') { this.huespedes.ninos = Math.max(0, this.huespedes.ninos + cambio); } 
+    else if (tipo === 'habitaciones') { this.huespedes.habitaciones = Math.max(1, this.huespedes.habitaciones + cambio); }
   }
 
-  // Método de Tours
   changeCountTour(tipo: 'total', cambio: number) {
     if (tipo === 'total') {
       this.personas.total =  Math.min(15, Math.max(1, this.personas.total + cambio));
     }
   }
 
-  /**
-   * Método para la navegación a resultados de hoteles/tours.
-   * Pasa los filtros como Query Parameters.
-   */
   mostrarLugares() {
-    console.log('Navegando a la página de resultados...', {
-      tipo: this.tipoBusqueda,
-      destino: this.destino,
-      checkIn: this.checkInDate,
-      checkOut: this.checkOutDate
-    });
-    
+    // Antes de navegar, una última verificación de seguridad
+    if (this.itinerarioBloqueado) {
+      this.apagarItinerarioForzoso();
+    } else {
+      sessionStorage.setItem('itinerarioBasico', String(this.itinerarioBasico));
+    }
+
     if (this.tipoBusqueda === 'hoteles') {
       this.router.navigate(['/hoteles/resultados'], {
         queryParams: {
@@ -234,7 +220,8 @@ export class BuscadorComponent implements OnInit {
           checkOut: this.checkOutDate,
           adultos: this.huespedes.adultos,
           ninos: this.huespedes.ninos,
-          habitaciones: this.huespedes.habitaciones
+          habitaciones: this.huespedes.habitaciones,
+          itinerarioBasico: this.itinerarioBasico
         }
       });
     } else if (this.tipoBusqueda === 'tours') {
@@ -244,7 +231,8 @@ export class BuscadorComponent implements OnInit {
           categoria: this.categoriaTour,
           checkIn: this.checkInDate,
           checkOut: this.checkOutDate,
-          personas: this.personas.total
+          personas: this.personas.total,
+          itinerarioBasico: this.itinerarioBasico
         }
       });
     }
