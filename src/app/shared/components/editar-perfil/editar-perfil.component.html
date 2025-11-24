@@ -20,9 +20,7 @@
     <form [formGroup]="form" (ngSubmit)="guardarCambios()">
 
       <!-- Rol actual (Ahora usa la clase .role-display) -->
-      <div class="role-display">
-        Rol actual: {{ currentRole() | uppercase }}
-      </div>
+      <div class="role-display">Rol actual: {{ currentRole() | uppercase }}</div>
 
       <!-- Campos Comunes para Viajero -->
       <ng-container *ngIf="currentRole() === 'viajero'">
@@ -47,10 +45,19 @@
             </div>
           </div>
         </div>
-      </ng-container>
-
-      <!-- Campos de Proveedor -->
+              <!-- Botón eliminado: la URL se aplica automáticamente al escribir/pastear en el input -->
       <ng-container *ngIf="currentRole() === 'proveedor'">
+        <!-- Avatar grande para proveedores: aparece arriba de 'Nombre de la Empresa' -->
+        <div class="avatar-section" style="margin-bottom:16px;">
+          <div class="avatar-large">
+            <img
+              [src]="getAvatarUrl()"
+              alt="Avatar"
+              (error)="selectedImageUrl.set(null)"
+            />
+          </div>
+        </div>
+
         <!-- field-group-container para la cuadrícula de Empresa, Teléfono y RUC -->
         <div class="field-group field-group-container">
           <!-- Nombre Empresa -->

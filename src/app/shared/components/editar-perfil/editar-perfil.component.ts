@@ -160,6 +160,9 @@ export class EditarPerfilComponent implements OnInit {
     const passwordCtrl = this.fb.control('');
     const confirmarPasswordCtrl = this.fb.control('');
 
+    // Control para la URL de la imagen de perfil
+    const imagenCtrl = this.fb.control(userData?.imagen ?? '');
+
     this.form = this.fb.group(
       {
         email: emailCtrl,
@@ -169,10 +172,14 @@ export class EditarPerfilComponent implements OnInit {
         telefono: telefonoCtrl,
         ruc: rucCtrl,
         password: passwordCtrl,
-        confirmarPassword: confirmarPasswordCtrl
+        confirmarPassword: confirmarPasswordCtrl,
+        imagen: imagenCtrl
       },
       { validators: passwordMatchValidator() }
     );
+
+    // Inicializar la vista previa con la imagen del usuario (si existe)
+    this.selectedImageUrl.set(userData?.imagen ?? null);
   }
 
   togglePassword(): void {
@@ -436,11 +443,32 @@ export class EditarPerfilComponent implements OnInit {
    */
   selectImage(imageUrl: string): void {
     this.selectedImageUrl.set(imageUrl);
-
-    // Si quieres también guardar en el form (para luego enviarlo al backend),
-    // primero crea un control en buildForm, por ejemplo 'avatar':
-    // this.form.patchValue({ avatar: imageUrl });
+    // Parchear el formulario para incluir la URL seleccionada
+    try {
+      if (this.form) this.form.patchValue({ imagen: imageUrl });
+    } catch (err) {
+      // Si por alguna razón el formulario no está listo, lo ignoramos
+      console.warn('selectImage: form not ready to patch', err);
+    }
 
     this.imageSearchResults = [];
+  }
+
+  /** Devuelve la URL a usar en la preview del avatar */
+  getAvatarUrl(): string {
+    const sel = this.selectedImageUrl();
+    if (sel) return sel;
+    const user = this.currentUser();
+    if (user) {
+      const anyUser = user as any;
+      return anyUser?.imagen || anyUser?.avatar || '/public/img/imagen.jpg';
+    }
+    return '/public/img/imagen.jpg';
+  }
+
+  /** Actualiza la preview mientras el usuario escribe/pega una URL */
+  onImageUrlInput(val: string): void {
+    const v = (val || '').trim();
+    this.selectedImageUrl.set(v || null);
   }
 }

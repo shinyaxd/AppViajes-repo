@@ -67,6 +67,31 @@ h1 {
     margin-bottom: 30px; 
 }
 
+/* AVATAR: sección para preview y controles de imagen */
+.role-display-and-avatar {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+}
+
+.avatar-section { display:flex; gap:12px; align-items:center }
+.avatar-large {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f3f4f6;
+    border: 2px solid rgba(0,0,0,0.06);
+}
+.avatar-large img { width:100%; height:100%; object-fit:cover }
+.avatar-actions { display:flex; flex-direction:column; gap:8px }
+.avatar-actions input[type="url"] { width:380px; padding:8px; border-radius:6px }
+.avatar-hint { font-size:12px; color:#6b7280 }
+.avatar-apply button { padding:8px 12px; border-radius:6px }
+
 
 /* -------------------------------------------------------------------------- */
 /* ESTILOS DEL FORMULARIO                      */

@@ -53,10 +53,15 @@
         
         <div class="dropdown-usuario" [class.open]="menuOpen">
           <button class="bienvenida dropdown-toggle" (click)="toggleMenu($event)" [attr.aria-expanded]="menuOpen">
-            Hola, 
+            Hola,
+            <!-- Mini-avatar junto al saludo -->
+            <ng-container *ngIf="currentUser$ | async as user">
+              <img class="avatar-mini" [src]="getAvatar(user)" alt="avatar" />
             
             <!-- CORRECCIÓN CLAVE: Usamos 'currentUser$ | async as user' para acceder a las propiedades -->
-            <ng-container *ngIf="currentUser$ | async as user">
+            
+            
+                
                 <!-- LÓGICA DE VISUALIZACIÓN DE NOMBRE SEGÚN ROL -->
                 <ng-container *ngIf="user.rol === 'proveedor'; else travelerName">
                   <!-- Prioridad de Proveedor: 

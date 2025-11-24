@@ -94,6 +94,13 @@ export class HeaderComponent {
     }
   }
 
+  /** Devuelve la URL del avatar, usando campos adicionales si el backend los provee */
+  public getAvatar(user: User | null): string {
+    if (!user) return '/public/img/imagen.jpg';
+    const anyUser = user as any;
+    return anyUser?.imagen || anyUser?.avatar || '/public/img/imagen.jpg';
+  }
+
   // ======================================================
   // 📤 Métodos
   // ======================================================
