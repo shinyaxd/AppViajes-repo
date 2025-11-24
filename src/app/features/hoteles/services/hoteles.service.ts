@@ -284,12 +284,14 @@ export class HotelService {
             direccion: h.direccion,
             estrellas: h.estrellas,
             imagen_url: h.imagen_url || 'https://img.freepik.com/premium-photo/abstract-blur-hotel-interior_1124848-65384.jpg?semt=ais_hybrid&w=740&q=80',
-            imagenes:  (h.imagenes ?? [])
-              .filter((img: any) => img && img.url)
-              .map((img: any) => ({
-                url: img.url,
-                alt: img.alt ?? null
-              })),
+            imagenes: (h.imagenes ?? [])
+              .map((img: any) => {
+                if (!img) return null;
+                if (typeof img === 'string') return { url: img, alt: null };
+                if (img.url) return { url: img.url, alt: img.alt ?? null };
+                return null;
+              })
+              .filter((img: any) => img && img.url),
             precio_por_noche: h.precio_por_noche ?? null,
             descripcion: h.descripcion ?? null,
             reservations: 0

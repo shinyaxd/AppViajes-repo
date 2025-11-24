@@ -18,7 +18,7 @@ export class ImageUtils {
    */
   static getImageUrl(
     primary: string | undefined | null,
-    gallery: ImageObject[] | undefined | null,
+    gallery: Array<ImageObject | string> | undefined | null,
     tipo: 'hotel' | 'tour' | 'generic' = 'generic'
   ): string {
     // 1. Intentar usar imagen principal
@@ -28,12 +28,12 @@ export class ImageUtils {
 
     // 2. Intentar usar primera imagen de galería
     if (gallery && Array.isArray(gallery) && gallery.length > 0) {
-      // Filtrar el primer objeto con una URL válida
-      const firstImageObject = gallery.find(
-        img => img && this.isValidImageUrl(img.url)
-      );
-      if (firstImageObject && firstImageObject.url) {
-        return firstImageObject.url;
+      // Soportar elementos que pueden ser string o ImageObject
+      for (const img of gallery) {
+        const url = typeof img === 'string' ? img : img?.url;
+        if (this.isValidImageUrl(url)) {
+          return url as string;
+        }
       }
     }
 
@@ -48,26 +48,31 @@ export class ImageUtils {
    */
   static getAllImages(
     primary: string | undefined | null,
-    gallery: ImageObject[] | undefined | null
+    gallery: Array<ImageObject | string> | undefined | null
   ): string[] {
     const images: string[] = [];
 
     // 1. Agregar imagen principal si existe
     if (this.isValidImageUrl(primary)) {
-      images.push(primary);
+      images.push(primary as string);
     }
 
-    // 2. Agregar URLs de galería si existen
+    // 2. Agregar URLs de galería si existen (soportando strings u objetos)
     if (gallery && Array.isArray(gallery)) {
       const galleryUrls = gallery
-        .map(img => img.url) // Extraer solo la URL
-        .filter(this.isValidImageUrl); // Filtrar URLs válidas
+        .map(img => (typeof img === 'string' ? img : img?.url))
+        .filter(url => this.isValidImageUrl(url));
 
-      images.push(...galleryUrls);
+      images.push(...galleryUrls as string[]);
     }
 
     // 3. Remover duplicados manteniendo orden
-    return [...new Set(images)];
+    const deduped: string[] = [];
+    for (const url of images) {
+      if (!deduped.includes(url)) deduped.push(url);
+    }
+
+    return deduped;
   }
 
   /**
@@ -83,21 +88,12 @@ export class ImageUtils {
   ): string[] {
     const result = [...images];
 
-    // Determinar la URL de relleno a usar: la primera imagen real si existe, o null.
-    const fillerUrl = images.length > 0 ? images[0] : null;
-
-    // Completar hasta el objetivo
+    // No duplicar imágenes reales al rellenar. Usar placeholders únicos.
     while (result.length < targetCount) {
-      if(fillerUrl){
-        result.push(fillerUrl);
-      }else{
-        // Agregar placeholder con índice
-        const index = result.length + 1;
-        result.push(`${this.getPlaceholder(tipo)}?index=${index}`);
-      }
+      const index = result.length + 1;
+      result.push(`${this.getPlaceholder(tipo)}?index=${index}`);
     }
 
-    // Limitar al número objetivo
     return result.slice(0, targetCount);
   }
 
