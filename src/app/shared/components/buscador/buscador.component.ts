@@ -1,5 +1,5 @@
-import { Component, OnInit, Input, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, Input, inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 
@@ -34,6 +34,7 @@ export class BuscadorComponent implements OnInit {
   private hotelService = inject(HotelService); 
   private tourService = inject(TourService);
   private route = inject(ActivatedRoute);
+  private platformId = inject(PLATFORM_ID);
 
   @Input() tipoBusqueda: 'hoteles' | 'tours' | undefined;
 
@@ -65,8 +66,10 @@ export class BuscadorComponent implements OnInit {
     this.minDate = DateUtils.getTodayISO();
     this.minCheckoutDate = DateUtils.getTomorrowISO();
 
-    const preferenciaSesion = sessionStorage.getItem('itinerarioBasico');
-    this.itinerarioBasico = preferenciaSesion === 'true';
+    if (isPlatformBrowser(this.platformId)) {
+      const preferenciaSesion = sessionStorage.getItem('itinerarioBasico');
+      this.itinerarioBasico = preferenciaSesion === 'true';
+    }
   }
 
   // Propiedad computada: Si falta alguna fecha, devuelve true (bloqueado)
@@ -111,7 +114,9 @@ export class BuscadorComponent implements OnInit {
   // ✅ MÉTODO DE LIMPIEZA: Apaga switch y borra session
   private apagarItinerarioForzoso() {
     this.itinerarioBasico = false;
-    sessionStorage.setItem('itinerarioBasico', 'false');
+    if (isPlatformBrowser(this.platformId)) {
+      sessionStorage.setItem('itinerarioBasico', 'false');
+    }
   }
 
   // Se llama cuando el usuario intenta mover el switch manualmente
@@ -122,7 +127,9 @@ export class BuscadorComponent implements OnInit {
       return;
     }
 
-    sessionStorage.setItem('itinerarioBasico', String(this.itinerarioBasico));
+    if (isPlatformBrowser(this.platformId)) {
+      sessionStorage.setItem('itinerarioBasico', String(this.itinerarioBasico));
+    }
     console.log('Modo itinerario (sesión):', this.itinerarioBasico);
 
     // Si ya estamos en resultados, actualizamos la URL en tiempo real
@@ -208,7 +215,7 @@ export class BuscadorComponent implements OnInit {
     // Antes de navegar, una última verificación de seguridad
     if (this.itinerarioBloqueado) {
       this.apagarItinerarioForzoso();
-    } else {
+    } else if (isPlatformBrowser(this.platformId)) {
       sessionStorage.setItem('itinerarioBasico', String(this.itinerarioBasico));
     }
 
