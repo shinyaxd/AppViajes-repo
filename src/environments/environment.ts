@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: '/api', // Usa proxy configurado en proxy.conf.json
+  apiUrl: 'https://trouvels360-backend-laravel.onrender.com/api', // Usa proxy configurado en proxy.conf.json
 };
