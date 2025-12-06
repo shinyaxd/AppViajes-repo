@@ -46,7 +46,7 @@
               <!-- Usamos type="button" para evitar envío de formulario, y removemos (click)="toggleGuestMenu()" -->
               <button type="button" (click)="changeCount('adultos', -1)">-</button>
               <span>{{ huespedes.adultos }}</span>
-              <button type="button" (click)="changeCount('adultos', 1)">+</button>
+              <button type="button" (click)="changeCount('adultos', 1)"[disabled]="esMaximoAlcanzado('adultos')">+</button>
             </div>
           </div>
           
@@ -55,7 +55,7 @@
             <div class="counter">
               <button type="button" (click)="changeCount('ninos', -1)">-</button>
               <span>{{ huespedes.ninos }}</span>
-              <button type="button" (click)="changeCount('ninos', 1)">+</button>
+              <button type="button" (click)="changeCount('ninos', 1)" [disabled]="esMaximoAlcanzado('ninos')">+</button>
             </div>
           </div>
 
@@ -64,12 +64,17 @@
             <div class="counter">
               <button type="button" (click)="changeCount('habitaciones', -1)">-</button>
               <span>{{ huespedes.habitaciones }}</span>
-              <button type="button" (click)="changeCount('habitaciones', 1)">+</button>
+              <button type="button" (click)="changeCount('habitaciones', 1)" [disabled]="esMaximoAlcanzado('habitaciones')">+</button>
             </div>
           </div>
           <button class="save-button" (click)="toggleGuestMenu()">Listo</button>
         </div>
       </div>
+
+      <div *ngIf="mensajeErrorHuespedes" class="error-msg" style="color: red; font-size: 0.85rem; margin-top: 5px;">
+        <i class="fas fa-exclamation-circle"></i> {{ mensajeErrorHuespedes }}
+      </div>
+
       <div class="input-group input-group-row"> 
         <span class="switch-label" [class.disabled-text]="itinerarioBloqueado">Itinerario básico</span>
         <label class="switch" [title]="itinerarioBloqueado ? 'Selecciona fechas primero' : ''">
@@ -77,7 +82,7 @@
             type="checkbox" 
             [(ngModel)]="itinerarioBasico" 
             (change)="onItinerarioChange()"
-            [disabled]="itinerarioBloqueado"> <!-- 🔒 BLOQUEO -->
+            [disabled]="itinerarioBloqueado"> 
           <span class="slider round"></span>
         </label>
       </div>

@@ -25,6 +25,7 @@ export class PagosToursComponent implements OnInit {
 
   // UI state
   reservaExitosa = false;
+  mensajeErrorTarjeta: string = '';
 
   // Datos del tour
   nombreTour = '';
@@ -156,20 +157,13 @@ export class PagosToursComponent implements OnInit {
   }
 
   formatearTarjeta(event: any) {
-    // Elimina todo lo que no sea número
     let value = event.target.value.replace(/\D/g, '');
-
-    // Máximo 16 dígitos
     value = value.substring(0, 16);
-
-    // Inserta espacios cada 4 dígitos
     value = value.replace(/(.{4})/g, '$1 ').trim();
-
     event.target.value = value;
     this.tarjeta.numero = value;
   }
 
-  // Validación total de los campos
   datosTarjetaValidos(): boolean {
     const nombreValido = (this.tarjeta.nombre || '').trim().length > 0;
     const numeroSinEspacios = this.tarjeta.numero?.replace(/\s/g, '') || '';
@@ -177,10 +171,9 @@ export class PagosToursComponent implements OnInit {
     const fecha = this.tarjeta.expiracion || '';
 
     const datosValidos = nombreValido && numeroSinEspacios.length === 16 && /^\d{3}$/.test(cvc) && fecha !== '';
-    if (!datosValidos) {
-      this.falloConfirmar = true;
+    if (!datosValidos){
+      this.falloConfirmar=true;
     }
-
     return datosValidos;
   }
 
@@ -193,16 +186,90 @@ export class PagosToursComponent implements OnInit {
     this.mostrarModalPago = false;
   }
 
-  confirmarPago() {
-    if (!this.tarjeta.nombre || !this.tarjeta.numero || !this.tarjeta.expiracion || !this.tarjeta.cvc) {
-      alert('Completa todos los datos de la tarjeta.');
-      return;
+  esTarjetaVencida(): boolean {
+    if (!this.tarjeta.expiracion) return false;
+
+    const hoy = new Date();
+    const mesActual = hoy.getMonth() + 1;
+    const anioActual = hoy.getFullYear();
+
+    let anioTarjeta = 0;
+    let mesTarjeta = 0;
+
+    if (this.tarjeta.expiracion.includes('/')) {
+      const partes = this.tarjeta.expiracion.split('/');
+      mesTarjeta = parseInt(partes[0], 10);
+      anioTarjeta = parseInt(partes[1], 10);
+    } else {
+      return false;
     }
 
-    // Cierra modal
-    this.mostrarModalPago = false;
+    // Corrección de año (2 dígitos a 4 dígitos)
+    if (anioTarjeta < 100) anioTarjeta += 2000;
 
-    // Continúa el flujo de procesarPago
+    // Validar que el mes sea real (1-12)
+    // Si el mes no existe (ej. 13, 15, 99), lo consideramos "inválido/error"
+    if (mesTarjeta < 1 || mesTarjeta > 12) return true;
+
+    // Validaciones de tiempo
+    if (anioTarjeta < anioActual) return true;
+    if (anioTarjeta === anioActual && mesTarjeta < mesActual) return true;
+
+    return false;
+  }
+
+  formatearFechaExpiracion(event: any) {
+    // 1. Limpiar todo lo que NO sea número
+    let input = event.target.value.replace(/\D/g, '');
+
+    // 2. VALIDACIÓN DE MES: Si los primeros 2 dígitos son > 12, borramos el último
+    if (input.length >= 2) {
+      const mes = parseInt(input.substring(0, 2), 10);
+      // Si el mes es 00 o mayor a 12, eliminamos el último dígito ingresado
+      if (mes === 0 || mes > 12) {
+        input = input.substring(0, 1);
+      }
+    }
+
+    // 3. Limitar longitud total (4 dígitos: 2 mes + 2 año)
+    if (input.length > 4) {
+      input = input.substring(0, 4);
+    }
+
+    // 4. Agregar el slash automático
+    if (input.length >= 2) {
+      event.target.value = input.substring(0, 2) + '/' + input.substring(2);
+    } else {
+      event.target.value = input;
+    }
+
+    this.tarjeta.expiracion = event.target.value;
+  }
+
+ confirmarPago() {
+    // 1. Limpiamos errores previos
+    this.mensajeErrorTarjeta = '';
+
+    // 2. Validación de campos vacíos
+    if (!this.tarjeta.nombre || !this.tarjeta.numero || !this.tarjeta.expiracion || !this.tarjeta.cvc) {
+      this.mensajeErrorTarjeta = 'Completa todos los datos de la tarjeta.';
+      return; // Detiene el proceso, el modal sigue abierto
+    }
+
+    // 3. Validación de fecha de expiración (NUEVO)
+    if (this.esTarjetaVencida()) {
+    // Verificamos por qué falló
+      const mes = parseInt(this.tarjeta.expiracion.split('/')[0], 10);
+    
+    if (mes > 12) {
+        this.mensajeErrorTarjeta = 'El mes de expiración no es válido.';
+    } else {
+        this.mensajeErrorTarjeta = 'Tu tarjeta está vencida o la fecha es incorrecta.';
+      }
+    return;
+    }
+
+    this.mostrarModalPago = false;
     this.continuarPago();
   }
 
@@ -229,7 +296,7 @@ export class PagosToursComponent implements OnInit {
       return;
     }
 
-    // 👉 Mostrar el modal antes de continuar
+    // Mostrar el modal antes de continuar
     this.abrirModalPago();
   };
 
@@ -242,7 +309,7 @@ export class PagosToursComponent implements OnInit {
 
     try {
       console.log('[PAGO] creando reserva...', payload);
-      // CORRECCIÓN: Usar crearReservaTour y pasar salidaId
+      // Usar crearReservaTour y pasar salidaId
       await firstValueFrom(this.reservasService.crearReservaTour(this.salidaId, payload));
       
       // Al crear la reserva en el backend, también la guardamos localmente para "Mis reservas"
@@ -250,7 +317,7 @@ export class PagosToursComponent implements OnInit {
         this.localReservasStore.addReserva({
           id: Date.now(),
           titulo: this.nombreTour,
-          // CORRECCIÓN: Usar toISODate porque fechaSalida ya es Date
+          // Usar toISODate porque fechaSalida ya es Date
           fecha_inicio: this.fechaSalida ? this.toISODate(this.fechaSalida) : undefined,
           fecha_fin: undefined,
           total: this.totalPagar,

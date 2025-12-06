@@ -126,6 +126,14 @@
     <div class="modal-card">
       <h2>Datos de Tarjeta</h2>
 
+      <label>Nombre del propietario</label>
+      <input type="text"
+        name="nombreTitular"
+        placeholder="José Pérez"
+        [(ngModel)]="tarjeta.nombre"
+        (input)="soloLetras($event); mensajeErrorTarjeta = ''"
+        required>  
+
       <label>Número de tarjeta</label>
       <input type="text"
         name="numeroTarjeta"
@@ -133,15 +141,17 @@
         maxlength="19"
         placeholder="XXXX XXXX XXXX XXXX"
         [(ngModel)]="tarjeta.numero"
-        (input)="formatearTarjeta($event); falloConfirmar = false"
+        (input)="formatearTarjeta($event); mensajeErrorTarjeta = ''"
         inputmode="numeric" required>
 
       <label>Fecha de expiración</label>
-      <input type="month"
+      <input type="text"
         name="fechaExpiracion"
         placeholder="MM/YY"
+        maxlength="5"
        [(ngModel)]="tarjeta.expiracion"
-        (change)="falloConfirmar = false" required>
+        (input)="formatearFechaExpiracion($event); mensajeErrorTarjeta = ''"
+        required>
 
       <label>CVV</label>
       <input type="password"
@@ -151,21 +161,13 @@
        maxlength="3"
        inputmode="numeric"
        pattern="[0-9]*"
-       (input)="soloNumeros($event); falloConfirmar = false" required>
+       (input)="soloNumeros($event); mensajeErrorTarjeta = ''" required>
 
-      <label>Nombre del propietario</label>
-      <input type="text"
-        name="nombreTitular"
-        placeholder="José Pérez"
-        [(ngModel)]="tarjeta.nombre"
-        (input)="soloLetras($event); falloConfirmar = false"
-        required>  
-
-       <!--p class="mensaje-error" *ngIf="falloConfirmar">
+      <div *ngIf="mensajeErrorTarjeta" class="alert-error-tarjeta">
         <i class="fas fa-exclamation-triangle"></i>
-        Datos de tarjeta inválidos. Verifica número, fecha y CVV.
-      </p--->
-      
+        <span>{{ mensajeErrorTarjeta }}</span>
+      </div>
+       
       <div class="modal-actions">
         <button class="btn-primary" [disabled]="!datosTarjetaValidos()" (click)="confirmarPago()">Confirmar pago</button>
         <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
