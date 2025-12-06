@@ -9,16 +9,6 @@ import { ReservasService, ReservaHabitacionPayload } from '../../services/reserv
 import { ReservasService as LocalReservasStore } from '../../../../shared/services/reservas.service';
 import { firstValueFrom } from 'rxjs';
 
-// Mock para fallback (respaldo) solamente
-const MOCK_ACTIVIDADES_HOTEL_FALLBACK = [
-  { id: 1, precio: 85 }, 
-  { id: 2, precio: 40 }, 
-  { id: 3, precio: 35 }, 
-  { id: 4, precio: 60 }, 
-  { id: 5, precio: 30 }, 
-  { id: 6, precio: 45 } 
-];
-
 interface ReservaItem {
   habitacionId: number;
   tipo: string;
@@ -45,6 +35,10 @@ export class PagosHotelesComponent implements OnInit {
   reservaExitosa = false;
   mensajeErrorTarjeta: string = '';
 
+  // --- SOLO PARA CORREGIR EL ERROR (No afectan el cobro) ---
+  incluyeItinerario: boolean = false; // Al ser false, el HTML oculta la sección
+  costoItinerario: number = 0;
+
   // Datos visibles
   nombreHotel = '';
   ubicacion = '';
@@ -65,10 +59,6 @@ export class PagosHotelesComponent implements OnInit {
   impuesto = 0.18;
   montoImpuesto = 0;
   totalPagar = 0;
-
-  // ✅ NUEVAS VARIABLES PARA ITINERARIO
-  incluyeItinerario = false;
-  costoItinerario = 0;
 
   // Datos para simular pasarela
   mostrarModalPago = false;
@@ -114,8 +104,6 @@ export class PagosHotelesComponent implements OnInit {
     this.totalNoches = +params['noches'] || 0;
     this.tarifaBasica = +params['precioTotalGeneral'] || 0;
 
-    this.incluyeItinerario = params['itinerarioBasico'] === 'true' || sessionStorage.getItem('itinerarioBasico') === 'true';
-
     const numTiposReservados = +params['numTiposReservados'] || 0;
 
     this.reservas = [];
@@ -128,9 +116,6 @@ export class PagosHotelesComponent implements OnInit {
         this.cantidadTotalCuartos += r.cantidad;
       }
     }
-
-    // CALCULAR COSTO DEL ITINERARIO (Antes del total final)
-    this.calcularCostoItinerario();
 
     // Cálculo final
     this.calcularImpuestosYTotal();
@@ -157,69 +142,10 @@ export class PagosHotelesComponent implements OnInit {
     return { habitacionId, tipo, cantidad, precioNoche, precioTotalReserva };
   }
 
-  // Busca clave única y suma solo las noches correspondientes
-  private calcularCostoItinerario(): void {
-    this.costoItinerario = 0;
-
-    if (this.incluyeItinerario && this.totalNoches > 0) {
-      let sumaPreciosActividades = 0;
-      
-      // 1. Buscar el itinerario ESPECÍFICO de este hotel usando el ID
-      // Esto evita que el itinerario del Hotel A se use para cobrar el Hotel B
-      const key = 'itinerario_hotel_' + this.hotelId;
-      const itinerarioGuardadoStr = sessionStorage.getItem(key);
-      
-      let itinerarioEncontrado = false;
-
-      if (itinerarioGuardadoStr) {
-        try {
-          const itinerarioGuardado = JSON.parse(itinerarioGuardadoStr);
-          if (Array.isArray(itinerarioGuardado) && itinerarioGuardado.length > 0) {
-            console.log(`[PAGO] Recuperado itinerario específico (${key}):`, itinerarioGuardado);
-            itinerarioEncontrado = true;
-            
-            // Sumamos precios para CADA noche de estancia
-            for (let i = 0; i < this.totalNoches; i++) {
-              // Si la estancia es más larga que el itinerario guardado, repetimos cíclicamente
-              // (usando el operador módulo %) para asegurar que siempre hay precio
-              const index = i % itinerarioGuardado.length;
-              const actividad = itinerarioGuardado[index];
-              if (actividad && actividad.precio) {
-                sumaPreciosActividades += actividad.precio;
-              }
-            }
-          }
-        } catch (e) {
-          console.error('Error leyendo itinerario guardado', e);
-        }
-      } 
-      
-      // 2. Fallback si no se encontró nada (seguridad)
-      if (!itinerarioEncontrado) {
-        console.warn('[PAGO] No se encontró itinerario guardado, generando uno al azar...');
-        const pool = [...MOCK_ACTIVIDADES_HOTEL_FALLBACK];
-        for (let i = 0; i < this.totalNoches; i++) {
-          const actividad = pool[Math.floor(Math.random() * pool.length)];
-          sumaPreciosActividades += actividad.precio;
-        }
-      }
-
-      const totalPersonas = (this.adultosReservados || 1) + (this.ninosReservados || 0);
-      this.costoItinerario = sumaPreciosActividades * totalPersonas;
-      
-      console.log('[PAGO] Costo Itinerario Final:', { 
-        noches: this.totalNoches,
-        sumaPreciosUnitarios: sumaPreciosActividades, 
-        totalPersonas, 
-        costoFinal: this.costoItinerario 
-      });
-    }
-  }
-
   private calcularImpuestosYTotal(): void {
     if (this.tarifaBasica > 0) {
       this.montoImpuesto = this.tarifaBasica * this.impuesto;
-      this.totalPagar = this.tarifaBasica + this.montoImpuesto + this.costoItinerario;
+      this.totalPagar = this.tarifaBasica + this.montoImpuesto;
     } else {
       this.montoImpuesto = 0;
       this.totalPagar = 0;
@@ -240,8 +166,7 @@ export class PagosHotelesComponent implements OnInit {
             checkOut: this.checkOut ? this.toISODate(this.checkOut) : '',
             adultos: this.adultosReservados || 1,
             ninos: this.ninosReservados || 0,
-            habitaciones: this.habitacionesSolicitadas || 1,
-            itinerarioBasico: this.incluyeItinerario 
+            habitaciones: this.habitacionesSolicitadas || 1 
           };
 
           if (this.hotelId) {
@@ -260,8 +185,7 @@ export class PagosHotelesComponent implements OnInit {
         checkOut: this.checkOut ? this.toISODate(this.checkOut) : '',
         adultos: this.adultosReservados || 1,
         ninos: this.ninosReservados || 0,
-        habitaciones: this.habitacionesSolicitadas || 1,
-        itinerarioBasico: this.incluyeItinerario
+        habitaciones: this.habitacionesSolicitadas || 1
       };
       if (this.hotelId) {
         this.router.navigate(['/hoteles/detalle', this.hotelId], { queryParams: qp });
