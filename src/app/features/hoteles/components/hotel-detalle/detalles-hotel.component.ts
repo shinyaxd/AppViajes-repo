@@ -9,7 +9,7 @@ import { ReviewsSectionComponent } from '../../../../shared/components/reviews-s
 import { DateUtils } from '../../../../shared/utils/date.utils';
 import { ImageUtils } from '../../../../shared/utils/image.utils';
 
-// 1. MOCK DATA (Mismo que en resultados para consistencia)
+// 1. MOCK DATA
 const MOCK_ACTIVIDADES_HOTEL = [
   {
     id: 1,
@@ -96,7 +96,7 @@ export class DetallesHotelComponent implements OnInit {
   fechaMinimaHoy: string = DateUtils.getTodayISO();
   fechaMinimaCheckOut: string = '';
 
-  // 🟢 NUEVAS VARIABLES: CONTROL DE MODALES DE ITINERARIO
+  // CONTROL DE MODALES DE ITINERARIO
   mostrarPreguntaItinerario = false;
   mostrarDetalleItinerario = false;
   itinerarioGenerado: any[] = [];
@@ -206,7 +206,7 @@ export class DetallesHotelComponent implements OnInit {
   }
 
   // ==========================================================
-  // 🟢 LÓGICA MODIFICADA: GUARDAR FECHAS
+  // GUARDAR FECHAS
   // ==========================================================
   guardarFechas(): void {
     if (!this.checkInDate || !this.checkOutDate) {
@@ -222,7 +222,7 @@ export class DetallesHotelComponent implements OnInit {
     this.verificarDisponibilidad();
     
     // Si guardó fechas y ya tenía selección, intentamos reservar
-    // 🔥 IMPORTANTE: Pasamos 'true' porque venimos del modal de fechas
+    // IMPORTANTE: Pasamos 'true' porque venimos del modal de fechas
     if (this.mostrarBotonReservar) {
       this.reservarHotelFinal(true);
     }
@@ -302,7 +302,7 @@ export class DetallesHotelComponent implements OnInit {
   }
 
   // ==========================================================
-  // 🟢 FLUJO DE RESERVA CON ITINERARIO
+  // FLUJO DE RESERVA CON ITINERARIO
   // ==========================================================
 
   // 1. Valida y pregunta por itinerario (CONDICIONALMENTE)

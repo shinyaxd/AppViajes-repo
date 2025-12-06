@@ -12,8 +12,7 @@ import { catchError, map, finalize, switchMap, concatMap } from 'rxjs/operators'
 import { throwError, of } from 'rxjs'; 
 
 const BASE_URL = environment.apiUrl;
-// Rutas de API
-// CORREGIDO: De '/auth2/me' a '/auth/me' según tu backend
+// Rutas de API '/auth/me'
 const API_GET_PROFILE_URL = `${BASE_URL}/auth/me`; 
 const API_UPDATE_PROFILE_URL = `${BASE_URL}/usuarios/me`; 
 const API_DELETE_PROFILE_URL = `${BASE_URL}/usuarios/me`; 
@@ -122,6 +121,8 @@ export class EditarPerfilComponent implements OnInit {
     const telefonoPattern = /^\+51\s?9\d{8}$/;
     // Permitir letras (incluye acentos) y espacios únicamente
     const nombrePattern = /^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/;
+    // Permitir letras (incluye acentos) y espacios únicamente
+    const apellidoPattern = /^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/;
     // Patrón para nombre de empresa: permitir letras, números, espacios y algunos signos comunes
     // (permitidos: guión, ampersand, punto, coma, apóstrofe). Se bloquean símbolos como # % +
     const empresaPattern = /^[A-Za-zÀ-ÖØ-öø-ÿ0-9\s\-\&\.,']+$/;
@@ -138,7 +139,7 @@ export class EditarPerfilComponent implements OnInit {
 
     const apellidoCtrl = this.fb.control(
       { value: userData?.apellido ?? '', disabled: isProveedor },
-      isProveedor ? [] : [Validators.required]
+      isProveedor ? [] : [Validators.required, Validators.pattern(apellidoPattern)]
     );
 
     const empresaCtrl = this.fb.control(
@@ -198,6 +199,13 @@ export class EditarPerfilComponent implements OnInit {
         this.message.set('La contraseña y su confirmación no coinciden.');
         return;
       }
+    }
+
+    // Validación del apellido
+    if (this.form.get('apellido')?.hasError('pattern')) {
+      this.messageType.set('error');
+      this.message.set('El apellido solo puede contener letras.');
+      return; 
     }
 
     if (this.form.invalid) {

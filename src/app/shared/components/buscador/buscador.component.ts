@@ -61,6 +61,14 @@ export class BuscadorComponent implements OnInit {
   };
   showGuestMenuTour = false;
 
+  // 1. DEFINIMOS LOS LÍMITES (Puedes ajustar estos números)
+  readonly MAX_ADULTOS = 10;
+  readonly MAX_NINOS = 6;
+  readonly MAX_HABITACIONES = 5;
+
+  // 2. VARIABLE PARA EL MENSAJE DE ERROR
+  mensajeErrorHuespedes: string = '';  
+
   constructor() {
     this.minDate = DateUtils.getTodayISO();
     this.minCheckoutDate = DateUtils.getTomorrowISO();
@@ -108,7 +116,7 @@ export class BuscadorComponent implements OnInit {
     } catch (e) { }
   }
 
-  // ✅ MÉTODO DE LIMPIEZA: Apaga switch y borra session
+  // Apaga switch y borra session
   private apagarItinerarioForzoso() {
     this.itinerarioBasico = false;
     sessionStorage.setItem('itinerarioBasico', 'false');
@@ -192,10 +200,52 @@ export class BuscadorComponent implements OnInit {
   toggleGuestMenu() { this.showGuestMenu = !this.showGuestMenu; }
   toggleGuestMenuTour() { this.showGuestMenuTour = !this.showGuestMenuTour; }
 
-  changeCount(tipo: 'adultos' | 'ninos' | 'habitaciones', cambio: number) {
-    if (tipo === 'adultos') { this.huespedes.adultos = Math.max(1, this.huespedes.adultos + cambio); } 
-    else if (tipo === 'ninos') { this.huespedes.ninos = Math.max(0, this.huespedes.ninos + cambio); } 
-    else if (tipo === 'habitaciones') { this.huespedes.habitaciones = Math.max(1, this.huespedes.habitaciones + cambio); }
+changeCount(tipo: 'adultos' | 'ninos' | 'habitaciones', cambio: number) {
+    // Limpiamos el error al intentar cualquier acción
+    this.mensajeErrorHuespedes = '';
+
+    if (tipo === 'adultos') {
+      const nuevoValor = this.huespedes.adultos + cambio;
+      
+      // Validación de Máximo
+      if (nuevoValor > this.MAX_ADULTOS) {
+        this.mensajeErrorHuespedes = `Máximo ${this.MAX_ADULTOS} adultos permitidos.`;
+        return; // Detenemos la función, no suma
+      }
+      
+      // Asignación (Mínimo 1)
+      this.huespedes.adultos = Math.max(1, nuevoValor);
+    } 
+    
+    else if (tipo === 'ninos') {
+      const nuevoValor = this.huespedes.ninos + cambio;
+      
+      if (nuevoValor > this.MAX_NINOS) {
+        this.mensajeErrorHuespedes = `Máximo ${this.MAX_NINOS} niños permitidos.`;
+        return;
+      }
+      
+      this.huespedes.ninos = Math.max(0, nuevoValor);
+    } 
+    
+    else if (tipo === 'habitaciones') {
+      const nuevoValor = this.huespedes.habitaciones + cambio;
+      
+      if (nuevoValor > this.MAX_HABITACIONES) {
+        this.mensajeErrorHuespedes = `Máximo ${this.MAX_HABITACIONES} habitaciones permitidas.`;
+        return;
+      }
+      
+      this.huespedes.habitaciones = Math.max(1, nuevoValor);
+    }
+  }
+
+  // Para deshabilitar el botón "+" en el HTML visualmente
+  esMaximoAlcanzado(tipo: 'adultos' | 'ninos' | 'habitaciones'): boolean {
+    if (tipo === 'adultos') return this.huespedes.adultos >= this.MAX_ADULTOS;
+    if (tipo === 'ninos') return this.huespedes.ninos >= this.MAX_NINOS;
+    if (tipo === 'habitaciones') return this.huespedes.habitaciones >= this.MAX_HABITACIONES;
+    return false;
   }
 
   changeCountTour(tipo: 'total', cambio: number) {
