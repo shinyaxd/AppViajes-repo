@@ -54,16 +54,19 @@ export class DetallesHotelComponent implements OnInit {
 
   get servicioData(): ServicioDetalleData | null {
     if (!this.hotel) return null;
-    const galeria = ImageUtils.getAllImages(this.hotel.imagen_url, this.hotel.imagenes);
-    const galeriaFinal = ImageUtils.fillGallery(galeria, 5, 'hotel');
+    // galeriaFull contiene la imagen principal (si existe) + todas las de la galería
+    const galeriaFull = ImageUtils.getAllImages(this.hotel.imagen_url, this.hotel.imagenes);
+    // galeriaGrid la usamos solo para mostrar 5 miniaturas en el header (el header puede calcularlo también)
+    const galeriaGrid = ImageUtils.fillGallery(galeriaFull, 5, 'hotel');
 
     const imagenesApiObjects = (this.hotel as any).imagenes?.map((img: any) => {
-      const url = img.url || img.imagen_url || '';
-      const alt = img.alt || img.descripcion || img.caption || img.titulo || img.alt_text || '';
+      const url = typeof img === 'string' ? img : (img.url || img.imagen_url || '');
+      const alt = img?.alt || img?.descripcion || img?.caption || img?.titulo || img?.alt_text || '';
       return { url, alt };
     }) || [];
 
-    const altsFinal: string[] = galeriaFinal.map(url => {
+    // Alts alineados con la lista completa (galeriaFull)
+    const altsFull: string[] = galeriaFull.map(url => {
       const found = imagenesApiObjects.find((o: any) => o.url === url);
       if (found && found.alt && found.alt.trim().length > 0) return found.alt;
       return this.hotel?.nombre || '';
@@ -77,8 +80,9 @@ export class DetallesHotelComponent implements OnInit {
       estrellas: this.hotel.estrellas,
       precio: this.precioHotelMostrado,
       descripcion: this.hotel.descripcion || '',
-      galeria_imagenes: galeriaFinal,
-      galeria_alts: altsFinal
+      // Pasamos la lista completa: el header decide el grid (5) y el viewer (hasta 6)
+      galeria_imagenes: galeriaFull,
+      galeria_alts: altsFull
     };
   }
 
@@ -108,6 +112,14 @@ export class DetallesHotelComponent implements OnInit {
     this.hotelService.getHotelCompleto(id).subscribe({
       next: (detalle: any) => {
         this.hotel = detalle.hotel;
+        // DEBUG: mostrar imágenes recibidas desde la API y cómo las procesa ImageUtils
+        try {
+          console.log('[DEBUG HOTEL IMAGES] raw hotel.imagenes:', (this.hotel as any)?.imagenes);
+          const all = ImageUtils.getAllImages(this.hotel?.imagen_url, (this.hotel as any)?.imagenes || []);
+          console.log('[DEBUG HOTEL IMAGES] ImageUtils.getAllImages ->', all, 'count:', all.length);
+        } catch (e) {
+          console.warn('[DEBUG HOTEL IMAGES] error al calcular galería:', e);
+        }
         this.habitacionesFiltradas = (detalle.habitaciones as any[]).map((h: any) => ({ ...h, seleccionada: 0 }));
         this.verificarDisponibilidad();
         this.verificarSeleccion();

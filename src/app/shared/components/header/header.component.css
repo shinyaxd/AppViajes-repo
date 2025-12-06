@@ -209,6 +209,16 @@
 /* Alineación del toggle */
 .dropdown-toggle { align-items: center }
 
+/* Mini avatar next to greeting */
+.avatar-mini {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 8px;
+    border: 1px solid rgba(0,0,0,0.08);
+}
+
 /* Aumentar contraste y espacio de cada item para coincidir con diseño */
 .dropdown-item { padding: 14px 18px; }
 .dropdown-item .item-label { font-size: 0.98rem; color: #102027 }

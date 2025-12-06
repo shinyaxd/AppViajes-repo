@@ -94,6 +94,25 @@ export class HeaderComponent {
     }
   }
 
+  /** Devuelve la URL del avatar, usando campos adicionales si el backend los provee */
+  public getAvatar(user: User | null): string {
+    // Placeholder SVG data URI para avatar 'unknown' (se usa cuando no hay imagen)
+    const UNKNOWN_AVATAR = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+        <rect width="100%" height="100%" fill="#f3f4f6"/>
+        <g fill="#cfcfcf">
+          <circle cx="60" cy="40" r="24"/>
+          <path d="M24 100c0-22 36-34 36-34s36 12 36 34z"/>
+        </g>
+        <text x="60" y="112" font-size="10" fill="#9ca3af" text-anchor="middle">no image</text>
+      </svg>
+    `);
+
+    if (!user) return UNKNOWN_AVATAR;
+    const anyUser = user as any;
+    return anyUser?.imagen || anyUser?.avatar || UNKNOWN_AVATAR;
+  }
+
   // ======================================================
   // 📤 Métodos
   // ======================================================

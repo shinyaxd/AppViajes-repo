@@ -124,6 +124,9 @@ export class LoginComponent implements OnInit {
   }
 
   campoInvalido(campo: string): boolean {
+    if (!this.loginForm) {
+      return false;
+    }
     const control = this.loginForm.get(campo);
     return !!(control && control.invalid && (control.dirty || control.touched));
   }

@@ -219,6 +219,9 @@ export class RegistroComponent implements OnInit, OnDestroy {
   }
 
   campoInvalido(campo: string): boolean {
+    if (!this.registerForm) {
+      return false;
+    }
     const control = this.registerForm.get(campo);
     // Agregamos el chequeo de "dirty" para mejor UX
     return !!(control && control.invalid && (control.dirty || control.touched)); 

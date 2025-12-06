@@ -40,11 +40,9 @@ export class ServicioDetalleHeaderComponent {
    * ACTUALIZADO: Usa ImageUtils centralizado
    */
   get imagenesParaGrid(): string[] {
-    const imagenesOriginales = this.servicio?.galeria_imagenes || [];
     const tipoImagen = this.tipo === 'hotel' ? 'hotel' : 'tour';
-    
-    // Usar ImageUtils para completar la galería hasta 5 imágenes
-    return ImageUtils.fillGallery(imagenesOriginales, 5, tipoImagen);
+    const all = ImageUtils.getAllImages(null, (this.servicio?.galeria_imagenes || []) as any);
+    return ImageUtils.fillGallery(all, 5, tipoImagen);
   }
 
   /**
@@ -53,7 +51,15 @@ export class ServicioDetalleHeaderComponent {
    * por todas las imágenes reales del servicio.
    */
   get imagenesViewer(): string[] {
-    return this.servicio?.galeria_imagenes || [];
+    const tipoImagen = this.tipo === 'hotel' ? 'hotel' : 'tour';
+    const all = ImageUtils.getAllImages(null, (this.servicio?.galeria_imagenes || []) as any);
+    // Mostrar hasta 6 imágenes reales si existen.
+    // No duplicar imágenes reales para rellenar el viewer: si no hay 6, mostrar solo las existentes.
+    if (!all || all.length === 0) {
+      // Si no hay imágenes reales, mostrar placeholders en el viewer
+      return ImageUtils.fillGallery([], 6, tipoImagen);
+    }
+    return all.slice(0, 6);
   }
 
   get imagenPrincipal(): string {

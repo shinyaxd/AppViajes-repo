@@ -20,8 +20,17 @@
     <form [formGroup]="form" (ngSubmit)="guardarCambios()">
 
       <!-- Rol actual (Ahora usa la clase .role-display) -->
-      <div class="role-display">
-        Rol actual: {{ currentRole() | uppercase }}
+      <div class="role-display">Rol actual: {{ currentRole() | uppercase }}</div>
+
+      <!-- Avatar preview: visible para Viajero y Proveedor -->
+      <div class="avatar-section" style="margin: 16px 0;">
+        <div class="avatar-large">
+          <img
+            [src]="getAvatarUrl()"
+            alt="Avatar"
+            (error)="selectedImageUrl.set(null)"
+          />
+        </div>
       </div>
 
       <!-- Campos Comunes para Viajero -->
@@ -48,8 +57,7 @@
           </div>
         </div>
       </ng-container>
-
-      <!-- Campos de Proveedor -->
+      <!-- Botón eliminado: la URL se aplica automáticamente al escribir/pastear en el input -->
       <ng-container *ngIf="currentRole() === 'proveedor'">
         <!-- field-group-container para la cuadrícula de Empresa, Teléfono y RUC -->
         <div class="field-group field-group-container">
@@ -94,11 +102,7 @@
         <!-- Campo opcional para mostrar la URL elegida -->
         <div class="field-card">
           <label>URL seleccionada</label>
-          <input
-            type="text"
-            [value]="selectedImageUrl() || ''"
-            readonly
-          />
+            <input id="imagen" type="text" formControlName="imagen" placeholder="Pega la URL de la imagen de perfil (con o sin http)..." (input)="onImageUrlInput($any($event.target).value)" />
         </div>
 
         <label class="text-muted">

@@ -107,6 +107,13 @@ export class EditarPerfilComponent implements OnInit {
         this.currentUser.set(userData);
         this.rol = userData.rol;
         this.buildForm(userData);
+            // Asegurar que el estado global del usuario esté sincronizado
+            try {
+              this.authService.updateUserInState(userData);
+            } catch (err) {
+              // No crítico; evitamos romper la carga del perfil por fallos de sincronización
+              console.warn('No se pudo sincronizar usuario con AuthService:', err);
+            }
       },
       error: (err) => {
         console.error('Error general cargando el perfil (Observable):', err);
@@ -161,6 +168,11 @@ export class EditarPerfilComponent implements OnInit {
     const passwordCtrl = this.fb.control('');
     const confirmarPasswordCtrl = this.fb.control('');
 
+    // Control para la URL de la imagen de perfil
+    // Acepta enlaces con o sin esquema (http/https). Validador es permisivo.
+    const urlPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]{2,}(\/.*)?$/i;
+    const imagenCtrl = this.fb.control(userData?.imagen ?? '', [Validators.pattern(urlPattern)]);
+
     this.form = this.fb.group(
       {
         email: emailCtrl,
@@ -170,10 +182,14 @@ export class EditarPerfilComponent implements OnInit {
         telefono: telefonoCtrl,
         ruc: rucCtrl,
         password: passwordCtrl,
-        confirmarPassword: confirmarPasswordCtrl
+        confirmarPassword: confirmarPasswordCtrl,
+        imagen: imagenCtrl
       },
       { validators: passwordMatchValidator() }
     );
+
+    // Inicializar la vista previa con la imagen del usuario (si existe)
+    this.selectedImageUrl.set(userData?.imagen ?? null);
   }
 
   togglePassword(): void {
@@ -444,11 +460,63 @@ export class EditarPerfilComponent implements OnInit {
    */
   selectImage(imageUrl: string): void {
     this.selectedImageUrl.set(imageUrl);
-
-    // Si quieres también guardar en el form (para luego enviarlo al backend),
-    // primero crea un control en buildForm, por ejemplo 'avatar':
-    // this.form.patchValue({ avatar: imageUrl });
-
+    // Parchear el formulario para incluir la URL seleccionada
+    try {
+      if (this.form) this.form.patchValue({ imagen: imageUrl });
+    } catch (err) {
+      // Si por alguna razón el formulario no está listo, lo ignoramos
+      console.warn('selectImage: form not ready to patch', err);
+    }
+    
+    // Actualizar el estado global del usuario para reflejar el cambio inmediatamente
+    try {
+      const cur = this.currentUser();
+      const updated = cur ? { ...cur, imagen: imageUrl } : { imagen: imageUrl };
+      this.currentUser.set(updated);
+      this.authService.updateUserInState(updated as User);
+    } catch (err) {
+      console.warn('selectImage: no se pudo sincronizar con AuthService', err);
+    }
     this.imageSearchResults = [];
+  }
+
+  /** Devuelve la URL a usar en la preview del avatar */
+  getAvatarUrl(): string {
+    const sel = this.selectedImageUrl();
+    if (sel) return sel;
+    const user = this.currentUser();
+    // Placeholder SVG data URI para avatar 'unknown'
+    const UNKNOWN_AVATAR = 'data:image/svg+xml;utf8,' + encodeURIComponent(`
+      <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+        <rect width="100%" height="100%" fill="#f3f4f6"/>
+        <g fill="#cfcfcf">
+          <circle cx="60" cy="40" r="24"/>
+          <path d="M24 100c0-22 36-34 36-34s36 12 36 34z"/>
+        </g>
+        <text x="60" y="112" font-size="10" fill="#9ca3af" text-anchor="middle">no image</text>
+      </svg>
+    `);
+
+    if (user) {
+      const anyUser = user as any;
+      return anyUser?.imagen || anyUser?.avatar || UNKNOWN_AVATAR;
+    }
+
+    return UNKNOWN_AVATAR;
+  }
+
+  /** Actualiza la preview mientras el usuario escribe/pega una URL */
+  onImageUrlInput(val: string): void {
+    const v = (val || '').trim();
+    this.selectedImageUrl.set(v || null);
+    // Reflejar el cambio en el header/estado global mientras el usuario escribe
+    try {
+      const cur = this.currentUser();
+      const updated = cur ? { ...cur, imagen: v || null } : { imagen: v || null };
+      this.currentUser.set(updated);
+      this.authService.updateUserInState(updated as User);
+    } catch (err) {
+      // No crítico
+    }
   }
 }
