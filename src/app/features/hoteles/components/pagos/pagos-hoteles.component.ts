@@ -35,6 +35,10 @@ export class PagosHotelesComponent implements OnInit {
   reservaExitosa = false;
   mensajeErrorTarjeta: string = '';
 
+  // --- SOLO PARA CORREGIR EL ERROR (No afectan el cobro) ---
+  incluyeItinerario: boolean = false; // Al ser false, el HTML oculta la sección
+  costoItinerario: number = 0;
+
   // Datos visibles
   nombreHotel = '';
   ubicacion = '';
