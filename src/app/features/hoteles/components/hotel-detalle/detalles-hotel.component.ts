@@ -8,70 +8,7 @@ import { ServicioDetalleHeaderComponent, ServicioDetalleData } from '../../../..
 import { ReviewsSectionComponent } from '../../../../shared/components/reviews-section/reviews-section.component';
 import { DateUtils } from '../../../../shared/utils/date.utils';
 import { ImageUtils } from '../../../../shared/utils/image.utils';
-
-// 1. MOCK DATA
-const MOCK_ACTIVIDADES_HOTEL = [
-  {
-    id: 1,
-    titulo: 'Tour de Aventura Extrema en Lunahuaná',
-    imagen: 'https://mochileaperu.com/wp-content/uploads/2020/03/canopy-tdp-696x415.png',
-    rating: 4.8,
-    ratingTexto: 'Excelente',
-    resenias: 35,
-    duracion: '10 Horas',
-    precio: 85
-  },
-  {
-    id: 2,
-    titulo: 'Aventura en la Naturaleza en Lomas de Lachay',
-    imagen: 'https://majestictyt.com/wp-content/uploads/2020/10/Lomas-de-Lachay-960x1149.jpg',
-    rating: 4.5,
-    ratingTexto: 'Muy bueno',
-    resenias: 21,
-    duracion: '9 Horas',
-    precio: 40
-  },
-  {
-    id: 3,
-    titulo: 'Aventura en el Mar de la Costa Verde',
-    imagen: 'https://freewalkingtoursperu.com/wp-content/uploads/2019/07/costa-verde-lima-peru-5.jpg',
-    rating: 4.5,
-    ratingTexto: 'Muy bueno',
-    resenias: 21,
-    duracion: '3 Horas',
-    precio: 35
-  },
-  {
-    id: 4,
-    titulo: 'Trekking a la Laguna 69',
-    imagen: 'https://images.squarespace-cdn.com/content/v1/5a87961cbe42d637c54cab93/1611152719695-GYI2P6S5ZL2Z1042UOAO/hiking-guide-laguna-69-peru.jpg',
-    rating: 4.9,
-    ratingTexto: 'Excepcional',
-    resenias: 120,
-    duracion: '12 Horas',
-    precio: 60
-  },
-  {
-    id: 5,
-    titulo: 'Sandboarding en la Huacachina',
-    imagen: 'https://cdn.getyourguide.com/image/format=auto,fit=contain,gravity=auto,quality=60,width=1440,height=650,dpr=1/tour_img/db43fe07a5896774c48ecda19a0c0920bb154c3782f9c4a4fe2c9086b0cbe402.jpg',
-    rating: 4.7,
-    ratingTexto: 'Excelente',
-    resenias: 85,
-    duracion: '4 Horas',
-    precio: 30
-  },
-  {
-    id: 6,
-    titulo: 'City Tour Nocturno y Circuito Mágico',
-    imagen: 'https://machupicchuwayna.com/wp-content/uploads/2025/06/Circuito-Magico-del-Agua.webp',
-    rating: 4.6,
-    ratingTexto: 'Muy bueno',
-    resenias: 55,
-    duracion: '5 Horas',
-    precio: 45
-  }
-];
+import { ItineraryService } from '../../services/itinerary.service';
 
 @Component({
   selector: 'app-detalles-hotel',
@@ -85,6 +22,7 @@ export class DetallesHotelComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private hotelService = inject(HotelService);
+  private itineraryService = inject(ItineraryService);
 
   hotel: HotelData | undefined;
   habitacionesFiltradas: Habitacion[] = [];
@@ -99,7 +37,12 @@ export class DetallesHotelComponent implements OnInit {
   // CONTROL DE MODALES DE ITINERARIO
   mostrarPreguntaItinerario = false;
   mostrarDetalleItinerario = false;
-  itinerarioGenerado: any[] = [];
+  itinerarioGenerado: any = null;
+  loadingItinerario = false;
+
+  // NUEVO: Interés seleccionado por el usuario (Default Cultura)
+  interesSeleccionado: string = 'Cultura'; 
+  opcionesInteres = ['Cultura', 'Aventura', 'Gastronomía', 'Relajación'];
 
   // Parámetros de búsqueda
   hotelId: string | null = null;
@@ -347,39 +290,48 @@ export class DetallesHotelComponent implements OnInit {
 
   // Opción 2B: Aceptar itinerario -> Generar y Mostrar
   aceptarItinerario(): void {
-    this.mostrarPreguntaItinerario = false;
-    this.generarYGuardarItinerario();
-    this.mostrarDetalleItinerario = true;
+    if (!this.hotel) return;
+
+    this.loadingItinerario = true;
+
+    // Preparamos los datos para Laravel
+    const payload = {
+      destino: this.hotel.ciudad,
+      hotel_id: this.hotel.id,
+      fecha_checkin: this.checkInDate,
+      fecha_checkout: this.checkOutDate,
+      interes: this.interesSeleccionado // Usamos el interés seleccionado
+    };
+
+    // AGREGAMOS ': any' en los parámetros response y err
+    this.itineraryService.generarItinerario(payload).subscribe({
+      next: (response: any) => { 
+        this.loadingItinerario = false;
+        this.mostrarPreguntaItinerario = false;
+
+        // Guardamos el itinerario en la variable y en Storage
+        // response.data contiene: { itinerario: [...], resumen: {...}, ... }
+        this.itinerarioGenerado = response.data; 
+
+        // Guardar en session para la vista de pagos
+        const key = 'itinerario_hotel_' + this.hotel!.id;
+        sessionStorage.setItem(key, JSON.stringify(this.itinerarioGenerado));
+        
+        // Mostrar el modal con la línea de tiempo
+        this.mostrarDetalleItinerario = true;
+      },
+      error: (err: any) => {
+        this.loadingItinerario = false;
+        console.error('Error generando itinerario:', err);
+        alert('Hubo un problema generando tu itinerario. Intenta nuevamente o continúa solo con el hotel.');
+      }
+    });
   }
 
   // Paso 3: Continuar al pago DESPUÉS de ver el itinerario
   continuarAlPagoConItinerario(): void {
     this.mostrarDetalleItinerario = false;
     this.navegarAPagos(true);
-  }
-
-  // Helper: Genera datos aleatorios y los guarda en SessionStorage con ID
-  private generarYGuardarItinerario(): void {
-    if (!this.hotel) return;
-
-    const dias = this.calcularNoches() || 1;
-    this.itinerarioGenerado = [];
-    const pool = [...MOCK_ACTIVIDADES_HOTEL];
-
-    while (this.itinerarioGenerado.length < dias) {
-      pool.sort(() => 0.5 - Math.random());
-      for (const actividad of pool) {
-        if (this.itinerarioGenerado.length < dias) {
-          this.itinerarioGenerado.push({ ...actividad });
-        } else {
-          break;
-        }
-      }
-    }
-
-    const key = 'itinerario_hotel_' + this.hotel.id;
-    sessionStorage.setItem(key, JSON.stringify(this.itinerarioGenerado));
-    console.log('[DETALLE] Itinerario generado y guardado:', key);
   }
 
   // 4. Navegación final

@@ -90,11 +90,26 @@
 <div class="modal-overlay" *ngIf="mostrarPreguntaItinerario">
   <div class="modal-card itinerario-pregunta">
     <div class="icon-header"><i class="fas fa-map-marked-alt"></i></div>
+    
     <h3>¿Deseas agregar un itinerario?</h3>
     <p>Podemos generar un plan de actividades personalizado para complementar tu estadía en {{ hotel?.nombre }}.</p>
+    
+    <div class="form-group mt-3 mb-3" style="text-align: left;">
+      <label for="interesSelect" style="font-weight: 500; display: block; margin-bottom: 5px;">¿Qué tipo de viaje prefieres?</label>
+      <select id="interesSelect" [(ngModel)]="interesSeleccionado" class="form-control" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ddd;">
+        <option *ngFor="let opcion of opcionesInteres" [value]="opcion">{{ opcion }}</option>
+      </select>
+    </div>
+
     <div class="modal-actions vertical">
-      <button (click)="aceptarItinerario()" class="btn-confirm full">Sí, generar itinerario</button>
-      <button (click)="rechazarItinerario()" class="btn-cancel full">No, solo reservar hotel</button>
+      <button (click)="aceptarItinerario()" class="btn-confirm full" [disabled]="loadingItinerario">
+        <span *ngIf="!loadingItinerario">Sí, generar itinerario con IA</span>
+        <span *ngIf="loadingItinerario"><i class="fas fa-spinner fa-spin"></i> Generando itinerario...</span>
+      </button>
+      
+      <button (click)="rechazarItinerario()" class="btn-cancel full" [disabled]="loadingItinerario">
+        No, solo reservar hotel
+      </button>
     </div>
   </div>
 </div>
@@ -108,44 +123,57 @@
     
     <div class="modal-header">
       <div class="header-text">
-        <h3>Tu Itinerario Sugerido</h3>
-        <p class="subtitle" *ngIf="hotel">Complementa tu estadía en {{ hotel.nombre }}</p>
+        <h3>Tu Itinerario Sugerido ({{ interesSeleccionado }})</h3>
+        <p class="subtitle" *ngIf="itinerarioGenerado">
+          {{ itinerarioGenerado.resumen.total_tours }} actividades • Costo extra: S/ {{ itinerarioGenerado.resumen.costo_total }}
+        </p>
       </div>
       <button class="close-btn" (click)="mostrarDetalleItinerario = false">×</button>
     </div>
 
     <div class="modal-body">
       <p class="intro-text">Hemos organizado estas experiencias para tus días de estadía:</p>
+      
       <div class="timeline-container">
-        <div class="timeline-item" *ngFor="let actividad of itinerarioGenerado; let i = index">
-          <h4 class="dia-label">Día {{ i + 1 }}:</h4>
-          <div class="actividad-card">
-            <div class="card-img"><img [src]="actividad.imagen" [alt]="actividad.titulo"></div>
-            <div class="card-content">
-              <!-- Fila 1 -->
-              <div class="card-top-row">
-                <h5 class="card-title">{{ actividad.titulo }}</h5>
-                <div class="card-price-block">
-                  <span class="label">Desde:</span>
-                  <span class="amount">${{ actividad.precio }}<small>/p</small></span>
-                  <span class="tax">excl. tax</span>
+        <div class="timeline-day-group" *ngFor="let dia of itinerarioGenerado?.itinerario">
+          
+          <h4 class="dia-label">Día {{ dia.dia }}:</h4>
+          
+          <p *ngIf="dia.actividades.length === 0" class="text-muted text-center p-3">
+            Día libre para disfrutar del hotel.
+          </p>
+
+          <div class="timeline-item" *ngFor="let actividad of dia.actividades">
+            <div class="actividad-card">
+              <div class="card-img">
+                <img [src]="actividad.imagen_url || 'assets/placeholder.jpg'" [alt]="actividad.nombre">
+              </div>
+              
+              <div class="card-content">
+                <div class="card-top-row">
+                  <h5 class="card-title">{{ actividad.nombre }}</h5>
+                  <div class="card-price-block">
+                    <span class="label">Precio:</span>
+                    <span class="amount">S/ {{ actividad.precio }}</span>
+                  </div>
                 </div>
-              </div>
-              <!-- Fila 2 -->
-              <div class="card-rating-row">
-                <span class="badge">{{ actividad.rating }}</span>
-                <span class="rating-text">{{ actividad.ratingTexto }}</span>
-                <span class="reviews">{{ actividad.resenias }} reseñas</span>
-              </div>
-              <!-- Fila 3 -->
-              <div class="card-bottom-row">
-                <i class="far fa-clock"></i>
-                <span>{{ actividad.duracion }}</span>
+                
+                <div class="card-rating-row">
+                  <span class="badge" *ngIf="actividad.promedio_estrellas > 0">⭐ {{ actividad.promedio_estrellas }}</span>
+                  <span class="reviews" *ngIf="actividad.total_resenas > 0">({{ actividad.total_resenas }} reseñas)</span>
+                  <span class="badge bg-secondary" *ngIf="actividad.promedio_estrellas === 0">Nuevo</span>
+                </div>
+                
+                <div class="card-bottom-row">
+                  <i class="far fa-clock"></i>
+                  <span>{{ actividad.duracion_horas }} horas</span>
+                  <span class="ms-2" style="font-size: 0.85em; color: #666;">• A {{ actividad.distancia_km }} km del hotel</span>
+                </div>
               </div>
             </div>
           </div>
+          </div>
         </div>
-      </div>
     </div>
 
     <div class="modal-footer">
